@@ -1,8 +1,6 @@
 #!/usr/bin/env python3
 
-'''Download the catalogues that contain LDR2 blazars that Tim imaged for me on
-01 February 2019 when in Dublin. It queries the lofar-surveys.org website and
-gets the catalogue.'''
+'''EDIT'''
 
 import argparse
 import glob
