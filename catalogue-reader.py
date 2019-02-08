@@ -16,9 +16,6 @@ def catalogue_reader(fits):
     table = Table.read(fits, format='fits')
     df = table.to_pandas()
 
-    # pd.set_option('expand_frame_repr', False)
-    # pd.set_option('display.max_columns', None)
-
     ds = df[df['S_Code']=='S']
     print('Sources fit with a single Guassian:', ds.shape[0])
 

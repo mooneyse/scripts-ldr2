@@ -52,7 +52,7 @@ def main():
                         required=False,
                         type=str,
                         default='/mnt/closet/blazars-shimwell/5BZ*.png',
-                        help='FITS file containing the data')
+                        help='Files containing the data')
 
     args = parser.parse_args()
     files = args.files
