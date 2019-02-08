@@ -1,17 +1,17 @@
 #!/usr/bin/env python3
 
-'''Get the blazars from BZCAT that matched with the LDR2 data that has been
-analysed to date.'''
+'''Query NED for a .'''
 
 import argparse
-import glob
 import pandas as pd
+import astropy.units as u
+from astroquery.ned import Ned
 
 __author__ = 'Sean Mooney'
 __email__ = 'sean.mooney@ucdconnect.ie'
 __date__ = '08 February 2019'
 
-def blazars_in_ldr2(files):
+def query_ned(files):
     '''From the filenames of the images Tim sent on, read the names of the
     sources.'''
 

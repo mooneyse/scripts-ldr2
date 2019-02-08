@@ -3,9 +3,7 @@
 '''Print information from a catalogue that is in FITS format.'''
 
 import argparse
-import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from astropy.table import Table
 
 __author__ = 'Sean Mooney'
