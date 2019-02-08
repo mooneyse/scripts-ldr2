@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-'''Print information from the LDR2 mosaic catalogue that is in FITS format.'''
+'''Print information from a catalogue that is in FITS format.'''
 
 import argparse
 import numpy as np
@@ -15,16 +15,20 @@ __date__ = '07 February 2019'
 def catalogue_reader(fits):
     table = Table.read(fits, format='fits')
     df = table.to_pandas()
+    df.to_csv(fits[:-4] + 'csv')
 
-    ds = df[df['S_Code']=='S']
-    print('Sources fit with a single Guassian:', ds.shape[0])
+    pd.set_option('expand_frame_repr', False)
+    pd.set_option('display.max_columns', None)
+    print(df)
 
-    ds = df[df['S_Code']!='S']
-    print('Sources fit with more than a single Guassian:', ds.shape[0])
+    # ds = df[df['S_Code']=='S']
+    # print('Sources fit with a single Guassian:', ds.shape[0])
+    # ds = df[df['S_Code']!='S']
+    # print('Sources fit with more than a single Guassian:', ds.shape[0])
 
 
 def main():
-    '''Print information from the LDR2 mosaic catalogue that is in FITS format.'''
+    '''Print information from a catalogue that is in FITS format.'''
 
     formatter_class = argparse.RawDescriptionHelpFormatter
     parser = argparse.ArgumentParser(description=__doc__,
@@ -34,7 +38,7 @@ def main():
                         '--fits',
                         required=False,
                         type=str,
-                        default='/mnt/closet/ldr2-blazars/catalogues/P146+42.fits',
+                        default='/mnt/closet/ldr2-blazars/catalogues/VanEck_HETDEX_LoTSS_76_final.fits',
                         help='FITS file containing the data')
 
     args = parser.parse_args()
