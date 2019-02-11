@@ -21,21 +21,16 @@ def flux_from_fits(files, cutout=100):
 
     blazars = glob.glob(files)  # get list of filenames
     fluxes = []
-    i = 0
+
     for blazar_fits in blazars:
         hdu_list = fits.open(blazar_fits)
         data = np.squeeze(hdu_list[0].data)  # remove single-dimensional entries
         l, L = box(data.shape[0], cutout)  # length
         w, W = box(data.shape[1], cutout)  # width
-        printing = {'file': blazar_fits.split('/')[-1],
-                    'peak': np.max(data[l:L, w:W]),
-                    'total': np.sum(data[l:L, w:W])}
+        fluxes.append([blazar_fits.split('/')[-1], np.sum(data[l:L, w:W]),
+                      np.max(data[l:L, w:W])])
         hdu_list.close()
-        print('File: {file}, Peak flux: {peak} mJy/beam, Total flux: {total} mJy/beam'.format(**printing))
-        fluxes.append(list(printing.values()))
-        i += 1
-        if i > 3:
-            break
+
     return fluxes
 
 

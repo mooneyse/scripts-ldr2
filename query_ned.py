@@ -76,7 +76,7 @@ def make_sed(ned_name, bzcat_name, savefig='/mnt/closet/ldr2-blazars/images/sed'
         blank.save('{}/{}.png'.format(savefig, bzcat_name))
 
 
-def query_ned(catalogue):
+def query_ned(catalogue, radius=10):
     '''Query NED given the source position.'''
 
     df = pd.read_csv(catalogue, sep=',')  # read in ldr2 bzcat sources
@@ -85,7 +85,7 @@ def query_ned(catalogue):
     for bzcat_name, ra, dec in zip(df[' Source name '], df[' RA (J2000.0) '], df[' Dec (J2000.0) ']):
         bzcat_name = bzcat_name.strip()  # remove leading and trailing spaces
         coordinate = coordinates.SkyCoord(ra=ra, dec=dec, unit=(u.deg, u.deg), frame='icrs')
-        result_table = ned.query_region(coordinate, radius=10 * u.arcsec, equinox='J2000.0')
+        result_table = ned.query_region(coordinate, radius=radius * u.arcsec, equinox='J2000.0')
         ned_name = str(result_table[0]['Object Name'])[2:-1]
         redshift = result_table[0]['Redshift']
         objects.append([ned_name, bzcat_name, redshift])

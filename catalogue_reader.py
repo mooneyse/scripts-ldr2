@@ -19,9 +19,9 @@ def catalogue_reader(fits):
     pd.set_option('display.max_columns', None)
     print(df['PolInt'])  # units are mJy/PSF/RMSF
 
-    # ds = df[df['S_Code']=='S']
+    # ds = df[df['S_Code'] == 'S']
     # print('Sources fit with a single Guassian:', ds.shape[0])
-    # ds = df[df['S_Code']!='S']
+    # ds = df[df['S_Code'] != 'S']
     # print('Sources fit with more than a single Guassian:', ds.shape[0])
 
 
