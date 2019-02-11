@@ -15,17 +15,32 @@ __date__ = '11 February 2019'
 
 # TODO add 4FGL crossmatches
 
+def clean(x):
+    '''Get the BZCAT source name from the FITS filename.'''
+
+    return x.split('-P')[0]
+
+
 def combine_catalogues(fluxes, redshifts, polarisation, fermi):
     '''Combine data into a new CSV using Pandas.'''
 
-    df_pol = pd.read_csv(polarisation)
-    df_flux = pd.DataFrame(fluxes, columns=['BZCAT name', 'Total flux', 'Peak flux'])
+    pd.set_option('expand_frame_repr', False)
+    pd.set_option('display.max_columns', None)
+
+    df_polarisation = pd.read_csv(polarisation)
+    df_polarisation.rename(columns={'Source_name': 'BZCAT name'}, inplace=True)  # rename column for merging
+    df_flux = pd.DataFrame(fluxes, columns=['BZCAT name', 'Flux density (144 MHz)', 'Peak flux (144 MHz)'])
     df_redshift = pd.DataFrame(redshifts, columns=['NED name', 'BZCAT name', 'Redshift'])
 
-    # name = flux_name.split('-P')[0]
+    df_flux['BZCAT name'] = df_flux['BZCAT name'].apply(clean)  # remove path from name
+    df_flux_redshift = pd.merge(df_flux, df_redshift, on='BZCAT name', how='inner')
+    df = pd.merge(df_flux_redshift, df_polarisation, on='BZCAT name', how='left')
 
-    print(df_flux.head)
-    print(df_redshift.head)
+    for column in ['Source_Name', '# col1', 'id', 'Redshift_y', 'Separation_2', 'Separation', 'RA',  'DEC']:  # remove duplicate columns
+        df.drop(column, axis=1, inplace=True)  # axis=0 for rows, axis=1 for columns
+
+    print(list(df))
+    print(df.head(5))
 
 
 def main():
@@ -55,7 +70,7 @@ def main():
                         '--polarisation',
                         required=False,
                         type=str,
-                        default='/mnt/closet/ldr2-blazars/catalogues/ldr2-bzcat.csv',
+                        default='/mnt/closet/ldr2-blazars/catalogues/ldr2-bzcat-vaneck.csv',
                         help='CSV of polarised LDR2 sources in BZCAT')
 
     parser.add_argument('-F',
