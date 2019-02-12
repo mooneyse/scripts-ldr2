@@ -6,6 +6,7 @@ analysed to date.'''
 import argparse
 import glob
 import pandas as pd
+from scipy.stats import stats
 
 __author__ = 'Sean Mooney'
 __email__ = 'sean.mooney@ucdconnect.ie'
@@ -67,6 +68,7 @@ def sample_properties(data):
     print('The sensitivity of LDR2 is 0.07 mJy and we expect the indices to be flat.')
     print('The average redshift is {redshift:.2f}.'.format(**statistics))
     print('There are {gamma} gamma-ray 3FGL sources.'.format(**statistics))
+    print('r, p = stats.pearsonr(radio_flux_density, gamma_ray_flux)')  # r = 0.51, p = 3e-12
 
 
 def main():
