@@ -46,13 +46,13 @@ def white_to_transparent(image):
     return Image.fromarray(x)
 
 
-def overlay_image(front, back, size=1024, alpha=0.66):
+def overlay_image(front, back, size=1024, alpha=0.5):
     '''Takes two images and plots the front one with moderate transparency over
     the back image.'''
 
     image1 = Image.open(front)
     image2 = Image.open(back)
-    transparent1 = white_to_transparent(image1)  # (0, 0, 0, 0) is white and transparent
+    transparent1 = image1 # white_to_transparent(image1)  # (0, 0, 0, 0) is white and transparent
     output = Image.blend(transparent1, image2, alpha=alpha)  # alpha=0 shows transparent1, alpha=1 shows image2
 
     save = '/'.join(front.split('/')[:-1]) + '/output.png'
@@ -72,11 +72,11 @@ def main():
                                      formatter_class=formatter_class)
 
     parser.add_argument('-f', '--radio', required=False, type=str,
-                        default='/home/sean/Downloads/m51-r.fits',
+                        default='/home/sean/Downloads/fits/m51-r.fits',
                         help='First FITS file to be plotted.')
 
     parser.add_argument('-F', '--optical', required=False, type=str,
-                        default='/home/sean/Downloads/m51-o.fits',
+                        default='/home/sean/Downloads/fits/m51-o.fits',
                         help='Second FITS file to be plotted.')
 
     parser.add_argument('-r', '--ra', required=False, type=float,
@@ -93,8 +93,8 @@ def main():
     ra = args.ra
     dec = args.dec
 
-    radio_image = get_image(fits=radio, centre=[ra, dec], cmap='hot_r', vmin=0.001, vmax=0.005)
-    optical_image = get_image(fits=optical, centre=[ra, dec], cmap='gray_r', vmin=3000, vmax=10000)
+    radio_image = get_image(fits=radio, centre=[ra, dec], cmap='hot', vmin=0.001, vmax=0.005)
+    optical_image = get_image(fits=optical, centre=[ra, dec], cmap='gray', vmin=3000, vmax=10000)
     overlay_image(front=radio_image, back=optical_image)
 
 
