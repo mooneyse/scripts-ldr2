@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python3.6
 
 '''Plot one FITS file (e.g. LOFAR radio data) over another (e.g. SDSS optical
 data).'''
@@ -9,6 +9,7 @@ warnings.filterwarnings('ignore')  # supress warnings
 import aplpy
 import argparse
 import matplotlib.pyplot as plt
+import montage_wrapper as montage
 import numpy as np
 import os
 from PIL import Image, ImageDraw
@@ -22,10 +23,10 @@ def get_image(fits, centre, cmap, vmin, vmax, radius=450, dpi=256, max_dpi=0,
     arcseconds.'''
 
     plt.rcParams['axes.edgecolor'] = 'white'
-    image = aplpy.FITSFigure(fits)
+    image = aplpy.FITSFigure(fits)  # north=True
     image.recenter(centre[0], centre[1], radius=radius / 60 / 60)
-    image.show_colorscale(cmap=cmap, vmin=vmin, vmax=vmax, smooth=3)
-    # image.frame.set_linewidth(0)
+    image.show_colorscale(cmap=cmap, vmin=vmin, vmax=vmax)
+    image.frame.set_linewidth(0)
     image.hide_axis_labels()
     image.hide_tick_labels()
 
@@ -45,7 +46,7 @@ def white_to_transparent(image):
     return Image.fromarray(x)
 
 
-def overlay_image(front, back, size=1024, alpha=0.5):
+def overlay_image(front, back, size=1024, alpha=0.66):
     '''Takes two images and plots the front one with moderate transparency over
     the back image.'''
 
@@ -71,11 +72,11 @@ def main():
                                      formatter_class=formatter_class)
 
     parser.add_argument('-f', '--radio', required=False, type=str,
-                        default='/home/sean/Downloads/fits/m51-radio.fits',
+                        default='/home/sean/Downloads/m51-r.fits',
                         help='First FITS file to be plotted.')
 
     parser.add_argument('-F', '--optical', required=False, type=str,
-                        default='/home/sean/Downloads/fits/m51-optical.fits',
+                        default='/home/sean/Downloads/m51-o.fits',
                         help='Second FITS file to be plotted.')
 
     parser.add_argument('-r', '--ra', required=False, type=float,
@@ -92,8 +93,8 @@ def main():
     ra = args.ra
     dec = args.dec
 
-    radio_image = get_image(fits=radio, centre=[ra, dec], cmap='hot_r', vmin=0.001, vmax=0.004)
-    optical_image = get_image(fits=optical, centre=[ra, dec], cmap='gray_r', vmin=0, vmax=1)
+    radio_image = get_image(fits=radio, centre=[ra, dec], cmap='hot_r', vmin=0.001, vmax=0.005)
+    optical_image = get_image(fits=optical, centre=[ra, dec], cmap='gray_r', vmin=3000, vmax=10000)
     overlay_image(front=radio_image, back=optical_image)
 
 
