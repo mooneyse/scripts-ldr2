@@ -7,107 +7,55 @@ import aplpy
 from astroquery.sdss import SDSS
 from astropy import coordinates as coords
 from astropy.io import fits
+from astropy.wcs import WCS
+import glob
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
-pos = coords.SkyCoord(187.277915, 2.052388, unit='deg', frame='icrs')
-xid = SDSS.query_region(pos)#, spectro=False)
-# print(xid)
+# TODO add this all into a function
 
-# http://skyserver.sdss.org/dr2/en/proj/advanced/color/sdssfilters.asp
-im = SDSS.get_images(matches=xid, band='i')  # i = near infrared
-# print(im[0][0])
-# # image_data = fits.getdata(im[0][0], ext=0)
-# # print(im[0].info())#.info)
-# data = im[0][0][1].data
-# image_data = im[0][0]
-# print(type(image_data))
-#
-# print(image_data)
-hdul = im[0]
-# print(hdul[0].header['ALT'])
-hdr = hdul[0].header
+radio_directory = '/mnt/closet/ldr2-blazars/images/fits'
+save_directory = '/mnt/closet/ldr2-blazars/images/contour'
+bzcat_csv = '/mnt/closet/ldr2-blazars/catalogues/ldr2-bzcat.csv'
+band = 'i'  # i = near infrared
+cmap = 'bone_r'
+vmin, vmax = 0, 1
+format = 'png'
+radio_cmap = 'YlOrRd_r'
+radio_levels = [4, 8, 16, 32]  # mJy
+radius = 120  # arcseconds
+figsize = 12
+unit = 'deg'
+frame = 'icrs'
 
-data = hdul[0].data
-            # print(data.shape)
-            # print(data.dtype.name)
-            # plt.imshow(data, cmap='gray')
-            # plt.show()
-print(repr(hdr))
-print(np.min(data), np.max(data))
+df = pd.read_csv(bzcat_csv)  # get catalogue which has positions we need
+df.rename(columns={' Source name ': 'name', ' RA (J2000.0) ': 'ra',
+                   ' Dec (J2000.0) ': 'dec'}, inplace=True)
+df['name'] = df['name'].str.strip()  # remove spaces from blazar names
+fits_files = glob.glob('{}/*'.format(radio_directory))  # get the fits files
 
-print(hdr['CRPIX1'], hdr['CRPIX2'])  # x, y of ref pixel
-print(hdr['CRVAL1'], hdr['CRVAL2'])  # ra, dec of ref pixel
+for fits_file in fits_files:
+    blazar_name = fits_file.split('/')[-1].split('-P')[0]
 
-# image = aplpy.FITSFigure(data, convention='calabretta')  # , figsize=(16, 16)
-# image = aplpy.FITSFigure('/home/sean/Downloads/fits/sdss-test.fits', hdu=0)#, figsize=(16, 16))
-# w1,w2= image.pixel2world(100,100)
-# print(image.data)
+    blazar_row = df[df['name'] == blazar_name]
+    ra, dec = float(blazar_row['ra']), float(blazar_row['dec'])
 
+    save = '{}/{}.{}'.format(save_directory, blazar_name, format)
 
+    # http://skyserver.sdss.org/dr2/en/proj/advanced/color/sdssfilters.asp
+    position = coords.SkyCoord(ra, dec, unit=unit, frame=frame)
+    id = SDSS.query_region(position, spectro=False)
+    image_file = SDSS.get_images(matches=id, band=band)[0]  # use first image
 
-# print(w1,w2)
-# image.set_xaxis_coord_type('scalar')
-# image.recenter(187.277915, 2.052388, radius=60 / 60 / 60)
-# image.show_colorscale(cmap='viridis', vmin=0, vmax=1)
-# image.add_grid()
-# plt.show()
-
-
-
-
-
-
-# image = aplpy.FITSFigure(fits)  # north=True
-# image.recenter(centre[0], centre[1], radius=radius / 60 / 60)
-# image.show_colorscale(cmap=cmap, vmin=vmin, vmax=vmax)
-# image.frame.set_linewidth(0)
-# image.hide_axis_labels()
-# image.hide_tick_labels()
-#
-# save = os.path.splitext(fits)[0] + '.' + format
-# image.save(save, dpi=dpi, max_dpi=max_dpi)
-
-
-# im[0].close()
-
-# plt.imshow(image_data, cmap='gray')
-
-image_file = '/home/sean/Downloads/fits/sdss-test.fits'
-# hdu_list = fits.open(image_file)
-# hdu_list.info()
-# image_data = hdu_list[0].data
-#
-#
-# print(type(image_data))
-# print(image_data.shape)
-#
-# plt.imshow(image_data, cmap='gray')
-# plt.colorbar()
-# plt.show()
-
-from astropy.wcs import WCS
-hdu = fits.open(image_file)[0]
-wcs = WCS(hdu.header)
-
-# plt.subplot(projection=wcs)
-# plt.imshow(hdu.data,  vmin=-0, vmax=1, origin='lower')
-# plt.grid(color='white', ls='solid')
-# plt.xlabel('Galactic Longitude')
-# plt.ylabel('Galactic Latitude')
-# plt.show()
-
-
-ax = plt.subplot(projection=wcs)
-
-ax.imshow(hdu.data, vmin=-0, vmax=1, origin='lower')
-
-ax.coords.grid(True, color='white', ls='solid')
-# ax.coords[0].set_axislabel('Galactic Longitude')
-# ax.coords[1].set_axislabel('Galactic Latitude')
-
-# overlay = ax.get_coords_overlay('fk5')
-# overlay.grid(color='white', ls='dotted')
-# overlay[0].set_axislabel('Right Ascension (J2000)')
-# overlay[1].set_axislabel('Declination (J2000)')
-plt.show()
+    image = aplpy.FITSFigure(image_file, north=True, figsize=(figsize, figsize))
+    image.show_colorscale(cmap=cmap, vmin=vmin, vmax=vmax)
+    image.recenter(ra, dec, radius=radius / (60 * 60))  # degrees
+    image.add_scalebar(radius / (60 * 60 * 2))
+    image.scalebar.set_label(str(int(radius / 2)) + '"')
+    image.show_grid()
+    image.set_title(blazar_name)
+    print(fits_file)
+    image.show_contour(fits_file, cmap=radio_cmap, levels=radio_levels)
+    image.save(save)
+    break
