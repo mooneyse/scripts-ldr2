@@ -41,7 +41,11 @@ def make_plot(fits_file, df, format='png', north=True, figsize=12, radius=120,
     blazar_row = df[df['name'] == blazar_name]
     ra, dec = float(blazar_row['ra']), float(blazar_row['dec'])
     save = '{}/{}.{}'.format(save_directory, blazar_name, format)
-    image_file = query_sdss(ra, dec)
+    try:
+        image_file = query_sdss(ra, dec)
+    except:
+        print('SDSS match for {} not found.'.format(blazar_name))
+        return
 
     # make image
     image = aplpy.FITSFigure(image_file, north=north, figsize=(figsize, figsize))
