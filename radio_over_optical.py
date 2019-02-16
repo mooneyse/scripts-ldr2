@@ -8,11 +8,11 @@ warnings.filterwarnings('ignore')  # supress warnings
 
 import argparse
 import aplpy
+import glob
+import pandas as pd
+import matplotlib.pyplot as plt
 from astroquery.sdss import SDSS
 from astropy import coordinates as coords
-import glob
-import matplotlib.pyplot as plt
-import pandas as pd
 
 __author__ = 'Sean Mooney'
 __email__ = 'sean.mooney@ucdconnect.ie'
@@ -66,12 +66,8 @@ def radio_over_optical(radio_directory, bzcat_csv):
     df['name'] = df['name'].str.strip()  # remove spaces from blazar names
     fits_files = glob.glob('{}/*'.format(radio_directory))  # get fits files
 
-    i = 0
     for fits_file in fits_files:
         make_plot(fits_file, df)
-        i += 1
-        if i > 2:
-            break
 
 
 def main():
