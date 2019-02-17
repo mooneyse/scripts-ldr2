@@ -13,10 +13,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from astroquery.sdss import SDSS
 from astropy import coordinates as coords
+from pathlib import Path
 
 __author__ = 'Sean Mooney'
 __email__ = 'sean.mooney@ucdconnect.ie'
 __date__ = '16 February 2019'
+
+# TODO change it to check if there is already an image and if not, then make one
 
 def query_sdss(ra, dec, unit='deg', frame='icrs', band='i', spectro=False):
     '''Query SDSS. Many filters are available. See this URL for more:
@@ -30,9 +33,10 @@ def query_sdss(ra, dec, unit='deg', frame='icrs', band='i', spectro=False):
 
 
 def make_plot(fits_file, df, format='png', north=True, figsize=12, radius=120,
-              cmap='bone_r', vmin=0, vmax=1, radio_cmap='YlOrRd_r',
-              radio_levels=[4, 8, 16, 32],
-              save_directory='/mnt/closet/ldr2-blazars/images/contour'):
+              cmap='bone_r', vmin=0, radio_cmap='YlOrRd_r', color='white',
+              radio_levels=[4, 8, 16, 32], length=1074, width=1009, vmax=1,
+              save_directory='/mnt/closet/ldr2-blazars/images/contour',
+              fill='black'):
     '''Plot contours from one FITS file over the image of another. Radius is
     given in arcseconds.'''
 
@@ -41,20 +45,25 @@ def make_plot(fits_file, df, format='png', north=True, figsize=12, radius=120,
     blazar_row = df[df['name'] == blazar_name]
     ra, dec = float(blazar_row['ra']), float(blazar_row['dec'])
     save = '{}/{}.{}'.format(save_directory, blazar_name, format)
-    try:
-        image_file = query_sdss(ra, dec)
-    except:
-        print('SDSS match for {} not found.'.format(blazar_name))
+    sdss_data = True
+    if Path(save).is_file():
+        print('{} already exists so it is being skipped.'.format(save))
         return
 
+    try:
+        image_file = query_sdss(ra, dec)
+        image = aplpy.FITSFigure(image_file, north=north, figsize=(figsize, figsize))
+    except:  # if there is no sdss just plot the radio data
+        print('SDSS match for {} not found.'.format(blazar_name))
+        image = aplpy.FITSFigure(fits_file, figsize=(figsize, figsize))
+
     # make image
-    image = aplpy.FITSFigure(image_file, north=north, figsize=(figsize, figsize))
     image.show_colorscale(cmap=cmap, vmin=vmin, vmax=vmax)
     image.recenter(ra, dec, radius=radius / (60 * 60))  # degrees
     image.add_scalebar(radius / (60 * 60 * 2))
     image.scalebar.set_label(str(int(radius / 2)) + '"')
-    image.show_grid()
-    image.set_title(blazar_name)
+    # image.show_grid()
+    image.set_title(blazar_name if sdss_data else blazar_name + ' (SDSS data not found)')
     image.show_contour(fits_file, cmap=radio_cmap, levels=radio_levels)  # mJy
     image.save(save)
     print('Image saved at {}.'.format(save))
