@@ -19,8 +19,6 @@ __author__ = 'Sean Mooney'
 __email__ = 'sean.mooney@ucdconnect.ie'
 __date__ = '16 February 2019'
 
-# TODO change it to check if there is already an image and if not, then make one
-
 def query_sdss(ra, dec, unit='deg', frame='icrs', band='i', spectro=False):
     '''Query SDSS. Many filters are available. See this URL for more:
     http://skyserver.sdss.org/dr2/en/proj/advanced/color/sdssfilters.asp.'''
