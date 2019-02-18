@@ -44,6 +44,10 @@ def make_plot(fits_file, df, format='png', north=True, figsize=12, radius=120,
     ra, dec = float(blazar_row['ra']), float(blazar_row['dec'])
     save = '{}/{}.{}'.format(save_directory, blazar_name, format)
     sdss_data = True
+    if len(glob.glob(save_directory + '/*')) > 300:
+        print('300 files reached!')
+        return
+
     if Path(save).is_file():
         print('{} already exists so it is being skipped.'.format(save))
         return
@@ -53,6 +57,7 @@ def make_plot(fits_file, df, format='png', north=True, figsize=12, radius=120,
         image = aplpy.FITSFigure(image_file, north=north, figsize=(figsize, figsize))
     except:  # if there is no sdss just plot the radio data
         print('SDSS match for {} not found.'.format(blazar_name))
+        sdss_data = False
         image = aplpy.FITSFigure(fits_file, figsize=(figsize, figsize))
 
     # make image
@@ -89,7 +94,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=formatter_class)
 
-    parser.add_argument('-d', '--directory', type=str, help='BZCAT CSV',
+    parser.add_argument('-d', '--directory', type=str, help='LDR2 FITS images',
                         default='/mnt/closet/ldr2-blazars/images/fits')
 
     parser.add_argument('-c', '--csv', type=str, help='BZCAT CSV',
