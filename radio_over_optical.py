@@ -48,7 +48,7 @@ def make_plot(fits_file, df, format='png', north=True, figsize=12, radius=120,
         print('300 files reached!')
         return
 
-    if Path(save).is_file():
+    if Path(save).is_file():  # allows the script to be restarted
         print('{} already exists so it is being skipped.'.format(save))
         return
 
