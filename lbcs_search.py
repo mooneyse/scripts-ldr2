@@ -55,7 +55,7 @@ def main():
 
     lbcs_search(ra=ra, dec=dec, lbcs=lbcs)
 
-    '''Results:
+    ''' Results:
     ID       RA            Dec           Date        Time      Flux           Code  RA (deg)    Dec (deg)  Separation
     L618324  08:54:48.870  20:06:30.701  2017-10-05  06:59:24  PPPPPPPXPPXX-  56    133.703625  20.108528  0.000000   OJ 287
     L618322  08:53:02.750  20:04:21.601  2017-10-05  06:59:24  XXXXXXXXXXXXX  56    133.261458  20.072667  0.416807
