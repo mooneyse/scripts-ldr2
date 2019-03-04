@@ -1,0 +1,45 @@
+#!/usr/bin/env python2.7
+
+'''Use PyBDSF (http://www.astron.nl/citt/pybdsf/) to make the noise maps from a
+list of fits files by fitting 2D Gaussians and removing them from the data.'''
+
+import argparse
+import bdsf
+import glob
+import numpy as np
+import matplotlib.pyplot as plt
+# import pandas as pd
+# from astropy import units as u
+# from astropy.coordinates import SkyCoord
+
+__author__ = 'Sean Mooney'
+__email__ = 'sean.mooney@ucdconnect.ie'
+__date__ = '04 March 2019'
+
+def make_noise_maps(directory):
+    '''Use PyBDSF to fit the sources.'''
+
+    fits = glob.glob(directory + '/*')
+    image = bdsf.process_image(fits[0])
+    print '%s: %.4f mJy' % (fits[0].split('/')[-1], np.mean(image.rms_arr))
+
+
+def main():
+    '''Use PyBDSF (http://www.astron.nl/citt/pybdsf/) to make the noise maps
+    from a list of fits files by fitting 2D Gaussians and removing them from
+    the data.'''
+
+    formatter_class = argparse.RawDescriptionHelpFormatter
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=formatter_class)
+
+    parser.add_argument('-d', '--directory', type=str, help='Directory of FITS files', default='/mnt/closet/ldr2-blazars/images/fits')
+
+    args = parser.parse_args()
+    directory = args.directory
+
+    make_noise_maps(directory)
+
+
+if __name__ == '__main__':
+    main()
