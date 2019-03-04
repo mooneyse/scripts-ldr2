@@ -16,12 +16,30 @@ __author__ = 'Sean Mooney'
 __email__ = 'sean.mooney@ucdconnect.ie'
 __date__ = '04 March 2019'
 
+def get_noise(fits, directory='/mnt/closet/ldr2-blazars/images'):
+    '''Get the noise of an image.'''
+
+    name = fits.split('/')[-1].split('P')[0][:-1]
+    skymodel = directory + '/skymodel/' + name + '.skymodel'
+    noise_map = directory + '/noise/' + name + '.fits'
+    image = bdsf.process_image(fits)
+    image.write_catalog(outfile=skymodel, bbs_patches='source', format='bbs', srcroot=name)
+    image.export_image(outfile=noise_map, img_type='gaus_resid')
+    return name, np.mean(image.rms_arr)
+
+
 def make_noise_maps(directory):
     '''Use PyBDSF to fit the sources.'''
 
-    fits = glob.glob(directory + '/*')
-    image = bdsf.process_image(fits[0])
-    print '%s: %.4f mJy' % (fits[0].split('/')[-1], np.mean(image.rms_arr))
+    fits_files = glob.glob(directory + '/*')
+    rms = []
+    for fits in fits_files:
+        rms.append(get_noise(fits))
+        break
+    print(rms)
+    # TODO write noise to file and match it with the csv data
+    # what I want to do is say if the max(abs) > ~0.6 then flag=BAD, otherwise flag=GOOD
+    # and save this with the noise value.
 
 
 def main():
