@@ -35,6 +35,8 @@ def get_noise(fits, directory):
         image_max = np.max(np.abs(image.image_arr))
         image_rms = np.mean(image.rms_arr)
         residual_max = np.max(np.abs(image.resid_gaus_arr))
+    except:
+        print 'Failed for %s.' % name
 
     return name, image_max, image_rms, residual_max
 
