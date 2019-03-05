@@ -5,6 +5,7 @@ list of fits files by fitting 2D Gaussians and removing them from the data.'''
 
 import argparse
 import bdsf
+import csv
 import glob
 import numpy as np
 import matplotlib.pyplot as plt
@@ -16,30 +17,41 @@ __author__ = 'Sean Mooney'
 __email__ = 'sean.mooney@ucdconnect.ie'
 __date__ = '04 March 2019'
 
-def get_noise(fits, directory='/mnt/closet/ldr2-blazars/images'):
+def get_noise(fits, directory):
     '''Get the noise of an image.'''
 
     name = fits.split('/')[-1].split('P')[0][:-1]
-    skymodel = directory + '/skymodel/' + name + '.skymodel'
-    noise_map = directory + '/noise/' + name + '.fits'
-    image = bdsf.process_image(fits)
-    image.write_catalog(outfile=skymodel, bbs_patches='source', format='bbs', srcroot=name)
-    image.export_image(outfile=noise_map, img_type='gaus_resid')
-    return name, np.mean(image.rms_arr)
+    skymodel = directory + '/images/skymodel/' + name + '.skymodel'
+    noise_map = directory + '/images/noise/' + name + '.fits'
+
+    image_max, image_rms, residual_max = float('nan'), float('nan'), float('nan')
+
+    try:
+        image = bdsf.process_image(fits)
+        # print image.__dict__.keys()  # print object attributes
+        image.write_catalog(outfile=skymodel, bbs_patches='source', format='bbs', srcroot=name)
+        image.export_image(outfile=noise_map, img_type='gaus_resid')
+        # using max instead of np.max below gives an error
+        image_max = np.max(np.abs(image.image_arr))
+        image_rms = np.mean(image.rms_arr)
+        residual_max = np.max(np.abs(image.resid_gaus_arr))
+
+    return name, image_max, image_rms, residual_max
 
 
 def make_noise_maps(directory):
     '''Use PyBDSF to fit the sources.'''
 
-    fits_files = glob.glob(directory + '/*')
+    fits_files = glob.glob(directory + '/images/fits/*.fits')
     rms = []
     for fits in fits_files:
-        rms.append(get_noise(fits))
-        break
-    print(rms)
-    # TODO write noise to file and match it with the csv data
-    # what I want to do is say if the max(abs) > ~0.6 then flag=BAD, otherwise flag=GOOD
-    # and save this with the noise value.
+        rms.append(get_noise(fits, directory))
+
+    csv_file = directory + '/catalogues/noise.csv'
+    with open(csv_file, 'w') as f:
+        writer = csv.writer(f)
+        writer.writerow(['Name', 'Max_image', 'RMS', 'Max_residual'])
+        writer.writerows(rms)
 
 
 def main():
@@ -51,7 +63,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__,
                                      formatter_class=formatter_class)
 
-    parser.add_argument('-d', '--directory', type=str, help='Directory of FITS files', default='/mnt/closet/ldr2-blazars/images/fits')
+    parser.add_argument('-d', '--directory', type=str, help='Working directory', default='/mnt/closet/ldr2-blazars')
 
     args = parser.parse_args()
     directory = args.directory
