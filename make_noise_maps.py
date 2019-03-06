@@ -9,9 +9,6 @@ import csv
 import glob
 import numpy as np
 import matplotlib.pyplot as plt
-# import pandas as pd
-# from astropy import units as u
-# from astropy.coordinates import SkyCoord
 
 __author__ = 'Sean Mooney'
 __email__ = 'sean.mooney@ucdconnect.ie'
