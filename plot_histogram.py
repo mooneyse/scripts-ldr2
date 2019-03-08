@@ -40,7 +40,7 @@ def main(csv='/mnt/closet/ldr2-blazars/catalogues/ldr2-bzcat-vaneck-ned-noise.cs
     axes[0, 0].set_xlabel('Max image flux')
     axes[0, 0].set_ylabel('RMS')
     axes[0, 0].loglog(df['Max image flux'].dropna(), df['RMS'].dropna(), marker='.', ls='None', alpha=0.8, color='black')
-    axes[0, 0].plot([x], [y], marker='o', markersize=3, color="red")
+    # axes[0, 0].plot([x], [y], marker='o', markersize=3, color="red")
 
     axes[0, 1].set_xlabel('Max residual')
     axes[0, 1].set_ylabel('RMS')
