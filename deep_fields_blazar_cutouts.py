@@ -20,17 +20,20 @@ __author__ = 'Sean Mooney'
 __email__ = 'sean.mooney@ucdconnect.ie'
 __date__ = '12 March 2019'
 
-def make_cut_out_image(sources, field, radius=1 / 60, cmap='viridis', vmin=0, vmax=0.001):
+def make_cut_out_image(sources, field, radius=1 / 60, cmap='viridis', vmin=0,
+                       output='/data5/sean/deep-fields'):
     '''Make a cut-out image of a given source.'''
 
     df = pd.read_csv(sources)
     # print(df.head)
 
-    for ra, dec, peak_flux in zip(df['RA'], df['DEC'], df['Peak_flux']):
+    for name, ra, dec, peak_flux in zip(df['name'], df['RA'], df['DEC'], df['Peak_flux']):
         image = aplpy.FITSFigure(field)
         image.show_colorscale(cmap=cmap, vmin=vmin, vmax=peak_flux)
         image.recenter(ra, dec, radius=radius)
-        image.save(os.path.splitext(field)[0] + 'ra' + str(ra) + 'dec' + str(dec) + '.png')
+        image.add_colorbar()
+        image.set_title(name)
+        image.save(os.path.splitext(output + '/' + name + '.png')
         sys.exit()
 
 
