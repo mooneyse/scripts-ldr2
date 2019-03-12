@@ -7,7 +7,6 @@ mpl.use('Agg')
 
 import argparse
 import aplpy
-import os
 import sys
 import numpy as np
 import pandas as pd
@@ -33,7 +32,7 @@ def make_cut_out_image(sources, field, radius=1 / 60, cmap='viridis', vmin=0,
         image.recenter(ra, dec, radius=radius)
         image.add_colorbar()
         image.set_title(name)
-        image.save(os.path.splitext(output + '/' + name + '.png')
+        image.save(output + '/' + name + '.png')
         sys.exit()
 
 
