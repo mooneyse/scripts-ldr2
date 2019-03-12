@@ -31,7 +31,7 @@ def make_cut_out_image(sources, field, radius=1 / 60, cmap='viridis', vmin=0,
         image.show_colorscale(cmap=cmap, vmin=vmin, vmax=peak_flux)
         image.recenter(ra, dec, radius=radius)
         image.add_colorbar()
-        image.set_title(name)
+        image.set_title(source_name)
         image.save(output + '/' + source_name + '.png')
         sys.exit()
 
