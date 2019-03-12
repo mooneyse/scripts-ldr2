@@ -37,15 +37,15 @@ def main():
 
     parser.add_argument('-s', '--sources', required=False, type=str,
                         help='CSV of the BZCAT',
-                        default='/mnt/closet/ldr2-blazars/deep-fields/bootes-lockman-hole-blazars.csv')
+                        default='/data5/sean/deep-fields/bootes-lockman-hole-blazars.csv'
 
     parser.add_argument('-b', '--bootes', required=False, type=str,
                         help='FITS image of the Bootes field',
-                        default='/mnt/closet/ldr2-blazars/deep-fields/bootes-image.fits')
+                        default='/data5/sean/deep-fields/bootes/image_full_ampphase_di_m.NS_shift.int.facetRestored.blanked.scaled.fits')
 
     parser.add_argument('-l', '--lockman', required=False, type=str,
                         help='FITS image of the Lockman Hole',
-                        default='/mnt/closet/ldr2-blazars/deep-fields/lockman-hole-image.fits')
+                        default='/data5/sean/deep-fields/lockman-hole/image_full_ampphase_di_m.NS_shift.int.facetRestored.blanked.scaled.fits')
 
     args = parser.parse_args()
     sources = args.sources
