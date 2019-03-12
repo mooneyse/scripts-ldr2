@@ -2,6 +2,9 @@
 
 '''Get images of the blazars in the Deep Fields data.'''
 
+import matplotlib as mpl
+mpl.use('Agg')
+
 import argparse
 import aplpy
 import os
@@ -21,7 +24,7 @@ def make_cut_out_image(sources, field, radius=1 / 60, cmap='viridis', vmin=0, vm
     '''Make a cut-out image of a given source.'''
 
     df = pd.read_csv(sources)
-    print(df.head)
+    # print(df.head)
 
     for ra, dec, peak_flux in zip(df['RA'], df['DEC'], df['Peak_flux']):
         image = aplpy.FITSFigure(field)
