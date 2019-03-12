@@ -20,7 +20,7 @@ __email__ = 'sean.mooney@ucdconnect.ie'
 __date__ = '12 March 2019'
 
 def make_cut_out_image(sources, field, radius=1 / 60, cmap='viridis', vmin=0,
-                       output='/data5/sean/deep-fields'):
+                       output='/data5/sean/deep-fields/images'):
     '''Make a cut-out image of a given source.'''
 
     df = pd.read_csv(sources)
