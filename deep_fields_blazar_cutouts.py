@@ -19,14 +19,18 @@ __author__ = 'Sean Mooney'
 __email__ = 'sean.mooney@ucdconnect.ie'
 __date__ = '12 March 2019'
 
-def make_cut_out_image(sources, field, radius=1 / 60, cmap='viridis', vmin=0,
+def make_cut_out_image(sources, radius=1 / 60, cmap='viridis', vmin=0,
                        output='/data5/sean/deep-fields/images'):
     '''Make a cut-out image of a given source.'''
 
     df = pd.read_csv(sources)
-    # print(df.head)
 
-    for source_name, ra, dec, peak_flux in zip(df['Source name'], df['RA'], df['DEC'], df['Peak_flux']):
+    for source_name, ra, dec, peak_flux, field in zip(df['Source name'], df['RA'], df['DEC'], df['Peak_flux'], df['Field']):
+        if field == 'Bootes':
+            field_file = '/data5/sean/deep-fields/bootes/image_full_ampphase_di_m.NS_shift.int.facetRestored.blanked.scaled.fits'
+        elif field == 'Lockman Hole':
+            field_file = '/data5/sean/deep-fields/lockman-hole/image_full_ampphase_di_m.NS_shift.int.facetRestored.blanked.scaled.fits'
+
         image = aplpy.FITSFigure(field)
         image.show_colorscale(cmap=cmap, vmin=vmin, vmax=peak_flux)
         image.recenter(ra, dec, radius=radius)
@@ -44,23 +48,10 @@ def main():
                         help='CSV of the BZCAT',
                         default='/data5/sean/deep-fields/bootes-lockman-hole-blazars.csv')
 
-    parser.add_argument('-b', '--bootes', required=False, type=str,
-                        help='FITS image of the Bootes field',
-                        default='/data5/sean/deep-fields/bootes/image_full_ampphase_di_m.NS_shift.int.facetRestored.blanked.scaled.fits')
-
-    parser.add_argument('-l', '--lockman', required=False, type=str,
-                        help='FITS image of the Lockman Hole',
-                        default='/data5/sean/deep-fields/lockman-hole/image_full_ampphase_di_m.NS_shift.int.facetRestored.blanked.scaled.fits')
-
     args = parser.parse_args()
     sources = args.sources
-    bootes = args.bootes
-    lockman = args.lockman
 
-    fields = [bootes, lockman]  # elais n1
-
-    for field in fields:
-            make_cut_out_image(sources, field)
+    make_cut_out_image(sources)
 
 
 if __name__ == '__main__':
