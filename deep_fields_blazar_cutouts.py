@@ -37,7 +37,7 @@ def main():
 
     parser.add_argument('-s', '--sources', required=False, type=str,
                         help='CSV of the BZCAT',
-                        default='/data5/sean/deep-fields/bootes-lockman-hole-blazars.csv'
+                        default='/data5/sean/deep-fields/bootes-lockman-hole-blazars.csv')
 
     parser.add_argument('-b', '--bootes', required=False, type=str,
                         help='FITS image of the Bootes field',
