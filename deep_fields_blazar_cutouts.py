@@ -37,7 +37,6 @@ def make_cut_out_image(sources, radius=1 / 60, cmap='viridis', vmin=0,
         image.add_colorbar()
         image.set_title(source_name)
         image.save(output + '/' + source_name + '.png')
-        sys.exit()
 
 
 def main():
