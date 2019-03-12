@@ -26,13 +26,13 @@ def make_cut_out_image(sources, field, radius=1 / 60, cmap='viridis', vmin=0,
     df = pd.read_csv(sources)
     # print(df.head)
 
-    for name, ra, dec, peak_flux in zip(df['name'], df['RA'], df['DEC'], df['Peak_flux']):
+    for source_name, ra, dec, peak_flux in zip(df['Source name'], df['RA'], df['DEC'], df['Peak_flux']):
         image = aplpy.FITSFigure(field)
         image.show_colorscale(cmap=cmap, vmin=vmin, vmax=peak_flux)
         image.recenter(ra, dec, radius=radius)
         image.add_colorbar()
         image.set_title(name)
-        image.save(output + '/' + name + '.png')
+        image.save(output + '/' + source_name + '.png')
         sys.exit()
 
 
