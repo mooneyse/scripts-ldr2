@@ -31,7 +31,7 @@ def make_cut_out_image(sources, radius=1 / 60, cmap='viridis', vmin=0,
         elif field == 'Lockman Hole':
             field_file = '/data5/sean/deep-fields/lockman-hole/image_full_ampphase_di_m.NS_shift.int.facetRestored.blanked.scaled.fits'
 
-        image = aplpy.FITSFigure(field)
+        image = aplpy.FITSFigure(field_file)
         image.show_colorscale(cmap=cmap, vmin=vmin, vmax=peak_flux)
         image.recenter(ra, dec, radius=radius)
         image.add_colorbar()
