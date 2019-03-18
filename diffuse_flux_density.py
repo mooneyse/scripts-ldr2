@@ -75,7 +75,7 @@ def give_results(diffuse_and_core, core_only):
     '''Format the results.'''
 
     diffuse_only = diffuse_and_core - core_only
-    print('The core flux density is {:.3f} Jy/beam.'.format(core_only))
+    print('The core and jet flux density is {:.3f} Jy/beam.'.format(core_only))
     print('The diffuse flux density is {:.3f} Jy/beam.'.format(diffuse_only))
 
 
