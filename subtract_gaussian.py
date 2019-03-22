@@ -1,41 +1,108 @@
 #!/usr/bin/env python3
 
+'''Fit a Gaussian point spread function to a point source and subtract it from
+a source with diffuse emission.'''
+
+import argparse
 import numpy as np
 import matplotlib.pyplot as plt
-from astropy.io import fits
+from astropy import units as u
+from astropy.coordinates import SkyCoord
 from astropy.modeling.models import Gaussian2D
+from astropy.io import fits
+from astropy.wcs import WCS
+from astropy.nddata import Cutout2D
+from astropy.utils.data import get_pkg_data_filename
 from photutils.datasets import make_noise_image
 from photutils.isophote import build_ellipse_model, Ellipse, EllipseGeometry
 from photutils import EllipticalAperture
 
-fits_file = '/mnt/closet/ldr2-blazars/deep-fields/bootes-image.fits'
-my_array = np.squeeze(fits.open(fits_file)[0].data)
-field = my_array[13543:15543, 11523:13523]
-point = field[240:272, 336:368]
-point = my_array[13783:13815, 11859:11891]
-data = point / np.max(point)
+__author__ = 'Sean Mooney'
+__email__ = 'sean.mooney@ucdconnect.ie'
+__date__ = '20 March 2019'
 
-geometry = EllipseGeometry(x0=16, y0=16, sma=5, eps=0, pa=0)
-aper = EllipticalAperture((geometry.x0, geometry.y0), geometry.sma,
-                           geometry.sma * (1 - geometry.eps), geometry.pa)
+def get_fits(filename):
+    '''Open FITS file.'''
+    hdu = fits.open(filename)[0]
+    wcs = WCS(hdu.header, naxis=2)
+    return hdu, wcs
 
-ellipse = Ellipse(data, geometry)
-isolist = ellipse.fit_image()
 
-model_image = build_ellipse_model(data.shape, isolist)
-residual = data - model_image
+def get_data(position, hdu, wcs, size=[1, 1] * u.arcmin):
+    '''Cut out the source from the FITS data.'''
+    sky_position = SkyCoord(position[0], position[1], unit='deg')
+    cutout = Cutout2D(np.squeeze(hdu.data), sky_position, size=size, wcs=wcs)
+    data_normalised = cutout.data / np.max(cutout.data)
+    return data_normalised
 
-fig, (ax1, ax2, ax3) = plt.subplots(nrows=1, ncols=3)
-ax1.imshow(data, origin='lower', vmin=0, vmax=1)
-ax1.set_title('Data')
-ax1.axis('off')
 
-ax2.imshow(model_image, origin='lower', vmin=0, vmax=1)
-ax2.set_title('Model')
-ax2.axis('off')
+def make_model(data, x0=20, y0=19, sma=3, eps=0, pa=0):
+    '''Fit a two-dimensional Gaussian to the data.'''
+    geometry = EllipseGeometry(x0=x0, y0=y0, sma=sma, eps=eps, pa=pa)
+    ellipse = Ellipse(data, geometry)
+    iso_list = ellipse.fit_image()
+    model = build_ellipse_model(data.shape, iso_list)
+    return model
 
-ax3.imshow(residual, origin='lower', vmin=0, vmax=1)
-ax3.set_title('Residual')
-ax3.axis('off')
 
-plt.show()
+def make_plot(position, data, title, rows=2, columns=3, origin='lower', vmin=0,
+              vmax=1, axis='off'):
+    '''Plot the image on a grid.'''
+    ax = plt.subplot(int(str(rows) + str(columns) + str(position)))
+    ax.imshow(data, origin=origin, vmin=vmin, vmax=vmax)
+    ax.set_title(title)
+    ax.axis(axis)
+
+
+def main():
+    '''Fit a Gaussian point spread function to a point source and subtract it
+    from a source with diffuse emission.'''
+
+    formatter_class = argparse.RawDescriptionHelpFormatter
+    parser = argparse.ArgumentParser(description=__doc__,
+                                     formatter_class=formatter_class)
+
+    parser.add_argument('-f',
+                        '--filename',
+                        required=False,
+                        type=str,
+                        default='/mnt/closet/ldr2-blazars/deep-fields/bootes-image.fits',
+                        help='FITS file of the field')
+
+    parser.add_argument('-p',
+                        '--point',
+                        required=False,
+                        nargs='+',
+                        default=[216.71718, 33.97577],
+                        help='FITS file containing a point source')
+
+    parser.add_argument('-b',
+                        '--blazar',
+                        required=False,
+                        nargs='+',
+                        default=[216.5321226, 34.07423184],
+                        help='FITS file containing a diffuse source')
+
+    args = parser.parse_args()
+    filename = args.filename
+    point_source_position = args.point
+    blazar_position = args.blazar
+
+    hdu, wcs = get_fits(filename=filename)
+    blazar_data = get_data(position=blazar_position, hdu=hdu, wcs=wcs)
+    point_source_data = get_data(position=point_source_position, hdu=hdu, wcs=wcs)
+    model = make_model(data=point_source_data)
+    point_source_residual = point_source_data - model
+    blazar_residual = blazar_data - model
+
+    make_plot(position=1, data=point_source_data, title='Point source')
+    make_plot(position=2, data=model, title='Point source model')
+    make_plot(position=3, data=point_source_residual, title='Point source residual')
+    make_plot(position=4, data=blazar_data, title='5BZBJ1426+3404')
+    make_plot(position=6, data=blazar_residual, title='5BZBJ1426+3404 residual')
+
+    plt.show()
+
+
+if __name__ == '__main__':
+    main()
