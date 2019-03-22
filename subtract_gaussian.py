@@ -8,14 +8,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 from astropy import units as u
 from astropy.coordinates import SkyCoord
-from astropy.modeling.models import Gaussian2D
 from astropy.io import fits
 from astropy.wcs import WCS
 from astropy.nddata import Cutout2D
-from astropy.utils.data import get_pkg_data_filename
-from photutils.datasets import make_noise_image
 from photutils.isophote import build_ellipse_model, Ellipse, EllipseGeometry
-from photutils import EllipticalAperture
 
 __author__ = 'Sean Mooney'
 __email__ = 'sean.mooney@ucdconnect.ie'
