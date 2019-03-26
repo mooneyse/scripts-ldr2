@@ -3,12 +3,15 @@
 '''Fit a Gaussian point spread function to a point source and subtract it from
 a source with diffuse emission.'''
 
+import sys
 import argparse
 import numpy as np
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+from matplotlib_scalebar.scalebar import ScaleBar
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
@@ -35,15 +38,18 @@ def get_df(filename, format, index):
     return df
 
 
-def get_position(df, blazar_name):
+def get_position(df, field='Bootes'):
     '''Look up the position of the blazar.'''
-    ra = df.loc[blazar_name, 'RA']
-    dec = df.loc[blazar_name, 'DEC']
-    blazar_position = [ra, dec]
-    return blazar_position
+    df = df[df['Field'] == field]
+    blazar_names = df.index.tolist()
+    blazar_positions = []
+    for ra, dec in zip(df['RA'], df['DEC']):
+        blazar_positions.append([ra, dec])
+    return blazar_names, blazar_positions
 
 
-def nearest_point_source(df, position, s_code='S', flux_threshold=0.02):
+def nearest_point_source(df, position, s_code='S', flux_threshold=0.01,
+                         distance_threshold=0.6, elongation_threshold=1.2):
     '''Find the nearest bright point source to a given blazar.'''
     # disable warning, see https://stackoverflow.com/a/20627316/6386612
     pd.options.mode.chained_assignment = None
@@ -52,13 +58,19 @@ def nearest_point_source(df, position, s_code='S', flux_threshold=0.02):
     df_point_sources = df[(df['S_Code'] == s_code) &
                           (df['Total_flux'] > flux_threshold)]
     blazar = SkyCoord(position[0], position[1], unit='deg')
-    separations = []
-    for ra, dec in zip(df_point_sources['RA'], df_point_sources['DEC']):
+    separations, elongations = [], []
+    for ra, dec, major, minor in zip(df_point_sources['RA'],
+                                     df_point_sources['DEC'],
+                                     df_point_sources['Maj'],
+                                     df_point_sources['Min']):
         point_source = SkyCoord(ra, dec, unit='deg')
         separation = blazar.separation(point_source)
         separations.append(separation.deg)
+        elongations.append(major / minor)
 
     df_point_sources['Separation'] = separations
+    df_point_sources['Elongation'] = elongations
+    df_point_sources = df_point_sources[df_point_sources['Elongation'] < elongation_threshold]
     nearest = df_point_sources.loc[df_point_sources['Separation'].idxmin()]
     point_source_position = [nearest['RA'], nearest['DEC']]
     results = {'i': 'ILTJ' + str(nearest['Source_id']),
@@ -66,6 +78,9 @@ def nearest_point_source(df, position, s_code='S', flux_threshold=0.02):
                'f': nearest['Total_flux'] * 1000}
     print('{i} is {s:.2f} degrees away and has a total flux density of {f:.2f}'
           ' mJy.'.format(**results))
+    if results['s'] > distance_threshold:
+        print('The point source is too far away.')
+        sys.exit()
     return results['i'], point_source_position
 
 
@@ -159,7 +174,7 @@ def get_noise_image(original_data, new_data, x0=0, x1=10, y0=0, y1=10, sigma=5):
     return threshold
 
 
-def get_noise_catalogue(df, blazar_name, new_data, sigma=20):
+def get_noise_catalogue(df, blazar_name, new_data, sigma=10):
     '''Calculate the noise in the blazar image.'''
     peak = df.loc[blazar_name, 'Peak_flux']
     rms = df.loc[blazar_name, 'Isl_rms']  # QUESTION Isl_rms or Resid_Isl_rms?
@@ -191,19 +206,26 @@ def make_plot(position, data, title, rows=2, columns=5, origin='lower',
               vmin=0, vmax=1, zmin=0, zmax=1, axis='off', elev=28, azim=-61,
               linewidth=0.25, pane_colour='white', line_colour='black',
               cmap='magma_r', projection='3d', stretch='arcsinh', levels='',
-              plot='', layer=''):
+              plot='', layer='', contour_colours=['black', 'white'], pad=0.05,
+              size='5%', orientation='horizontal', location='bottom',
+              linestyles='dashed'):
     '''Plot the image on a grid.'''
     ax0 = plt.subplot(rows, columns, position)
     ax0.set_title(title)
     ax0.get_xaxis().set_ticks([])
     ax0.get_yaxis().set_ticks([])
-    ax0.imshow(data, origin=origin, vmin=vmin, vmax=vmax, cmap=cmap,
-               norm=DS9Normalize(stretch=stretch))
+    # image is 1 * 1 arcminutes so 100 / 400 pixels = 0.25 arcminutes
+    plt.text(300, 70, '15"', horizontalalignment='center', verticalalignment='center', fontsize=12)
+    plt.plot([260, 360], [40, 40], 'k-', lw=1.5)
+    image = ax0.imshow(data, origin=origin, cmap=cmap, vmin=vmin, vmax=vmax)  # norm=DS9Normalize(stretch=stretch)
+    divider = make_axes_locatable(ax0)
+    cax0 = divider.append_axes(location, size=size, pad=pad)
+    plt.colorbar(image, cax=cax0, orientation=orientation)
     if plot is 'blazar':
-        ax0.contour(data, levels=levels, origin=origin)
+        ax0.contour(data, levels=levels, origin=origin, colors=contour_colours[0])
     elif plot is 'diffuse':
-        ax0.contour(layer, levels=levels, origin=origin)
-        ax0.contour(data, levels=levels, origin=origin, linestyles='dashed')
+        ax0.contour(layer, levels=levels, origin=origin, colors=contour_colours[0])
+        ax0.contour(data, levels=levels, origin=origin, linestyles=linestyles, colors=contour_colours[1])
 
     len_x, len_y = data.shape
     range_x = range(len_x)
@@ -269,41 +291,50 @@ def main():
     csv = args.csv
     output = args.output
 
-    blazar_name = '5BZBJ1426+3404'
     font = 'STIXGeneral'
     math_font = 'cm'
+    font_size = 12
     figsize = (20, 10)
     bbox_inches = 'tight'
-    savefig = output + '/' + blazar_name + '.png'
+    testing = True
 
     df_blazars = get_df(csv, format='csv', index='Source name')
-    df_bootes = get_df(catalogue, format='fits', index='Source_id')
-    blazar_position = get_position(df_blazars, blazar_name)
-    point_source_id, point_source_position = nearest_point_source(df_bootes, blazar_position)
-    hdu, wcs = get_fits(filename=image)
-    blazar_data = get_data(position=blazar_position, hdu=hdu, wcs=wcs)
-    point_source_data = get_data(position=point_source_position, hdu=hdu, wcs=wcs)
-    blazar_regrid = regrid(blazar_data)
-    point_source_regrid =regrid(point_source_data)
-    model = make_model(point_source_regrid)
-    blazar_shifted = match_peaks(blazar_regrid, model)
-    point_source_residual = point_source_regrid - model
-    blazar_residual = blazar_shifted - model
-    # threshold = get_noise_image(blazar_data, new_data=blazar_shifted, x1=12, y1=12)  # box bounds determined by inspection
-    threshold = get_noise_catalogue(df_blazars, blazar_name, blazar_shifted)
-    diffuse_emission = diffuse_fraction(df_blazars, blazar_name, blazar_shifted,
-                                        blazar_residual, threshold)
+    blazar_names, blazar_positions = get_position(df_blazars)
+    for i, (blazar_name, blazar_position) in enumerate(zip(blazar_names, blazar_positions)):
+        if testing:
+            if i != 0:  # doing on e at a time
+                sys.exit()
+        print('Analysing {} (blazar {} of {}).'.format(blazar_name, i + 1, len(blazar_names)))
+        df_bootes = get_df(catalogue, format='fits', index='Source_id')
+        point_source_id, point_source_position = nearest_point_source(df_bootes, blazar_position)
+        hdu, wcs = get_fits(filename=image)
+        blazar_data = get_data(position=blazar_position, hdu=hdu, wcs=wcs)
+        point_source_data = get_data(position=point_source_position, hdu=hdu, wcs=wcs)
+        blazar_regrid = regrid(blazar_data, new_size=10, normalise=False)  # peak and total values change with regridding
+        point_source_regrid =regrid(point_source_data, new_size=10, normalise=False)
+        model = make_model(point_source_regrid, sigma_x=4, sigma_y=4)
+        blazar_shifted = match_peaks(blazar_regrid, model)
+        point_source_residual = point_source_regrid - model
+        blazar_residual = blazar_shifted - model
+        # threshold = get_noise_image(blazar_data, new_data=blazar_shifted, x1=12, y1=12)  # box bounds determined by inspection
+        threshold = get_noise_catalogue(df_blazars, blazar_name, blazar_shifted)#, sigma=10)
+        diffuse_emission = diffuse_fraction(df_blazars, blazar_name, blazar_shifted,
+                                            blazar_residual, threshold)
+        savefig = output + '/' + blazar_name + '.png'
 
-    matplotlib.rcParams['font.family'] = font
-    matplotlib.rcParams['mathtext.fontset'] = math_font
-    plt.figure(figsize=figsize)
-    make_plot(position=1, data=point_source_regrid, title=point_source_id)
-    make_plot(position=2, data=model, title=point_source_id + ' model')
-    make_plot(position=3, data=point_source_residual, title=point_source_id + ' residual')
-    make_plot(position=4, data=blazar_shifted, title=blazar_name, levels=threshold, plot='blazar')
-    make_plot(position=5, data=blazar_residual, title=blazar_name + ' residual', levels=threshold, plot='diffuse', layer=blazar_shifted)
-    # plt.show()
-    plt.savefig(savefig, bbox_inches=bbox_inches)
+        matplotlib.rcParams['font.family'] = font
+        matplotlib.rcParams['mathtext.fontset'] = math_font
+        matplotlib.rcParams['font.size'] = font_size
+        plt.figure(figsize=figsize)
+        make_plot(position=1, data=point_source_regrid, title=point_source_id, vmax=np.max(point_source_regrid))
+        make_plot(position=2, data=model, title=point_source_id + ' model', vmax=np.max(point_source_regrid))
+        make_plot(position=3, data=point_source_residual, title=point_source_id + ' residual', vmax=np.max(point_source_regrid))
+        make_plot(position=4, data=blazar_shifted, title=blazar_name, levels=threshold, plot='blazar', vmax=np.max(blazar_shifted))
+        make_plot(position=5, data=blazar_residual, title=blazar_name + ' residual', levels=threshold, plot='diffuse', layer=blazar_shifted, vmax=np.max(blazar_shifted))
+        if testing:
+            plt.show()
+        else:
+            plt.savefig(savefig, bbox_inches=bbox_inches)
 
 
 if __name__ == '__main__':
