@@ -43,6 +43,32 @@ def get_position(df, blazar_name):
     return blazar_position
 
 
+def nearest_point_source(df, position, s_code='S', flux_threshold=0.02):
+    '''Find the nearest bright point source to a given blazar.'''
+    # disable warning, see https://stackoverflow.com/a/20627316/6386612
+    pd.options.mode.chained_assignment = None
+    df.reset_index(inplace=True)  # remove Source_id as index column
+    df['S_Code'] = df['S_Code'].str.decode('utf-8')  # byte string encoded
+    df_point_sources = df[(df['S_Code'] == s_code) &
+                          (df['Total_flux'] > flux_threshold)]
+    blazar = SkyCoord(position[0], position[1], unit='deg')
+    separations = []
+    for ra, dec in zip(df_point_sources['RA'], df_point_sources['DEC']):
+        point_source = SkyCoord(ra, dec, unit='deg')
+        separation = blazar.separation(point_source)
+        separations.append(separation.deg)
+
+    df_point_sources['Separation'] = separations
+    nearest = df_point_sources.loc[df_point_sources['Separation'].idxmin()]
+    point_source_position = [nearest['RA'], nearest['DEC']]
+    results = {'i': 'ILTJ' + str(nearest['Source_id']),
+               's': nearest['Separation'],
+               'f': nearest['Total_flux'] * 1000}
+    print('{i} is {s:.2f} degrees away and has a total flux density of {f:.2f}'
+          ' mJy.'.format(**results))
+    return results['i'], point_source_position
+
+
 def get_fits(filename):
     '''Open FITS image.'''
     hdu = fits.open(filename)[0]
@@ -164,8 +190,8 @@ def diffuse_fraction(df, blazar_name, data, residual, threshold):
 def make_plot(position, data, title, rows=2, columns=5, origin='lower',
               vmin=0, vmax=1, zmin=0, zmax=1, axis='off', elev=28, azim=-61,
               linewidth=0.25, pane_colour='white', line_colour='black',
-              cmap='magma_r', projection='3d', stretch='arcsinh', alpha=1,
-              levels='', source=''):
+              cmap='magma_r', projection='3d', stretch='arcsinh', levels='',
+              plot='', layer=''):
     '''Plot the image on a grid.'''
     ax0 = plt.subplot(rows, columns, position)
     ax0.set_title(title)
@@ -173,11 +199,11 @@ def make_plot(position, data, title, rows=2, columns=5, origin='lower',
     ax0.get_yaxis().set_ticks([])
     ax0.imshow(data, origin=origin, vmin=vmin, vmax=vmax, cmap=cmap,
                norm=DS9Normalize(stretch=stretch))
-    if source is not '':
-        ax0.contour(source, levels=levels, origin=origin, alpha=alpha,
-                    linestyles='dashed')
-    if levels is not '':
-        ax0.contour(data, levels=levels, origin=origin, alpha=alpha)
+    if plot is 'blazar':
+        ax0.contour(data, levels=levels, origin=origin)
+    elif plot is 'diffuse':
+        ax0.contour(layer, levels=levels, origin=origin)
+        ax0.contour(data, levels=levels, origin=origin, linestyles='dashed')
 
     len_x, len_y = data.shape
     range_x = range(len_x)
@@ -230,62 +256,30 @@ def main():
                         default='/mnt/closet/ldr2-blazars/deep-fields/bootes-lockman-hole-blazars.csv',
                         help='CSV catalogue of the blazars')
 
-    parser.add_argument('-p',
-                        '--point',
-                        required=False,
-                        nargs='+',
-                        default=[216.71718, 33.97577],
-                        help='Position of a point source')
-
-    parser.add_argument('-s',
-                        '--savefig',
+    parser.add_argument('-o',
+                        '--output',
                         required=False,
                         type=str,
-                        default='/home/sean/Downloads/images/gaussian.png',
-                        help='Filename of the plot')
+                        default='/mnt/closet/ldr2-blazars/deep-fields/images/gaussian',
+                        help='Directory to save the plots')
 
     args = parser.parse_args()
     image = args.image
     catalogue = args.catalogue
     csv = args.csv
-    point_source_position = args.point
-    savefig = args.savefig
+    output = args.output
 
     blazar_name = '5BZBJ1426+3404'
     font = 'STIXGeneral'
     math_font = 'cm'
     figsize = (20, 10)
     bbox_inches = 'tight'
-
-    # to get an automatic point source, search for the nearest source to a blazar
-    # that was fit with a single gaussian and has a flux above a certain amount
-    # the blazar name can also be read from the csv file
+    savefig = output + '/' + blazar_name + '.png'
 
     df_blazars = get_df(csv, format='csv', index='Source name')
     df_bootes = get_df(catalogue, format='fits', index='Source_id')
     blazar_position = get_position(df_blazars, blazar_name)
-
-    def nearest_point_source(df, position, s_code='S', flux_threshold=0.01):
-        '''Find the nearest bright point source to a given blazar.'''
-        df['S_Code'] = df['S_Code'].str.decode('utf-8')  # byte string encoded
-        df_point_sources = df[(df['S_Code'] == s_code) &
-                              (df['Total_flux'] > flux_threshold)]
-        blazar = SkyCoord(position[0], position[1], unit='deg')
-        separations = []
-        for ra, dec in zip(df_point_sources['RA'], df_point_sources['DEC']):
-            point_source = SkyCoord(ra, dec, unit='deg')
-            separation = blazar.separation(point_source)
-            separations.append(separation.deg)
-
-        df_point_sources['Separation'] = separations
-        print(df_point_sources)
-            # make a new column on the df and append this
-        # sort the df by the separation and return the top result
-        # position = [ra, dec]
-        # return position
-
-    Point_source_position = nearest_point_source(df_bootes, blazar_position)
-
+    point_source_id, point_source_position = nearest_point_source(df_bootes, blazar_position)
     hdu, wcs = get_fits(filename=image)
     blazar_data = get_data(position=blazar_position, hdu=hdu, wcs=wcs)
     point_source_data = get_data(position=point_source_position, hdu=hdu, wcs=wcs)
@@ -303,13 +297,13 @@ def main():
     matplotlib.rcParams['font.family'] = font
     matplotlib.rcParams['mathtext.fontset'] = math_font
     plt.figure(figsize=figsize)
-    make_plot(position=1, data=point_source_regrid, title='Point source')
-    make_plot(position=2, data=model, title='Point source model')
-    make_plot(position=3, data=point_source_residual, title='Point source residual')
-    make_plot(position=4, data=blazar_shifted, title=blazar_name, levels=threshold)
-    make_plot(position=5, data=blazar_residual, title=blazar_name + ' residual', levels=threshold, source=blazar_shifted)
-    plt.show()
-    # plt.savefig(savefig, bbox_inches=bbox_inches)
+    make_plot(position=1, data=point_source_regrid, title=point_source_id)
+    make_plot(position=2, data=model, title=point_source_id + ' model')
+    make_plot(position=3, data=point_source_residual, title=point_source_id + ' residual')
+    make_plot(position=4, data=blazar_shifted, title=blazar_name, levels=threshold, plot='blazar')
+    make_plot(position=5, data=blazar_residual, title=blazar_name + ' residual', levels=threshold, plot='diffuse', layer=blazar_shifted)
+    # plt.show()
+    plt.savefig(savefig, bbox_inches=bbox_inches)
 
 
 if __name__ == '__main__':
