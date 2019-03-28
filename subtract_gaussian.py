@@ -117,7 +117,7 @@ def regrid(data, new_size=10, normalise=True):
     coordinates = np.meshgrid(*new_dimensions, indexing='ij')
     new_data = map_coordinates(data, coordinates)
     new_data = new_data / np.max(new_data) if normalise else new_data
-    return new_data
+    return new_data  # this function was tested and worked as expected
 
 
 def gaussian(xy, amplitude, x0, y0, sigma_x, sigma_y, theta, offset):
