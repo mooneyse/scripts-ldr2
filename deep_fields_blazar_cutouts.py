@@ -20,7 +20,7 @@ __email__ = 'sean.mooney@ucdconnect.ie'
 __date__ = '12 March 2019'
 
 def make_cut_out_image(sources, radius=1 / 60, cmap='viridis', vmin=0,
-                       output='/data5/sean/deep-fields/',
+                       output='/data5/sean/deep-fields',
                        contours=[5, 10, 20]):
     '''Make a cut-out image of a given source.'''
 
@@ -31,12 +31,12 @@ def make_cut_out_image(sources, radius=1 / 60, cmap='viridis', vmin=0,
         # TODO add noise field to include contours
 
         if field == 'Bootes':
-            # field_file = '/data5/sean/deep-fields/bootes/image_full_ampphase_di_m.NS_shift.int.facetRestored.blanked.scaled.fits'
-            field_file = '/mnt/closet/ldr2-blazars/deep-fields/bootes-image.fits'
+            field_file = '/data5/sean/deep-fields/bootes/image_full_ampphase_di_m.NS_shift.int.facetRestored.blanked.scaled.fits'
         elif field == 'Lockman Hole':
             field_file = '/data5/sean/deep-fields/lockman-hole/image_full_ampphase_di_m.NS_shift.int.facetRestored.blanked.scaled.fits'
 
         image = aplpy.FITSFigure(field_file)
+        image.show_regions('/data5/sean/deep-fields/ellipses.reg')
         image.recenter(ra, dec, radius=radius)
         image.show_colorscale(cmap=cmap, vmin=vmin, vmax=peak_flux,
                               stretch='arcsinh')
@@ -47,6 +47,7 @@ def make_cut_out_image(sources, radius=1 / 60, cmap='viridis', vmin=0,
         # image.scalebar.set_label('15"')
         image.set_title(source_name)
         image.save(output + '/ds9test-' + source_name + '.png')
+        print('That is all, folk! ^_^')
         sys.exit()
 
 
@@ -57,7 +58,7 @@ def main():
 
     parser.add_argument('-s', '--sources', required=False, type=str,
                         help='CSV of the BZCAT',
-                        default='/mnt/closet/ldr2-blazars/deep-fields/bootes-lockman-hole-blazars.csv')
+                        default='/data5/sean/deep-fields/bootes-lockman-hole-blazars.csv')
 
     args = parser.parse_args()
     sources = args.sources
