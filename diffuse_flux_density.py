@@ -15,6 +15,7 @@ from astropy.nddata import Cutout2D
 from astropy.wcs import WCS, utils
 from astropy import coordinates
 from astropy import units as u
+import pyregion
 
 __author__ = 'Sean Mooney'
 __email__ = 'sean.mooney@ucdconnect.ie'
@@ -38,6 +39,7 @@ def shift_and_crop(ra, dec, fits_file, size=60):
     position = SkyCoord(ra, dec, unit='deg', frame='icrs')
     wcs = WCS(hdu.header)  # load the wcs
     pixel = utils.skycoord_to_pixel(position, wcs=wcs)
+
     data = np.squeeze(hdu.data)
     cutout = Cutout2D(data, position=pixel, size=size)#, wcs=wcs)
     cutout_data = cutout.data

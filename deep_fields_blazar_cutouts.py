@@ -35,18 +35,21 @@ def make_cut_out_image(sources, radius=1 / 60, cmap='viridis', vmin=0,
         elif field == 'Lockman Hole':
             field_file = '/data5/sean/deep-fields/lockman-hole/image_full_ampphase_di_m.NS_shift.int.facetRestored.blanked.scaled.fits'
 
-        image = aplpy.FITSFigure(field_file)
+
+        # image = aplpy.FITSFigure(field_file, nax)._get
         # image.show_regions('/data5/sean/deep-fields/ellipses.reg')
-        image.recenter(ra, dec, radius=radius)
-        image.show_colorscale(cmap=cmap, vmin=vmin, vmax=peak_flux,
-                              stretch='arcsinh')
+        # image.recenter(ra, dec, radius=radius)  # BUG this doesn't work with the latest aplpy for LoTSS which has 4 axes in the FITS (or something)
+        # image.show_colorscale(cmap=cmap, vmin=vmin, vmax=peak_flux,
+        #                       stretch='arcsinh')
         # image.show_contour(levels=[contour * noise for contour in contours],
         #                    colors='white', overlap=True)
-        image.add_colorbar()
+        # image.add_colorbar()
+        # image.naxis()
         # image.add_scalebar(radius / 4)
         # image.scalebar.set_label('15"')
-        image.set_title(source_name)
-        image.save(output + '/ds9test-' + source_name + '.png')
+        #
+        # image.set_title(source_name)
+        # image.save(output + '/ds9test-' + source_name + '.png')
         print('That is all, folk! ^_^')
         sys.exit()
 
