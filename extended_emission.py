@@ -75,26 +75,6 @@ def kpc_per_asec(z, H0=70, WM=0.26, WV=0.74, n=1000):
     return (299792.458 / H0) * az * ratio * (DCMR / 206.264806)
 
 
-def asdf(sean=''):
-    """Short summary.
-
-    Parameters
-    ----------
-    p : type
-        Description of parameter `p`.
-
-    Returns
-    -------
-    type
-        Description of returned object.
-
-    """
-    np.sqrt(2)
-    pd.read_csv(sean)
-    plt.show(sean)
-    return sean
-
-
 def main():
     """Blazar LDR2 analysis.
 
