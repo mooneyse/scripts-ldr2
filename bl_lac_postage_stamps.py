@@ -3,8 +3,10 @@
 '''Plot postage stamp images of LDR2 BL Lacs.'''
 
 import warnings
-warnings.filterwarnings('ignore')  # supress warnings
-
+warnings.filterwarnings('ignore')
+import matplotlib as mpl
+import os.path
+mpl.use('Agg')
 import aplpy
 import argparse
 import math
@@ -17,12 +19,9 @@ import matplotlib.pyplot as plt
 from PIL import Image, ImageDraw
 
 __author__ = 'Sean Mooney'
-__date__ = '27 June 2019'
+__email__ = 'sean.mooney@ucdconnect.ie'
+__date__ = '06 September 2019'
 
-def files_in_directory(directory):
-    '''Get the files in a given directory.'''
-    files = [directory + '/' + f for f in os.listdir(directory) if os.path.isfile(os.path.join(directory, f))]
-    return files
 
 def get_levels(fits, sigma=[3, 5]):
     '''Get the the noise for the FITS image by taking the standard deviation of the residual.'''
@@ -106,24 +105,16 @@ def get_z(blazar, z_csv, no_z_csv):
 
 def main():
     '''Plot postage stamp images of LDR2 BL Lacs.'''
-    formatter_class = argparse.RawDescriptionHelpFormatter
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=formatter_class)
-    parser.add_argument('-d', '--directory', required=False, type=str, default='/mnt/closet/ldr2-blazars/images/fits/bzb', help='FITS files to be plotted.')
-    parser.add_argument('-z', '--z_csv', required=False, type=str, default='/mnt/closet/ldr2-blazars/catalogues/bl_lacs_with_z.csv', help='CSV of BL Lacs with redshift.')
-    parser.add_argument('-n', '--no_z_csv', required=False, type=str, default='/mnt/closet/ldr2-blazars/catalogues/bl_lacs_without_z.csv', help='CSV of BL Lacs without redshift.')
-    args = parser.parse_args()
-    directory = args.directory
-    z_csv = args.z_csv
-    no_z_csv = args.no_z_csv
+    directory = '/data5/sean/ldr2'
+    df = pd.read_csv(f'{directory}/catalogues/final.csv')
+    print(df['Mosaic_ID'])
 
-    fits_list = files_in_directory(directory=directory)
-
-    for fits in fits_list:
-        try:
-            has_z, z, z_flag = get_z(os.path.basename(fits)[:14], z_csv, no_z_csv)
-            make_plot(fits=fits, has_z=has_z, new_diameter=2, z=z, z_flag=z_flag)
-        except:
-            print(f'Failed for {fits}.')
+    # for fits in fits_list:
+    #     try:
+    #         has_z, z, z_flag = get_z(os.path.basename(fits)[:14], z_csv, no_z_csv)
+    #         make_plot(fits=fits, has_z=has_z, new_diameter=2, z=z, z_flag=z_flag)
+    #     except:
+    #         print(f'Failed for {fits}.')
 
 
 if __name__ == '__main__':
