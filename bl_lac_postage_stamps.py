@@ -221,10 +221,10 @@ def smallest_circle(sigma=4):
 
         max_distances = np.array(max_distances)
         my_max = np.max(max_distances)
-        max_x1 = max_x1[max_distances.argmin()]
-        max_x2 = max_x2[max_distances.argmin()]
-        max_y1 = max_y1[max_distances.argmin()]
-        max_y2 = max_y2[max_distances.argmin()]
+        max_x1 = max_x1[max_distances.argmax()]
+        max_x2 = max_x2[max_distances.argmax()]
+        max_y1 = max_y1[max_distances.argmax()]
+        max_y2 = max_y2[max_distances.argmax()]
         asec_max = my_max * 1.5  # 1.5" per pixel
 
         ax = plt.subplot(projection=wcs)
