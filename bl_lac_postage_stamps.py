@@ -15,11 +15,38 @@ from matplotlib.patches import Circle
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+from skimage.measure import label
 import smallestenclosingcircle
 
 __author__ = 'Sean Mooney'
 __email__ = 'sean.mooney@ucdconnect.ie'
 __date__ = '06 September 2019'
+
+
+def nearest_to_centre(my_arr, percent):
+    """Given a two dimensional array, return the value of the pixel nearest to
+    the centre that is non-zero.
+    """
+    if np.max(my_arr) == 1:
+        return [1]
+    i1 = int(round(my_arr.shape[0] * (0.5 - percent / 2), 0))
+    i2 = int(round(my_arr.shape[0] * (0.5 + percent / 2), 0))
+    islands_in_the_sun = list(np.unique(my_arr[i1:i2, i1:i2]))
+    if 0 in islands_in_the_sun:
+        islands_in_the_sun.remove(0)
+
+    if len(islands_in_the_sun) >= 1:
+        return islands_in_the_sun
+    else:
+        R = int(round(my_arr.shape[0] / 2, 0))
+        C = int(round(my_arr.shape[0] / 2, 0))
+
+        dist = {}
+        for r in range(my_arr.shape[0]):
+            for c in range(my_arr.shape[1]):
+                if my_arr[r, c] != 0:
+                    dist[my_arr[r, c]] = np.sqrt((R - r) ** 2 + (C - c) ** 2)
+        return [min(dist.items(), key=operator.itemgetter(1))[0]]
 
 
 def get_dl_and_kpc_per_asec(z, H0=70, WM=0.26, WV=0.74):
@@ -134,9 +161,9 @@ def smallest_circle(sigma=4):
         The name of the CSV containing the results.
     """
     my_directory = '/data5/sean/ldr2'
-
     results_csv = f'{my_directory}/results/ldr2.bllacs.fsrqs.results.csv'
     df = pd.read_csv(f'{my_directory}/catalogues/final.csv')
+    big_sources = ['5BZBJ1202+4444', '5BZBJ1419+5423']
     result_header = ('Name,RA,Dec,RMS (uJy),Redshift,Width ("),Width (kpc)\n')
 
     with open(results_csv, 'a') as f:
@@ -155,11 +182,12 @@ def smallest_circle(sigma=4):
     mpl.rcParams['ytick.minor.width'] = 2
     mpl.rcParams['axes.linewidth'] = 2
 
-    big_sources = ['5BZBJ1202+4444', '5BZBJ1419+5423']
-
-    for source_name, ra, dec, mosaic, rms, z in zip(
-            df['Source name'], df['RA (J2000.0)'], df['Dec (J2000.0)'],
-            df['Mosaic_ID'], df['Isl_rms'], df['Redshift']):
+    for source_name, ra, dec, mosaic, rms, z in zip(df['Source name'],
+                                                    df['RA (J2000.0)'],
+                                                    df['Dec (J2000.0)'],
+                                                    df['Mosaic_ID'],
+                                                    df['Isl_rms'],
+                                                    df['Redshift']):
 
         field = f'{my_directory}/mosaics/{mosaic}-mosaic.fits'
         threshold = sigma * rms / 1000   # jansky
@@ -173,76 +201,56 @@ def smallest_circle(sigma=4):
                           size=size * u.arcmin, wcs=wcs)
 
         d = cutout.data
-        # https://docs.scipy.org/doc/numpy/reference/generated/numpy.copy.html
-        copy = np.copy(d)
-        d[d < threshold] = np.nan
+        copy_d = np.copy(d)
+        another_copy_d = np.copy(d)
+        d[d < threshold] = 0
+        d[d >= threshold] = 1
         rows, cols = d.shape
 
-        set_to_nan = []
-        for r in range(rows):  # set to nan if surrounded by non nans
+        d = label(d)  # label islands of emission
+        source_islands = nearest_to_centre(d, percent=0.1)
+        dummy = 123456
+        for source_island in source_islands:
+            d[d == source_island] = dummy
+
+        d[d != dummy] = 0
+        copy_d[d != dummy] = 0
+        set_to_nil = []  # identify values we can set to zero for being inside
+        for r in range(rows):  # set to 0 if surrounded by non nans
             for c in range(cols):
                 try:
-                    if (not np.isnan(d[r - 1, c - 1]) and
-                            not np.isnan(d[r - 1, c]) and
-                            not np.isnan(d[r - 1, c + 1]) and
-                            not np.isnan(d[r, c - 1]) and
-                            not np.isnan(d[r, c + 1]) and
-                            not np.isnan(d[r + 1, c - 1]) and
-                            not np.isnan(d[r + 1, c]) and
-                            not np.isnan(d[r + 1, c + 1])):
-                        set_to_nan.append((r, c))
+                    if (d[r - 1, c - 1] != 0 and d[r - 1, c] != 0 and
+                        d[r - 1, c + 1] != 0 and d[r, c - 1] != 0 and
+                        d[r, c + 1] != 0 and d[r + 1, c - 1] != 0 and
+                            d[r + 1, c] != 0 and d[r + 1, c + 1] != 0):
+                        set_to_nil.append((r, c))
                 except IndexError:
+                    print(f'Index error for {source_name}.')
                     continue
 
-        for r, c in set_to_nan:
-            d[r, c] = np.nan  # needs separate loop to avoid checkered pattern
+        for r, c in set_to_nil:
+            d[r, c] = 0  # needs separate loop to avoid checkered pattern
 
+        # d is an outline of the source (one) and everything else is zero
+        # copy_d is the source with flux values and everything else is zero
+        # another_copy_d has flux values throughout
         good_cells = []
         for r in range(rows):
             for c in range(cols):
-                if not np.isnan(d[r, c]):
+                if d[r, c] != 0:
                     good_cells.append([r, c])
 
         smallest_circle = smallestenclosingcircle.make_circle(good_cells)
-
-        # find distance between good_cell and all other good_cells
-        # max_distances, max_x1, max_x2, max_y1, max_y2 = [], [], [], [], []
-        # r = int(np.round(d.shape[0] / 2, 0))
-        # c = int(np.round(d.shape[1] / 2, 0))
-        #
-        # for (x1, y1) in good_cells:
-        #     for (x2, y2) in good_cells:
-        #         max_distances.append(np.sqrt((x1 - x2) ** 2 +
-        #                              (y1 - y2) ** 2))
-        #         max_x1.append(x1)
-        #         max_x2.append(x2)
-        #         max_y1.append(y1)
-        #         max_y2.append(y2)
-
-        # not so simple - need the shortest of the lines that passes through
-        # the centre
-        # d[r - 1:r + 1, c - 1:c + 1] = 0  # set centre to zero so we can see it
-
-        # max_distances = np.array(max_distances)
-        # my_max = np.max(max_distances)
-        # max_x1 = max_x1[max_distances.argmax()]
-        # max_x2 = max_x2[max_distances.argmax()]
-        # max_y1 = max_y1[max_distances.argmax()]
-        # max_y2 = max_y2[max_distances.argmax()]
-        # midpoint = ((max_x1 + max_x2) / 2, (max_y1 + max_y2) / 2)
-        # asec_max = my_max * 1.5  # 1.5" per pixel
 
         ax = plt.subplot(projection=wcs)
         plt.xlabel('Right ascension', fontsize=20, color='black')
         plt.ylabel('Declination', fontsize=20, color='black')
         ax.tick_params(axis='both', which='major', labelsize=20)
-        plt.imshow(copy, vmin=0, vmax=np.nanmax(copy), origin='lower',
-                   norm=DS9Normalize(stretch='arcsinh'), cmap='plasma_r')
-        #           interpolation='gaussian',
-        # plt.plot([max_y1, max_y2], [max_x1, max_x2], color='black', alpha=1,
-        #          lw=2)
-        beam = Circle((6, 6), radius=2, linestyle='dashed',
-                      lw=2, fc='none', edgecolor='grey')
+        plt.imshow(another_copy_d, vmin=0, vmax=np.nanmax(another_copy_d),
+                   origin='lower', norm=DS9Normalize(stretch='arcsinh'),
+                   cmap='plasma_r')  # interpolation='gaussian'
+        beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
+                      edgecolor='grey')
         diffuse = Circle((smallest_circle[1], smallest_circle[0]),
                          radius=smallest_circle[2], fc='none', edgecolor='k',
                          lw=2)
@@ -253,7 +261,8 @@ def smallest_circle(sigma=4):
         cbar.ax.tick_params(labelsize=20)
         plt.minorticks_on()
         plt.tick_params(which='minor', length=0)
-        plt.contour(copy, levels=[threshold], origin='lower', colors='w')
+        plt.contour(another_copy_d, levels=[threshold], origin='lower',
+                    colors='w')
         plt.savefig(save)
         plt.clf()
 
