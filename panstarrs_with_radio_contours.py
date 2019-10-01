@@ -211,7 +211,6 @@ def optical(sigma=4):
         save = f'{my_directory}/images/panstarrs-{source_name}.png'
 
         ax = plt.subplot(projection=wcs1)
-        ax.set_autoscale_on(False)
         plt.xlabel('Right ascension', fontsize=20, color='black')
         plt.ylabel('Declination', fontsize=20, color='black')
         ax.tick_params(axis='both', which='major', labelsize=20)
@@ -226,6 +225,7 @@ def optical(sigma=4):
         plt.minorticks_on()
         plt.tick_params(which='minor', length=0)
         plt.contour(ldr2, levels=levels, origin='lower',
+                    transform=ax.get_transform(WCS(hdu2.header)),
                     colors=['red', 'yellow', 'blue', 'purple'])
 
         plt.savefig(save)
