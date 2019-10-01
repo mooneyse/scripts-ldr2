@@ -225,7 +225,7 @@ def optical(sigma=4):
         plt.minorticks_on()
         plt.tick_params(which='minor', length=0)
         print(levels)
-        plt.contour(ldr2, levels=levels, origin='lower', colors='r',
+        ax.contour(ldr2, levels=[levels[0]], origin='lower', colors='r',
                     transform=ax.get_transform(wcs2))
                     # colors=['red', 'yellow', 'blue', 'purple'])
 
