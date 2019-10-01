@@ -189,47 +189,47 @@ def optical(sigma=4):
                                                     df['Isl_rms'],
                                                     df['Redshift']):
 
-        sky_position = SkyCoord(ra, dec, unit='deg')
-        if source_name == '5BZBJ1202+4444':
-            size = [3, 3] * u.arcmin
-        elif source_name == '5BZBJ1419+5423':
-            size = [4, 4] * u.arcmin
-        else:
-            size = [2, 2] * u.arcmin
+        panstarrs = f'{my_directory}/panstarrs/{source_name}.i.fits'
+        p_hdu = fits.open(panstarrs)[0]
+        p_data = p_hdu.data
+        p_wcs = WCS(p_hdu.header)
 
-        hdu1 = fits.open(f'{my_directory}/panstarrs/{source_name}.i.fits')[0]
-        wcs1 = WCS(hdu1.header)
-        panstarrs = Cutout2D(np.squeeze(hdu1.data), sky_position, size=size,
-                             wcs=wcs1).data
+        ldr2 = f'{my_directory}/mosaics/{mosaic}-mosaic.fits'
+        l_hdu = fits.open(ldr2)[0]
+        l_data = l_hdu.data
+        l_wcs = WCS(l_hdu.header, naxis=2)
 
-        hdu2 = fits.open(f'{my_directory}/mosaics/{mosaic}-mosaic.fits')[0]
-        wcs2 = WCS(hdu2.header, naxis=2)
-        ldr2 = Cutout2D(np.squeeze(hdu2.data), sky_position, size=size,
-                        wcs=wcs2).data
+        ax = plt.subplot(projection=p_wcs)
+        plt.imshow(p_data)
+        ax.contour(l_data, transform=ax.get_transform(l_wcs)),
 
-        levels = [level * rms / 1000 for level in [4, 8, 16, 32]]
         save = f'{my_directory}/images/panstarrs-{source_name}.png'
-
-        ax = plt.subplot(projection=wcs1)
-        plt.xlabel('Right ascension', fontsize=20, color='black')
-        plt.ylabel('Declination', fontsize=20, color='black')
-        ax.tick_params(axis='both', which='major', labelsize=20)
-        plt.imshow(panstarrs, vmin=0, vmax=8000,
-                   origin='lower', norm=DS9Normalize(stretch='arcsinh'),
-                   cmap='Greys')  # interpolation='gaussian'
-        # plt.plot([panstarrs.shape[0] * 0.2, panstarrs.shape[0] * 0.2],
-        #          [panstarrs.shape[1] * 0.25, panstarrs.shape[1] * 0.5],)
-        cbar = plt.colorbar()
-        cbar.set_label(r'Excess counts', size=20)
-        cbar.ax.tick_params(labelsize=20)
-        plt.minorticks_on()
-        ax.tick_params(which='minor', length=0)
-        ax.contour(ldr2, #levels=levels, origin='lower',
-                   transform=ax.get_transform(wcs2)),
-                   #colors=['red', 'yellow', 'blue', 'purple'])
-
         plt.savefig(save)
         plt.clf()
+        print(save)
+        return
+
+        # levels = [level * rms / 1000 for level in [4, 8, 16, 32]]
+
+        # plt.xlabel('Right ascension', fontsize=20, color='black')
+        # plt.ylabel('Declination', fontsize=20, color='black')
+        # ax.tick_params(axis='both', which='major', labelsize=20)
+        # plt.imshow(panstarrs, vmin=0, vmax=8000,
+        #            origin='lower', norm=DS9Normalize(stretch='arcsinh'),
+        #            cmap='Greys')  # interpolation='gaussian'
+        # plt.plot([panstarrs.shape[0] * 0.2, panstarrs.shape[0] * 0.2],
+        #          [panstarrs.shape[1] * 0.25, panstarrs.shape[1] * 0.5],)
+        # cbar = plt.colorbar()
+        # cbar.set_label('Excess counts', size=20)
+        # cbar.ax.tick_params(labelsize=20)
+        # plt.minorticks_on()
+        # ax.tick_params(which='minor', length=0)
+        # ax.contour(ldr2, #levels=levels, origin='lower',
+        #            transform=ax.get_transform(wcs2)),
+        #            #colors=['red', 'yellow', 'blue', 'purple'])
+
+        # plt.savefig(save)
+        # plt.clf()
 
         #     dl, kpc = get_dl_and_kpc_per_asec(z=z)
         #     width = r * kpc
