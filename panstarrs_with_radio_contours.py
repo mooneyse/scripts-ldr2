@@ -189,27 +189,23 @@ def optical(sigma=4):
                                                     df['Isl_rms'],
                                                     df['Redshift']):
 
-        panstarrs = f'{my_directory}/panstarrs/{source_name}.i.fits'
-        p_hdu = fits.open(panstarrs)[0]
-        # p_data = p_hdu.data
-        p_wcs = WCS(p_hdu.header)
         sky_position = SkyCoord(ra, dec, unit='deg')
         size = [2, 2] * u.arcmin
-        cutout = Cutout2D(p_hdu.data, sky_position, size=size,
-                          wcs=p_wcs)
-        p_data = cutout.data
+
+        panstarrs = f'{my_directory}/panstarrs/{source_name}.i.fits'
+        p_hdu = fits.open(panstarrs)[0]
+        p_wcs = WCS(p_hdu.header)
+        p_cutout = Cutout2D(p_hdu.data, sky_position, size=size, wcs=p_wcs)
+        p_data = p_cutout.data
 
         ldr2 = f'{my_directory}/mosaics/{mosaic}-mosaic.fits'
         l_hdu = fits.open(ldr2)[0]
-        # l_data = l_hdu.data
         l_wcs = WCS(l_hdu.header, naxis=2)
-        sky_position = SkyCoord(ra, dec, unit='deg')
-        size = [2, 2] * u.arcmin
-        cutout = Cutout2D(np.squeeze(l_hdu.data), sky_position, size=size,
-                          wcs=l_wcs)
-        l_data = cutout.data
+        l_cutout = Cutout2D(np.squeeze(l_hdu.data), sky_position, size=size,
+                            wcs=l_wcs)
+        l_data = l_cutout.data
 
-        ax = plt.subplot(projection=l_wcs)
+        ax = plt.subplot(projection=p_wcs)
         plt.imshow(p_data, vmin=0, vmax=1000)
         ax.contour(l_data, levels=[0.001], colors=['red'],transform=ax.get_transform(l_wcs))
         # plt.xlim(0, l_data.shape[1] - 1)
