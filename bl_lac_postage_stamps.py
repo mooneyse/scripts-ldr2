@@ -243,7 +243,7 @@ def smallest_circle(sigma=4):
         #          lw=2)
         beam = Circle((10, 10), radius=2, linestyle='dashed',
                       lw=2, fc='none', edgecolor='grey')
-        diffuse = Circle((smallest_circle[0], smallest_circle[1]),
+        diffuse = Circle((smallest_circle[1], smallest_circle[0]),
                          radius=smallest_circle[2], fc='none', edgecolor='k')
         ax.add_patch(beam)
         ax.add_patch(diffuse)
