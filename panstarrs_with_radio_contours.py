@@ -205,7 +205,7 @@ def optical(sigma=4):
         hdu2 = fits.open(f'{my_directory}/mosaics/{mosaic}-mosaic.fits')[0]
         wcs2 = WCS(hdu2.header, naxis=2)
         ldr2 = Cutout2D(np.squeeze(hdu2.data), sky_position, size=size,
-                        wcs=wcs2).data
+                        wcs=wcs).data
 
         levels = [level * rms / 1000 for level in [4, 8, 16, 32]]
         save = f'{my_directory}/images/panstarrs-{source_name}.png'
@@ -216,7 +216,7 @@ def optical(sigma=4):
         ax.tick_params(axis='both', which='major', labelsize=20)
         plt.imshow(panstarrs, vmin=0, vmax=8000,
                    origin='lower', norm=DS9Normalize(stretch='arcsinh'),
-                   cmap='plasma_r')  # interpolation='gaussian'
+                   cmap='Greys')  # interpolation='gaussian'
         # plt.plot([panstarrs.shape[0] * 0.2, panstarrs.shape[0] * 0.2],
         #          [panstarrs.shape[1] * 0.25, panstarrs.shape[1] * 0.5],)
         cbar = plt.colorbar()
