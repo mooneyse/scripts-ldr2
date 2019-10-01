@@ -205,7 +205,7 @@ def optical(sigma=4):
         hdu2 = fits.open(f'{my_directory}/mosaics/{mosaic}-mosaic.fits')[0]
         wcs2 = WCS(hdu2.header, naxis=2)
         ldr2 = Cutout2D(np.squeeze(hdu2.data), sky_position, size=size,
-                        wcs=wcs).data
+                        wcs=wcs1).data
 
         levels = [level * rms / 1000 for level in [4, 8, 16, 32]]
         save = f'{my_directory}/images/panstarrs-{source_name}.png'
