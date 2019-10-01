@@ -207,11 +207,11 @@ def optical(sigma=4):
         colors = ['#118ab2', '#06d6a0', '#ffd166', '#ef476f']
 
         ax = plt.subplot(projection=p_cutout.wcs)
-        ax.imshow(p_cutout.data, vmin=0, vmax=8000, cmap='Greys',
-                  origin='lower', norm=DS9Normalize(stretch='arcsinh'),
-                  interpolation='gaussian')
+        im = ax.imshow(p_cutout.data, vmin=0, vmax=8000, cmap='Greys',
+                       origin='lower', norm=DS9Normalize(stretch='arcsinh'),
+                       interpolation='gaussian')
 
-        cbar = plt.colorbar()
+        cbar = plt.colorbar(im)
         cbar.set_label('Excess counts', size=20)
         cbar.ax.tick_params(labelsize=20)
 
