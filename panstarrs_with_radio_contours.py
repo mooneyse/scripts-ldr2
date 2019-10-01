@@ -223,11 +223,10 @@ def optical(sigma=4):
         cbar.set_label(r'Excess counts', size=20)
         cbar.ax.tick_params(labelsize=20)
         plt.minorticks_on()
-        plt.tick_params(which='minor', length=0)
-        print(levels)
-        ax.contour(ldr2, levels=[levels[0]], origin='lower', colors='r',
-                    transform=ax.get_transform(wcs2))
-                    # colors=['red', 'yellow', 'blue', 'purple'])
+        ax.tick_params(which='minor', length=0)
+        ax.contour(ldr2, levels=levels, origin='lower',
+                   transform=ax.get_transform(wcs2))
+                   colors=['red', 'yellow', 'blue', 'purple'])
 
         plt.savefig(save)
         plt.clf()
