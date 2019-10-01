@@ -204,8 +204,9 @@ def optical(sigma=4):
         l_cutout = Cutout2D(np.squeeze(l_hdu.data), sky_position, size=size,
                             wcs=l_wcs)
         l_data = l_cutout.data
-
-        ax = plt.subplot(projection=p_wcs)
+        print(l_wcs)
+        print(p_wcs)
+        ax = plt.subplot(projection=l_wcs)
         plt.imshow(p_data, vmin=0, vmax=1000)
         ax.contour(l_data, levels=[0.001], colors=['red'],transform=ax.get_transform(l_wcs))
         # plt.xlim(0, l_data.shape[1] - 1)
