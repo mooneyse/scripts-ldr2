@@ -220,6 +220,7 @@ def optical(sigma=4):
         # plt.plot([panstarrs.shape[0] * 0.2, panstarrs.shape[0] * 0.2],
         #          [panstarrs.shape[1] * 0.25, panstarrs.shape[1] * 0.5],)
         cbar = plt.colorbar()
+        cbar.set_label(r'Excess counts', size=20)
         cbar.ax.tick_params(labelsize=20)
         plt.minorticks_on()
         plt.tick_params(which='minor', length=0)
