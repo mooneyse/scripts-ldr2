@@ -206,10 +206,10 @@ def optical(sigma=4):
 
         ax = plt.subplot(projection=l_wcs)
         plt.imshow(l_data)
+        ax.contour(p_data, transform=ax.get_transform(p_wcs)),
         plt.show()
         return
 
-        ax.contour(p_data, transform=ax.get_transform(p_wcs)),
 
         save = f'{my_directory}/images/panstarrs-{source_name}.png'
         plt.savefig(save)
