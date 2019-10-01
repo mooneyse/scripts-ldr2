@@ -197,7 +197,7 @@ def optical(sigma=4):
         else:
             size = [2, 2] * u.arcmin
 
-        hdu1 = fits.open(f'{my_directory}/panstarrs/{source_name}.fits')[0]
+        hdu1 = fits.open(f'{my_directory}/panstarrs/{source_name}.i.fits')[0]
         wcs1 = WCS(hdu1.header)
         panstarrs = Cutout2D(np.squeeze(hdu1.data), sky_position, size=size,
                              wcs=wcs1).data
