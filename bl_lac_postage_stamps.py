@@ -161,7 +161,7 @@ def smallest_circle(sigma=4):
         The name of the CSV containing the results.
     """
     my_directory = '/data5/sean/ldr2'
-    results_csv = f'{my_directory}/results/ldr2.bllacs.fsrqs.results.csv'
+    results_csv = f'{my_directory}/results/ldr2.csv'
     df = pd.read_csv(f'{my_directory}/catalogues/final.csv')
     result_header = ('Name,RA,Dec,RMS (uJy),Redshift,Width ("),Width (kpc)\n')
 
