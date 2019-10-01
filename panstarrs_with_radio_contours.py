@@ -205,12 +205,13 @@ def optical(sigma=4):
         hdu2 = fits.open(f'{my_directory}/mosaics/{mosaic}-mosaic.fits')[0]
         wcs2 = WCS(hdu2.header, naxis=2)
         ldr2 = Cutout2D(np.squeeze(hdu2.data), sky_position, size=size,
-                        wcs=wcs1).data
+                        wcs=wcs2).data
 
         levels = [level * rms / 1000 for level in [4, 8, 16, 32]]
         save = f'{my_directory}/images/panstarrs-{source_name}.png'
 
         ax = plt.subplot(projection=wcs1)
+        ax.set_autoscale_on(False)
         plt.xlabel('Right ascension', fontsize=20, color='black')
         plt.ylabel('Declination', fontsize=20, color='black')
         ax.tick_params(axis='both', which='major', labelsize=20)
