@@ -15,6 +15,7 @@ from matplotlib.patches import Circle
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import smallestenclosingcircle
 
 __author__ = 'Sean Mooney'
 __email__ = 'sean.mooney@ucdconnect.ie'
@@ -202,32 +203,34 @@ def smallest_circle(sigma=4):
                 if not np.isnan(d[r, c]):
                     good_cells.append([r, c])
 
-        # find distance between good_cell and all other good_cells
-        max_distances, max_x1, max_x2, max_y1, max_y2 = [], [], [], [], []
-        r = int(np.round(d.shape[0] / 2, 0))
-        c = int(np.round(d.shape[1] / 2, 0))
+        smallest_circle = make_circle(good_cells)
 
-        for (x1, y1) in good_cells:
-            for (x2, y2) in good_cells:
-                max_distances.append(np.sqrt((x1 - x2) ** 2 +
-                                     (y1 - y2) ** 2))
-                max_x1.append(x1)
-                max_x2.append(x2)
-                max_y1.append(y1)
-                max_y2.append(y2)
+        # find distance between good_cell and all other good_cells
+        # max_distances, max_x1, max_x2, max_y1, max_y2 = [], [], [], [], []
+        # r = int(np.round(d.shape[0] / 2, 0))
+        # c = int(np.round(d.shape[1] / 2, 0))
+        #
+        # for (x1, y1) in good_cells:
+        #     for (x2, y2) in good_cells:
+        #         max_distances.append(np.sqrt((x1 - x2) ** 2 +
+        #                              (y1 - y2) ** 2))
+        #         max_x1.append(x1)
+        #         max_x2.append(x2)
+        #         max_y1.append(y1)
+        #         max_y2.append(y2)
 
         # not so simple - need the shortest of the lines that passes through
         # the centre
-        d[r - 1:r + 1, c - 1:c + 1] = 0  # set centre to zero so we can see it
+        # d[r - 1:r + 1, c - 1:c + 1] = 0  # set centre to zero so we can see it
 
-        max_distances = np.array(max_distances)
-        my_max = np.max(max_distances)
-        max_x1 = max_x1[max_distances.argmax()]
-        max_x2 = max_x2[max_distances.argmax()]
-        max_y1 = max_y1[max_distances.argmax()]
-        max_y2 = max_y2[max_distances.argmax()]
-        midpoint = ((max_x1 + max_x2) / 2, (max_y1 + max_y2) / 2)
-        asec_max = my_max * 1.5  # 1.5" per pixel
+        # max_distances = np.array(max_distances)
+        # my_max = np.max(max_distances)
+        # max_x1 = max_x1[max_distances.argmax()]
+        # max_x2 = max_x2[max_distances.argmax()]
+        # max_y1 = max_y1[max_distances.argmax()]
+        # max_y2 = max_y2[max_distances.argmax()]
+        # midpoint = ((max_x1 + max_x2) / 2, (max_y1 + max_y2) / 2)
+        # asec_max = my_max * 1.5  # 1.5" per pixel
 
         ax = plt.subplot(projection=wcs)
         plt.xlabel('Right ascension', fontsize=20, color='black')
@@ -236,12 +239,12 @@ def smallest_circle(sigma=4):
         plt.imshow(copy, vmin=0, vmax=np.nanmax(copy), origin='lower',
                    norm=DS9Normalize(stretch='arcsinh'), cmap='plasma_r')
         #           interpolation='gaussian',
-        plt.plot([max_y1, max_y2], [max_x1, max_x2], color='black', alpha=1,
-                 lw=2)
+        # plt.plot([max_y1, max_y2], [max_x1, max_x2], color='black', alpha=1,
+        #          lw=2)
         beam = Circle((10, 10), radius=2, linestyle='dashed',
                       lw=2, fc='none', edgecolor='grey')
-        diffuse = Circle(midpoint, radius=my_max / 2, lw=2,
-                         fc='none', edgecolor='k')
+        diffuse = Circle((smallest_circle[0], smallest_circle[1]),
+                         radius=smallest_circle[2], fc='none', edgecolor='k')
         ax.add_patch(beam)
         ax.add_patch(diffuse)
         cbar = plt.colorbar()
@@ -254,14 +257,14 @@ def smallest_circle(sigma=4):
         plt.clf()
 
         dl, kpc = get_dl_and_kpc_per_asec(z=z)
-        width = asec_max * kpc
+        # width = asec_max * kpc
 
-        result = (f'{source_name},{ra},{dec},{rms * 1e3},{z}'
-                  f',{asec_max:.1f},{width:.1f}\n')
-        print(f'{source_name}: {asec_max:.1f}", {width:.2f} kpc')
+        # result = (f'{source_name},{ra},{dec},{rms * 1e3},{z}'
+        #           f',{asec_max:.1f},{width:.1f}\n')
+        # print(f'{source_name}: {asec_max:.1f}", {width:.2f} kpc')
 
-        with open(results_csv, 'a') as f:
-            f.write(result)
+        # with open(results_csv, 'a') as f:
+        #     f.write(result)
     return results_csv
 
 
