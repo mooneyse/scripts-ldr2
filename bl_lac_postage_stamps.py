@@ -178,6 +178,8 @@ def smallest_circle(sigma=4):
     mpl.rcParams['ytick.minor.width'] = 2
     mpl.rcParams['axes.linewidth'] = 2
 
+    big_sources = ['5BZBJ1202+4444', '5BZBJ1419+5423']
+
     for source_name, ra, dec, mosaic, rms, z in zip(
             df['Source name'], df['RA (J2000.0)'], df['Dec (J2000.0)'],
             df['Mosaic_ID'], df['Isl_rms'], df['Redshift']):
@@ -189,9 +191,9 @@ def smallest_circle(sigma=4):
         hdu = fits.open(field)[0]
         wcs = WCS(hdu.header, naxis=2)
         sky_position = SkyCoord(ra, dec, unit='deg')
-        size = [2, 2] * u.arcmin
-        cutout = Cutout2D(np.squeeze(hdu.data), sky_position, size=size,
-                          wcs=wcs)
+        size = [3, 3] if source_name in big_sources else [2, 2]
+        cutout = Cutout2D(np.squeeze(hdu.data), sky_position,
+                          size=size * u.arcmin, wcs=wcs)
 
         d = cutout.data
         # https://docs.scipy.org/doc/numpy/reference/generated/numpy.copy.html
@@ -262,10 +264,10 @@ def smallest_circle(sigma=4):
         plt.ylabel('Declination', fontsize=20, color='black')
         ax.tick_params(axis='both', which='major', labelsize=20)
         plt.imshow(copy, vmin=0, vmax=np.nanmax(copy), origin='lower',
-                   norm=DS9Normalize(stretch='arcsinh'),
-                   interpolation='gaussian', cmap='plasma_r')
-        plt.plot([min_y1, min_y2], [min_x1, min_x2], color='black', alpha=1,
-                 lw=2)
+                   norm=DS9Normalize(stretch='arcsinh'), cmap='plasma_r')
+        #           interpolation='gaussian',
+        # plt.plot([min_y1, min_y2], [min_x1, min_x2], color='black', alpha=1,
+        #          lw=2)
         cbar = plt.colorbar()
         cbar.set_label(r'Jy beam$^{-1}$', size=20)
         cbar.ax.tick_params(labelsize=20)
