@@ -163,7 +163,6 @@ def smallest_circle(sigma=4):
     my_directory = '/data5/sean/ldr2'
     results_csv = f'{my_directory}/results/ldr2.bllacs.fsrqs.results.csv'
     df = pd.read_csv(f'{my_directory}/catalogues/final.csv')
-    big_sources = ['5BZBJ1202+4444', '5BZBJ1419+5423']
     result_header = ('Name,RA,Dec,RMS (uJy),Redshift,Width ("),Width (kpc)\n')
 
     with open(results_csv, 'a') as f:
@@ -196,9 +195,14 @@ def smallest_circle(sigma=4):
         hdu = fits.open(field)[0]
         wcs = WCS(hdu.header, naxis=2)
         sky_position = SkyCoord(ra, dec, unit='deg')
-        size = [3, 3] if source_name in big_sources else [2, 2]
-        cutout = Cutout2D(np.squeeze(hdu.data), sky_position,
-                          size=size * u.arcmin, wcs=wcs)
+        if source_name == '5BZBJ1202+4444':
+            size = [3, 3] * u.arcmin
+        elif source_name == '5BZBJ1419+5423':
+            size = [4, 4] * u.arcmin
+        else:
+            size = [2, 2] * u.arcmin
+        cutout = Cutout2D(np.squeeze(hdu.data), sky_position, size=size,
+                          wcs=wcs)
 
         d = cutout.data
         copy_d = np.copy(d)
@@ -240,7 +244,7 @@ def smallest_circle(sigma=4):
                 if d[r, c] != 0:
                     good_cells.append([r, c])
 
-        smallest_circle = smallestenclosingcircle.make_circle(good_cells)
+        x, y, r = smallestenclosingcircle.make_circle(good_cells)
 
         ax = plt.subplot(projection=wcs)
         plt.xlabel('Right ascension', fontsize=20, color='black')
@@ -250,10 +254,8 @@ def smallest_circle(sigma=4):
                    origin='lower', norm=DS9Normalize(stretch='arcsinh'),
                    cmap='plasma_r')  # interpolation='gaussian'
         beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
-                      edgecolor='grey')
-        diffuse = Circle((smallest_circle[1], smallest_circle[0]),
-                         radius=smallest_circle[2], fc='none', edgecolor='k',
-                         lw=2)
+                      edgecolor='blue')
+        diffuse = Circle((y, x), radius=r, fc='none', edgecolor='k', lw=2)
         ax.add_patch(beam)
         ax.add_patch(diffuse)
         cbar = plt.colorbar()
@@ -263,15 +265,17 @@ def smallest_circle(sigma=4):
         plt.tick_params(which='minor', length=0)
         plt.contour(another_copy_d, levels=[threshold], origin='lower',
                     colors='w')
+        plt.contour(another_copy_d - copy_d, levels=[threshold], colors='grey',
+                    origin='lower')
         plt.savefig(save)
         plt.clf()
 
         dl, kpc = get_dl_and_kpc_per_asec(z=z)
-        # width = asec_max * kpc
+        width = r * kpc
 
-        # result = (f'{source_name},{ra},{dec},{rms * 1e3},{z}'
-        #           f',{asec_max:.1f},{width:.1f}\n')
-        # print(f'{source_name}: {asec_max:.1f}", {width:.2f} kpc')
+        result = (f'{source_name},{ra},{dec},{rms * 1e3},{z}'
+                  f',{asec_max:.1f},{width:.1f}\n')
+        print(f'{source_name}: {r:.1f}", {width:.2f} kpc')
 
         # with open(results_csv, 'a') as f:
         #     f.write(result)
