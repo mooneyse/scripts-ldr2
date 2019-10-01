@@ -196,19 +196,18 @@ def optical(sigma=4):
         p_hdu = fits.open(panstarrs)[0]
         p_wcs = WCS(p_hdu.header)
         p_cutout = Cutout2D(p_hdu.data, sky_position, size=size, wcs=p_wcs)
-        p_data = p_cutout.data
+        # p_data = p_cutout.data
 
         ldr2 = f'{my_directory}/mosaics/{mosaic}-mosaic.fits'
         l_hdu = fits.open(ldr2)[0]
         l_wcs = WCS(l_hdu.header, naxis=2)
         l_cutout = Cutout2D(np.squeeze(l_hdu.data), sky_position, size=size,
                             wcs=l_wcs)
-        l_data = l_cutout.data
-        print(l_wcs)
-        print(p_wcs)
-        ax = plt.subplot(projection=p_wcs)
-        ax.imshow(p_data, vmin=0, vmax=1000)
-        ax.contour(l_data,transform=ax.get_transform(l_cutout.wcs))#, levels=[0.001], colors=['red'],transform=ax.get_transform(l_wcs))
+        # l_data = l_cutout.data
+
+        ax = plt.subplot(projection=p_cutout.wcs)
+        ax.imshow(p_cutout.data, vmin=0, vmax=1000)
+        ax.contour(l_cutout.data,transform=ax.get_transform(l_cutout.wcs))#, levels=[0.001], colors=['red'],transform=ax.get_transform(l_wcs))
         # plt.xlim(0, l_data.shape[1] - 1)
         # plt.ylim(0, l_data.shape[0] - 1)
         plt.show()
