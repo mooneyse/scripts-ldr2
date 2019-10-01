@@ -117,31 +117,6 @@ def get_dl_and_kpc_per_asec(z, H0=70, WM=0.26, WV=0.74):
     return DL_Mpc * 3.086e22, kpc_DA
 
 
-def is_between(a, b, c):
-    """Check if three points lie on a line, and point c is between points a and
-    b. Inspired from https://stackoverflow.com/a/328122/6386612.
-
-    Parameters
-    ----------
-
-    """
-    x1, y1, x2, y2, x3, y3 = (int(a[0]), int(a[1]), int(b[0]), int(b[1]),
-                              int(c[0]), int(c[1]))
-    crossproduct = (y3 - y1) * (x2 - x1) - (x3 - x1) * (y2 - y1)
-    if abs(crossproduct) != 0:
-        return False
-
-    dotproduct = (x3 - x1) * (x2 - x1) + (y3 - y1) * (y2 - y1)
-    if dotproduct < 0:
-        return False
-
-    squaredlengthba = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)
-    if dotproduct > squaredlengthba:
-        return False
-
-    return True
-
-
 def smallest_circle(sigma=4):
     """Measure the extent of blazars in LDR1.
 
@@ -227,37 +202,30 @@ def smallest_circle(sigma=4):
                     good_cells.append([r, c])
 
         # find distance between good_cell and all other good_cells
-        min_distances, min_x1, min_x2, min_y1, min_y2 = [], [], [], [], []
+        max_distances, max_x1, max_x2, max_y1, max_y2 = [], [], [], [], []
         r = int(np.round(d.shape[0] / 2, 0))
         c = int(np.round(d.shape[1] / 2, 0))
 
         for (x1, y1) in good_cells:
             for (x2, y2) in good_cells:
-                if (is_between(a=[x1, y1], b=[x2, y2], c=[r - 1, c - 1]) or
-                        is_between(a=[x1, y1], b=[x2, y2], c=[r - 1, c]) or
-                        is_between(a=[x1, y1], b=[x2, y2], c=[r, c - 1]) or
-                        is_between(a=[x1, y1], b=[x2, y2], c=[r, c])) and (
-                        x1 != x2 or y1 != y2):
-                    # then the two points pass through the centre
-                    # avoids the minimum distance being zero
-                    min_distances.append(np.sqrt((x1 - x2) ** 2 +
-                                         (y1 - y2) ** 2))
-                    min_x1.append(x1)
-                    min_x2.append(x2)
-                    min_y1.append(y1)
-                    min_y2.append(y2)
+                max_distances.append(np.sqrt((x1 - x2) ** 2 +
+                                     (y1 - y2) ** 2))
+                max_x1.append(x1)
+                max_x2.append(x2)
+                max_y1.append(y1)
+                max_y2.append(y2)
 
         # not so simple - need the shortest of the lines that passes through
         # the centre
         d[r - 1:r + 1, c - 1:c + 1] = 0  # set centre to zero so we can see it
 
-        min_distances = np.array(min_distances)
-        my_min = np.min(min_distances)
-        min_x1 = min_x1[min_distances.argmin()]
-        min_x2 = min_x2[min_distances.argmin()]
-        min_y1 = min_y1[min_distances.argmin()]
-        min_y2 = min_y2[min_distances.argmin()]
-        asec_min = my_min * 1.5  # 1.5" per pixel
+        max_distances = np.array(max_distances)
+        my_max = np.min(max_distances)
+        max_x1 = max_x1[max_distances.argmin()]
+        max_x2 = max_x2[max_distances.argmin()]
+        max_y1 = max_y1[max_distances.argmin()]
+        max_y2 = max_y2[max_distances.argmin()]
+        asec_max = my_max * 1.5  # 1.5" per pixel
 
         ax = plt.subplot(projection=wcs)
         plt.xlabel('Right ascension', fontsize=20, color='black')
@@ -266,8 +234,8 @@ def smallest_circle(sigma=4):
         plt.imshow(copy, vmin=0, vmax=np.nanmax(copy), origin='lower',
                    norm=DS9Normalize(stretch='arcsinh'), cmap='plasma_r')
         #           interpolation='gaussian',
-        # plt.plot([min_y1, min_y2], [min_x1, min_x2], color='black', alpha=1,
-        #          lw=2)
+        plt.plot([max_y1, max_y2], [max_x1, max_x2], color='black', alpha=1,
+                 lw=2)
         cbar = plt.colorbar()
         cbar.set_label(r'Jy beam$^{-1}$', size=20)
         cbar.ax.tick_params(labelsize=20)
@@ -278,11 +246,11 @@ def smallest_circle(sigma=4):
         plt.clf()
 
         dl, kpc = get_dl_and_kpc_per_asec(z=z)
-        width = asec_min * kpc
+        width = asec_max * kpc
 
         result = (f'{source_name},{ra},{dec},{rms * 1e3},{z}'
-                  f',{asec_min:.1f},{width:.1f}\n')
-        print(f'{source_name}: {asec_min:.1f}", {width:.2f} kpc')
+                  f',{asec_max:.1f},{width:.1f}\n')
+        print(f'{source_name}: {asec_max:.1f}", {width:.2f} kpc')
 
         with open(results_csv, 'a') as f:
             f.write(result)
