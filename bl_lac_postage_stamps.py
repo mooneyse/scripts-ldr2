@@ -246,7 +246,7 @@ def smallest_circle(sigma=4):
 
         x, y, r = smallestenclosingcircle.make_circle(good_cells)
 
-        ax = plt.subplot(projection=wcs)
+        ax = plt.subplot(projection=cutout.wcs)
         plt.xlabel('Right ascension', fontsize=20, color='black')
         plt.ylabel('Declination', fontsize=20, color='black')
         ax.tick_params(axis='both', which='major', labelsize=20)
