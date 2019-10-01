@@ -1,120 +1,296 @@
 #!/usr/bin/env python3
 
-'''Plot postage stamp images of LDR2 BL Lacs.'''
+"""Plot postage stamp images of LDR2 BL Lacs."""
 
-import warnings
-warnings.filterwarnings('ignore')
 import matplotlib as mpl
-import os.path
 mpl.use('Agg')
-import aplpy
-import argparse
-import math
-import os
-import sys
+from astropy import units as u
+from astropy.coordinates import SkyCoord
+from astropy.io import fits
+from astropy.nddata import Cutout2D
+from astropy.wcs import WCS
+from ds9norm import DS9Normalize
+from math import sqrt, exp, sin
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import astropy.io
-import matplotlib.pyplot as plt
-from PIL import Image, ImageDraw
 
 __author__ = 'Sean Mooney'
 __email__ = 'sean.mooney@ucdconnect.ie'
 __date__ = '06 September 2019'
 
 
-def get_levels(fits, sigma=[3, 5]):
-    '''Get the the noise for the FITS image by taking the standard deviation of the residual.'''
-    residual_fits = f'/mnt/closet/ldr2-blazars/images/noise/{fits[41:55]}.fits'
-    # using the residuals is not ideal so the noise is over estimated
-    data = np.squeeze(astropy.io.fits.open(residual_fits)[0].data)
-    return np.std(data), [s * np.std(data) for s in sigma]  # mJy
+def get_dl_and_kpc_per_asec(z, H0=70, WM=0.26, WV=0.74):
+    """Ned Wright's cosmology calculator. See
+    http://www.astro.ucla.edu/~wright/CosmoCalc.html for the online version.
 
+    Parameters
+    ----------
+    z : float
+        Redshift.
+    H0 : float, optional
+        The Hubble constant. The default is 70. What are the units?
+    WM : float, optional
+        The omega matter value. The default is 0.26.
+    WV : float, optional
+        The omega vacuum parameter. The default is 0.74.
+    n : float, optional
+        The number of points to use in the integration.
 
-def make_plot(fits, has_z, z='', z_flag='', new_diameter='', vmin=0):
-    '''Get a png image from a FITS file. The size is the width of the square in arcseconds.'''
-    data = np.squeeze(astropy.io.fits.open(fits)[0].data)
-    pixels, _ = data.shape  # they are square
-    diameter = 12  # arcminutes
+    Returns
+    -------
+    float
+        The luminosity distance in metres.
+    float
+        The kpc per arcsecond at the given redshift.
+    """
+    WR = 0.        # Omega(radiation)
+    WK = 0.        # Omega curvaturve = 1-Omega(total)
+    c = 299792.458  # velocity of light in km/sec
+    DTT = 0.5      # time from z to now in units of 1/H0
+    age = 0.5      # age of Universe in units of 1/H0
+    zage = 0.1     # age of Universe at redshift z in units of 1/H0
+    DCMR = 0.0     # comoving radial distance in units of c/H0
+    DA = 0.0       # angular size distance
+    DA_Mpc = 0.0
+    kpc_DA = 0.0
+    DL = 0.0       # luminosity distance
+    DL_Mpc = 0.0
+    a = 1.0        # 1/(1+z), the scale factor of the Universe
+    az = 0.5       # 1/(1+z(object))
+    h = H0/100.
+    WR = 4.165E-5/(h*h)   # includes 3 massless neutrino species, T0 = 2.72528
+    WK = 1-WM-WR-WV
+    az = 1.0/(1+1.0*z)
+    age = 0.
+    n = 1000         # number of points in integrals
+    for i in range(n):
+        a = az*(i+0.5)/n
+        adot = sqrt(WK+(WM/a)+(WR/(a*a))+(WV*a*a))
+        age = age + 1./adot
 
-    if not new_diameter:
-        new_diameter = diameter
+    zage = az*age/n
+    DTT = 0.0
+    DCMR = 0.0
 
-    # find cutout region
-    scaling = new_diameter / diameter
-    new_pixels = pixels * scaling
-    start = np.rint((pixels / 2) - (new_pixels / 2)).astype(int)
-    end = np.rint((pixels / 2) + (new_pixels / 2)).astype(int)
-    cutout = data[start:end, start:end]
+    for i in range(n):
+        a = az+(1-az)*(i+0.5)/n
+        adot = sqrt(WK+(WM/a)+(WR/(a*a))+(WV*a*a))
+        DTT = DTT + 1./adot
+        DCMR = DCMR + 1./(a*adot)
 
-    # get contour levels
-    noise, levels = get_levels(fits)
+    DTT = (1.-az)*DTT/n
+    DCMR = (1.-az)*DCMR/n
+    age = DTT+zage
 
-    # make figure
-    plt.figure(figsize=(15, 12))
-    plt.imshow(cutout, origin='lower', vmin=0, vmax=np.max(cutout))
-    cbar = plt.colorbar()
-    plt.contour(cutout, levels=levels, colors=['white', 'magenta'])
-    plt.title(f'{os.path.basename(fits)[:14]}, z = {z_flag} {z}', fontsize=20)
-    plt.xlabel(f'Radius = {new_diameter / 2}"; RMS = {noise:.3f} mJy', fontsize=20)
-    plt.tick_params(axis='both', which='both', left=False, right=False, labelleft=False, bottom=False, top=False, labelbottom=False)
-    cbar.set_label(f'Jy beam\N{SUPERSCRIPT MINUS}\N{SUPERSCRIPT ONE}')
-    plt.tight_layout()
-    extra_dir = 'with-z' if has_z else 'without-z'
-    ending = 'z' if has_z else 'no-z'
-    save = f'/mnt/closet/ldr2-blazars/images/png/bzb-for-fra/{extra_dir}/{os.path.basename(fits)[:14]}-{ending}.png'
-    plt.savefig(save)
-    plt.clf()
-    print(f'Imaged saved at {save}.')
-
-
-def get_z(blazar, z_csv, no_z_csv):
-
-    blazar = blazar[:4] + ' ' + blazar[4:]  # have to add a space
-    df_z = pd.read_csv(z_csv)
-    df_no_z = pd.read_csv(no_z_csv)
-
-    if blazar in list(df_z['Name']):
-        row = df_z[df_z['Name'] == blazar]
-        z = row['Redshift'].values[0]
-        flag = ''
-        has_z = True
-        print(f'{blazar} has a good z (z = {z}).')
-
-    elif blazar in list(df_no_z['Name']):
-        row = df_no_z[df_no_z['Name'] == blazar]
-        z = row['Redshift'].values[0]
-        flag = row['Redshift flag'].values[0]
-        has_z = False
-        if math.isnan(z):
-            z = ''
-            print(f'{blazar} does not have a z.')
-        if math.isnan(flag):
-            flag = ''
+    ratio = 1.00
+    x = sqrt(abs(WK))*DCMR
+    if x > 0.1:
+        if WK > 0:
+            ratio = 0.5*(exp(x)-exp(-x))/x
         else:
-            print(f'{blazar} does not have a good z (z = {flag} {z}).')
-
+            ratio = sin(x)/x
     else:
-        z = ''
-        flag = ''
-        has_z = False
-        print('BL Lac not in either list.')
+        y = x*x
+        if WK < 0:
+            y = -y
+        ratio = 1. + y/6. + y*y/120.
+    DCMT = ratio*DCMR
+    DA = az*DCMT
+    DA_Mpc = (c/H0)*DA
+    kpc_DA = DA_Mpc/206.264806
+    DL = DA/(az*az)
+    DL_Mpc = (c/H0)*DL
 
-    return has_z, z, flag
+    ratio = 1.00
+    x = sqrt(abs(WK))*DCMR
+    if x > 0.1:
+        if WK > 0:
+            ratio = (0.125*(exp(2.*x)-exp(-2.*x))-x/2.)/(x*x*x/3.)
+        else:
+            ratio = (x/2. - sin(2.*x)/4.)/(x*x*x/3.)
+    else:
+        y = x*x
+        if WK < 0:
+            y = -y
+        ratio = 1. + y/5. + (2./105.)*y*y
+    return DL_Mpc * 3.086e22, kpc_DA
+
+
+def is_between(a, b, c):
+    """Check if three points lie on a line, and point c is between points a and
+    b. Inspired from https://stackoverflow.com/a/328122/6386612.
+
+    Parameters
+    ----------
+
+    """
+    x1, y1, x2, y2, x3, y3 = (int(a[0]), int(a[1]), int(b[0]), int(b[1]),
+                              int(c[0]), int(c[1]))
+    crossproduct = (y3 - y1) * (x2 - x1) - (x3 - x1) * (y2 - y1)
+    if abs(crossproduct) != 0:
+        return False
+
+    dotproduct = (x3 - x1) * (x2 - x1) + (y3 - y1) * (y2 - y1)
+    if dotproduct < 0:
+        return False
+
+    squaredlengthba = (x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1)
+    if dotproduct > squaredlengthba:
+        return False
+
+    return True
+
+
+def smallest_circle(sigma=4):
+    """Measure the extent of blazars in LDR1.
+
+    Parameters
+    ----------
+    sigma : float or int
+        The threshold of the significance to set the mask, as a factor of the
+        local RMS. The default is 4.
+
+    Returns
+    -------
+    string
+        The name of the CSV containing the results.
+    """
+    my_directory = '/data5/sean/ldr2'
+
+    results_csv = f'{my_directory}/results/ldr2.bllacs.fsrqs.results.csv'
+    df = pd.read_csv(f'{my_directory}/catalogues/final.csv')
+    result_header = ('Name,RA,Dec,RMS (uJy),Redshift,Width ("),Width (kpc)\n')
+
+    with open(results_csv, 'a') as f:
+        f.write(result_header)
+
+    plt.figure(figsize=(13.92, 8.60)).patch.set_facecolor('white')
+    plt.rcParams['font.family'] = 'serif'
+    plt.rcParams['mathtext.fontset'] = 'dejavuserif'
+    mpl.rcParams['xtick.major.size'] = 10
+    mpl.rcParams['xtick.major.width'] = 2
+    mpl.rcParams['xtick.minor.size'] = 5
+    mpl.rcParams['xtick.minor.width'] = 2
+    mpl.rcParams['ytick.major.size'] = 10
+    mpl.rcParams['ytick.major.width'] = 2
+    mpl.rcParams['ytick.minor.size'] = 5
+    mpl.rcParams['ytick.minor.width'] = 2
+    mpl.rcParams['axes.linewidth'] = 2
+
+    for source_name, ra, dec, mosaic, rms, z in zip(
+            df['Source name'], df['RA (J2000.0)'], df['Dec (J2000.0)'],
+            df['Mosaic_ID'], df['Isl_rms'], df['Redshift']):
+
+        field = f'{my_directory}/mosaics/{mosaic}-mosaic.fits'
+        threshold = sigma * rms / 1000   # jansky
+        save = f'{my_directory}/images/{source_name}.png'
+
+        hdu = fits.open(field)[0]
+        wcs = WCS(hdu.header, naxis=2)
+        sky_position = SkyCoord(ra, dec, unit='deg')
+        size = [2, 2] * u.arcmin
+        cutout = Cutout2D(np.squeeze(hdu.data), sky_position, size=size,
+                          wcs=wcs)
+
+        d = cutout.data
+        # https://docs.scipy.org/doc/numpy/reference/generated/numpy.copy.html
+        copy = np.copy(d)
+        d[d < threshold] = np.nan
+        rows, cols = d.shape
+
+        set_to_nan = []
+        for r in range(rows):  # set to nan if surrounded by non nans
+            for c in range(cols):
+                try:
+                    if (not np.isnan(d[r - 1, c - 1]) and
+                            not np.isnan(d[r - 1, c]) and
+                            not np.isnan(d[r - 1, c + 1]) and
+                            not np.isnan(d[r, c - 1]) and
+                            not np.isnan(d[r, c + 1]) and
+                            not np.isnan(d[r + 1, c - 1]) and
+                            not np.isnan(d[r + 1, c]) and
+                            not np.isnan(d[r + 1, c + 1])):
+                        set_to_nan.append((r, c))
+                except IndexError:
+                    continue
+
+        for r, c in set_to_nan:
+            d[r, c] = np.nan  # needs separate loop to avoid checkered pattern
+
+        good_cells = []
+        for r in range(rows):
+            for c in range(cols):
+                if not np.isnan(d[r, c]):
+                    good_cells.append([r, c])
+
+        # find distance between good_cell and all other good_cells
+        min_distances, min_x1, min_x2, min_y1, min_y2 = [], [], [], [], []
+        r = int(np.round(d.shape[0] / 2, 0))
+        c = int(np.round(d.shape[1] / 2, 0))
+
+        for (x1, y1) in good_cells:
+            for (x2, y2) in good_cells:
+                if (is_between(a=[x1, y1], b=[x2, y2], c=[r - 1, c - 1]) or
+                        is_between(a=[x1, y1], b=[x2, y2], c=[r - 1, c]) or
+                        is_between(a=[x1, y1], b=[x2, y2], c=[r, c - 1]) or
+                        is_between(a=[x1, y1], b=[x2, y2], c=[r, c])) and (
+                        x1 != x2 or y1 != y2):
+                    # then the two points pass through the centre
+                    # avoids the minimum distance being zero
+                    min_distances.append(np.sqrt((x1 - x2) ** 2 +
+                                         (y1 - y2) ** 2))
+                    min_x1.append(x1)
+                    min_x2.append(x2)
+                    min_y1.append(y1)
+                    min_y2.append(y2)
+
+        # not so simple - need the shortest of the lines that passes through
+        # the centre
+        d[r - 1:r + 1, c - 1:c + 1] = 0  # set centre to zero so we can see it
+
+        min_distances = np.array(min_distances)
+        my_min = np.min(min_distances)
+        min_x1 = min_x1[min_distances.argmin()]
+        min_x2 = min_x2[min_distances.argmin()]
+        min_y1 = min_y1[min_distances.argmin()]
+        min_y2 = min_y2[min_distances.argmin()]
+        asec_min = my_min * 1.5  # 1.5" per pixel
+
+        ax = plt.subplot(projection=wcs)
+        plt.xlabel('Right ascension', fontsize=20, color='black')
+        plt.ylabel('Declination', fontsize=20, color='black')
+        ax.tick_params(axis='both', which='major', labelsize=20)
+        plt.imshow(copy, vmin=0, vmax=np.nanmax(copy), origin='lower',
+                   norm=DS9Normalize(stretch='arcsinh'),
+                   interpolation='gaussian', cmap='plasma_r')
+        plt.plot([min_y1, min_y2], [min_x1, min_x2], color='black', alpha=1,
+                 lw=2)
+        cbar = plt.colorbar()
+        cbar.set_label(r'Jy beam$^{-1}$', size=20)
+        cbar.ax.tick_params(labelsize=20)
+        plt.minorticks_on()
+        plt.tick_params(which='minor', length=0)
+        plt.contour(copy, levels=[threshold], origin='lower', colors='w')
+        plt.savefig(save)
+        plt.clf()
+
+        dl, kpc = get_dl_and_kpc_per_asec(z=z)
+        width = asec_min * kpc
+
+        result = (f'{source_name},{ra},{dec},{rms * 1e3},{z}'
+                  f',{asec_min:.1f},{width:.1f}\n')
+        print(f'{source_name}: {asec_min:.1f}", {width:.2f} kpc')
+
+        with open(results_csv, 'a') as f:
+            f.write(result)
+    return results_csv
 
 
 def main():
-    '''Plot postage stamp images of LDR2 BL Lacs.'''
-    directory = '/data5/sean/ldr2'
-    df = pd.read_csv(f'{directory}/catalogues/final.csv')
-    print(df['Mosaic_ID'])
+    """Plot postage stamp images of LDR2 BL Lacs."""
 
-    # for fits in fits_list:
-    #     try:
-    #         has_z, z, z_flag = get_z(os.path.basename(fits)[:14], z_csv, no_z_csv)
-    #         make_plot(fits=fits, has_z=has_z, new_diameter=2, z=z, z_flag=z_flag)
-    #     except:
-    #         print(f'Failed for {fits}.')
+    smallest_circle()
 
 
 if __name__ == '__main__':
