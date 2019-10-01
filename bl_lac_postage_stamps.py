@@ -11,6 +11,7 @@ from astropy.nddata import Cutout2D
 from astropy.wcs import WCS
 from ds9norm import DS9Normalize
 from math import sqrt, exp, sin
+from matplotlib.patches import Circle
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -225,6 +226,7 @@ def smallest_circle(sigma=4):
         max_x2 = max_x2[max_distances.argmax()]
         max_y1 = max_y1[max_distances.argmax()]
         max_y2 = max_y2[max_distances.argmax()]
+        midpoint = ((max_x1 + max_x2) / 2, (max_y1 + max_y2) / 2)
         asec_max = my_max * 1.5  # 1.5" per pixel
 
         ax = plt.subplot(projection=wcs)
@@ -236,6 +238,11 @@ def smallest_circle(sigma=4):
         #           interpolation='gaussian',
         plt.plot([max_y1, max_y2], [max_x1, max_x2], color='black', alpha=1,
                  lw=2)
+        beam = Circle((10, 10), radius=2, linestyle='dashed', color='grey',
+                      lw=2)
+        diffuse = Circle(midpoint, radius=my_max / 2, color='k', lw=2)
+        ax.add_patch(beam)
+        ax.add_patch(diffuse)
         cbar = plt.colorbar()
         cbar.set_label(r'Jy beam$^{-1}$', size=20)
         cbar.ax.tick_params(labelsize=20)
