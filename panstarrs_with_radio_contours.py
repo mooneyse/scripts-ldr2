@@ -196,22 +196,25 @@ def optical(sigma=4):
 
         ldr2 = f'{my_directory}/mosaics/{mosaic}-mosaic.fits'
         l_hdu = fits.open(ldr2)[0]
+        l_data = l_hdu.data
         l_wcs = WCS(l_hdu.header, naxis=2)
-        sky_position = SkyCoord(ra, dec, unit='deg')
-        size = [2, 2] * u.arcmin
-        cutout = Cutout2D(np.squeeze(l_hdu.data), sky_position, size=size,
-                          wcs=l_wcs)
-        l_data = cutout.data
+        # sky_position = SkyCoord(ra, dec, unit='deg')
+        # size = [2, 2] * u.arcmin
+        # cutout = Cutout2D(np.squeeze(l_hdu.data), sky_position, size=size,
+        #                   wcs=l_wcs)
+        # l_data = cutout.data
 
         ax = plt.subplot(projection=l_wcs)
         plt.imshow(l_data)
+        plt.show()
+        return
+
         ax.contour(p_data, transform=ax.get_transform(p_wcs)),
 
         save = f'{my_directory}/images/panstarrs-{source_name}.png'
         plt.savefig(save)
         plt.clf()
         print(save)
-        return
 
         # levels = [level * rms / 1000 for level in [4, 8, 16, 32]]
 
