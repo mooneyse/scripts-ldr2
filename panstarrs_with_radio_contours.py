@@ -230,16 +230,16 @@ def optical(sigma=4):
         plt.savefig(save)
         plt.clf()
 
-        dl, kpc = get_dl_and_kpc_per_asec(z=z)
-        width = r * kpc
-
-        result = (f'{source_name},{ra},{dec},{rms * 1e3},{z}'
-                  f',{r:.1f},{width:.1f}\n')
-        print(f'{source_name}: {r:.1f}", {width:.1f} kpc')
-
-        with open(results_csv, 'a') as f:
-            f.write(result)
-    return results_csv
+        #     dl, kpc = get_dl_and_kpc_per_asec(z=z)
+        #     width = r * kpc
+        #
+        #     result = (f'{source_name},{ra},{dec},{rms * 1e3},{z}'
+        #               f',{r:.1f},{width:.1f}\n')
+        #     print(f'{source_name}: {r:.1f}", {width:.1f} kpc')
+        #
+        #     with open(results_csv, 'a') as f:
+        #         f.write(result)
+        # return results_csv
 
 
 def main():
