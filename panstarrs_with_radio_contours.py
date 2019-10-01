@@ -208,13 +208,12 @@ def optical(sigma=4):
 
         ax = plt.subplot(projection=p_cutout.wcs)
         im = ax.imshow(p_cutout.data, vmin=0, vmax=8000, cmap='Greys',
-                       origin='lower', norm=DS9Normalize(stretch='arcsinh'),
-                       interpolation='gaussian')
+                       origin='lower', norm=DS9Normalize(stretch='arcsinh'))
+        # interpolation='gaussian'
 
         cbar = plt.colorbar(im)
         cbar.set_label('Excess counts', size=20)
         cbar.ax.tick_params(labelsize=20)
-
 
         ax.contour(l_cutout.data, transform=ax.get_transform(l_cutout.wcs),
                    levels=levels, origin='lower', colors=colors)
@@ -224,32 +223,10 @@ def optical(sigma=4):
         ax.tick_params(axis='both', which='major', labelsize=20)
         plt.minorticks_on()
         ax.tick_params(which='minor', length=0)
-        plt.show()
-        return
-
 
         save = f'{my_directory}/images/panstarrs-{source_name}.png'
         plt.savefig(save)
         plt.clf()
-        print(save)
-
-        #
-
-
-        # plt.imshow(panstarrs, vmin=0, vmax=8000,
-        #            origin='lower', norm=DS9Normalize(stretch='arcsinh'),
-        #            cmap='Greys')  # interpolation='gaussian'
-        # plt.plot([panstarrs.shape[0] * 0.2, panstarrs.shape[0] * 0.2],
-        #          [panstarrs.shape[1] * 0.25, panstarrs.shape[1] * 0.5],)
-
-        #
-
-        # ax.contour(ldr2, #levels=levels, origin='lower',
-        #            transform=ax.get_transform(wcs2)),
-        #            #colors=['red', 'yellow', 'blue', 'purple'])
-
-        # plt.savefig(save)
-        # plt.clf()
 
         #     dl, kpc = get_dl_and_kpc_per_asec(z=z)
         #     width = r * kpc
