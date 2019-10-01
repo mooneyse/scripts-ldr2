@@ -220,7 +220,7 @@ def smallest_circle(sigma=4):
         d[r - 1:r + 1, c - 1:c + 1] = 0  # set centre to zero so we can see it
 
         max_distances = np.array(max_distances)
-        my_max = np.min(max_distances)
+        my_max = np.max(max_distances)
         max_x1 = max_x1[max_distances.argmin()]
         max_x2 = max_x2[max_distances.argmin()]
         max_y1 = max_y1[max_distances.argmin()]
