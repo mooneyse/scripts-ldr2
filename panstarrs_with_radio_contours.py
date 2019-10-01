@@ -191,8 +191,13 @@ def optical(sigma=4):
 
         panstarrs = f'{my_directory}/panstarrs/{source_name}.i.fits'
         p_hdu = fits.open(panstarrs)[0]
-        p_data = p_hdu.data
+        # p_data = p_hdu.data
         p_wcs = WCS(p_hdu.header)
+        sky_position = SkyCoord(ra, dec, unit='deg')
+        size = [2, 2] * u.arcmin
+        cutout = Cutout2D(p_hdu.data, sky_position, size=size,
+                          wcs=p_wcs)
+        p_data = cutout.data
 
         ldr2 = f'{my_directory}/mosaics/{mosaic}-mosaic.fits'
         l_hdu = fits.open(ldr2)[0]
