@@ -4,7 +4,7 @@
 """
 
 import matplotlib as mpl
-# mpl.use('Agg')
+mpl.use('Agg')
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
