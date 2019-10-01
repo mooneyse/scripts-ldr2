@@ -204,7 +204,7 @@ def optical(sigma=4):
                             wcs=l_wcs)
 
         levels = [level * rms / 1000 for level in [4, 8, 16, 32]]
-        colors = ['red', 'yellow', 'blue', 'purple']
+        colors = ['#118ab2', '#06d6a0', '#ffd166', '#ef476f']
 
         ax = plt.subplot(projection=p_cutout.wcs)
         ax.imshow(p_cutout.data, vmin=0, vmax=8000, cmap='Greys',
