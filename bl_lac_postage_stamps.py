@@ -203,7 +203,7 @@ def smallest_circle(sigma=4):
                 if not np.isnan(d[r, c]):
                     good_cells.append([r, c])
 
-        smallest_circle = make_circle(good_cells)
+        smallest_circle = smallestenclosingcircle.make_circle(good_cells)
 
         # find distance between good_cell and all other good_cells
         # max_distances, max_x1, max_x2, max_y1, max_y2 = [], [], [], [], []
