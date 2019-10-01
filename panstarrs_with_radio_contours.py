@@ -208,7 +208,7 @@ def optical(sigma=4):
         print(p_wcs)
         ax = plt.subplot(projection=p_wcs)
         ax.imshow(p_data, vmin=0, vmax=1000)
-        ax.contour(l_data,transform=ax.get_transform(WCS(l_cutout.header))#, levels=[0.001], colors=['red'],transform=ax.get_transform(l_wcs))
+        ax.contour(l_data,transform=ax.get_transform(WCS(l_cutout.header)))#, levels=[0.001], colors=['red'],transform=ax.get_transform(l_wcs))
         # plt.xlim(0, l_data.shape[1] - 1)
         # plt.ylim(0, l_data.shape[0] - 1)
         plt.show()
