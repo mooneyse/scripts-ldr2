@@ -190,7 +190,12 @@ def optical(sigma=4):
                                                     df['Redshift']):
 
         sky_position = SkyCoord(ra, dec, unit='deg')
-        size = [2, 2] * u.arcmin
+        if source_name == '5BZBJ1202+4444':
+            size = [3, 3] * u.arcmin
+        elif source_name == '5BZBJ1419+5423':
+            size = [4, 4] * u.arcmin
+        else:
+            size = [2, 2] * u.arcmin
 
         panstarrs = f'{my_directory}/panstarrs/{source_name}.i.fits'
         p_hdu = fits.open(panstarrs)[0]
