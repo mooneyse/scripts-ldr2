@@ -274,11 +274,11 @@ def smallest_circle(sigma=4):
         width = r * kpc
 
         result = (f'{source_name},{ra},{dec},{rms * 1e3},{z}'
-                  f',{asec_max:.1f},{width:.1f}\n')
-        print(f'{source_name}: {r:.1f}", {width:.2f} kpc')
+                  f',{r:.1f},{width:.1f}\n')
+        print(f'{source_name}: {r:.1f}", {width:.1f} kpc')
 
-        # with open(results_csv, 'a') as f:
-        #     f.write(result)
+        with open(results_csv, 'a') as f:
+            f.write(result)
     return results_csv
 
 
