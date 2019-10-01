@@ -216,6 +216,8 @@ def optical(sigma=4):
                        origin='lower', norm=DS9Normalize(stretch='arcsinh'))
         # interpolation='gaussian'
 
+        # plt.plot()
+
         cbar = plt.colorbar(im)
         cbar.set_label('Excess counts', size=20)
         cbar.ax.tick_params(labelsize=20)
