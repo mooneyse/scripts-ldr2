@@ -238,9 +238,10 @@ def smallest_circle(sigma=4):
         #           interpolation='gaussian',
         plt.plot([max_y1, max_y2], [max_x1, max_x2], color='black', alpha=1,
                  lw=2)
-        beam = Circle((10, 10), radius=2, linestyle='dashed', color='grey',
-                      lw=2)
-        diffuse = Circle(midpoint, radius=my_max / 2, color='k', lw=2)
+        beam = Circle((10, 10), radius=2, linestyle='dashed',
+                      lw=2, fc='none', edgecolor='grey')
+        diffuse = Circle(midpoint, radius=my_max / 2, lw=2,
+                         fc='none', edgecolor='k')
         ax.add_patch(beam)
         ax.add_patch(diffuse)
         cbar = plt.colorbar()
