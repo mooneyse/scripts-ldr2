@@ -183,17 +183,15 @@ def ghz(sigma=4):
         colors = ['#118ab2', '#06d6a0', '#ffd166', '#ef476f']
 
         f_level = f_rms * 4 / 1000
-        fmt = {}
-        fmt[f_level] = 'FIRST'
 
         ax = plt.subplot(projection=f_cutout.wcs)
         im = ax.imshow(f_cutout.data, vmin=0, vmax=np.max(f_cutout.data),
                        cmap='Greys', origin='lower',
                        norm=DS9Normalize(stretch='arcsinh'))
-        cs = ax.contour(f_cutout.data, levels=[f_level], origin='lower',
-                        colors=['k'])
-        # ax.clabel(cs), fmt=fmt)
         # interpolation='gaussian'
+        ax.contour(f_cutout.data, levels=[f_level], origin='lower',
+                   colors=['k'])
+        # ax.clabel(cs), fmt=fmt)
 
         cbar = plt.colorbar(im)
         cbar.set_label(r'Jy beam$^{-1}$', size=20)
@@ -213,7 +211,7 @@ def ghz(sigma=4):
 
         _, kpc_per_asec = get_dl_and_kpc_per_asec(z=z)
         kpc_per_pixel = kpc_per_asec * 1.5
-        plt.plot([10, 10], [10, 30], marker='none', lw=2, color='k')
+        plt.plot([10, 10], [10, 30], marker='None', lw=2, color='k')
         plt.text(8, 20, f'30" = {kpc_per_pixel * 30:.0f} kpc')
 
 
