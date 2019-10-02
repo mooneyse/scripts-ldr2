@@ -198,6 +198,10 @@ def ghz(sigma=4):
         ax.contour(l_cutout.data, transform=ax.get_transform(l_cutout.wcs),
                    levels=levels, origin='lower', colors=colors)
 
+        beam = Circle((6, 6), radius=1.5, linestyle='dashed', lw=2, fc='none',
+                      edgecolor='blue')  # beam = 5.4" diameter, 1 pixel = 1.8"
+        ax.add_patch(beam)
+
         plt.xlabel('Right ascension', fontsize=20, color='black')
         plt.ylabel('Declination', fontsize=20, color='black')
         ax.tick_params(axis='both', which='major', labelsize=20)
@@ -207,9 +211,13 @@ def ghz(sigma=4):
         plt.ylim(0, f_cutout.data.shape[1])
 
         _, kpc_per_asec = get_dl_and_kpc_per_asec(z=z)
-        kpc_per_pixel = kpc_per_asec * 1.5
-        plt.plot([10, 10], [10, 30], marker='None', lw=2, color='k')
-        plt.text(8, 20, f'30" = {kpc_per_pixel * 30:.0f} kpc')
+        kpc_per_pixel = kpc_per_asec * 1.8
+        plt.plot([10, 30], [10, 10], marker='None', lw=2, color='k')
+        plt.text(8, 20, f'30" = {kpc_per_pixel * 30:.0f} kpc', fontsize=20)
+
+
+        # add beam! 1.5000E-03 = bmaj bmin
+        # 1.8" x 1.8" pixel
 
         plt.show()
         return
