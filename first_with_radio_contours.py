@@ -209,8 +209,8 @@ def ghz(sigma=4):
         ax.tick_params(which='minor', length=0)
 
         plt.xlim(0, f_cutout.data.shape[0])
-        plt.xlim(0, f_cutout.data.shape[1])
-        
+        plt.ylim(0, f_cutout.data.shape[1])
+
         plt.show()
         # return
         # save = f'{my_directory}/images/panstarrs-{source_name}.png'
