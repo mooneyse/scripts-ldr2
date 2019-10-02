@@ -169,8 +169,9 @@ def ghz(sigma=4):
 
         first = f'{my_directory}/first/{source_name}.fits'
         f_hdu = fits.open(first)[0]
-        f_wcs = WCS(f_hdu.header)
-        f_cutout = Cutout2D(f_hdu.data, sky_position, size=size, wcs=f_wcs)
+        f_wcs = WCS(f_hdu.header, naxis=2)
+        f_cutout = Cutout2D(np.squeeze(f_hdu.data), sky_position, size=size,
+                            wcs=f_wcs)
 
         ldr2 = f'{my_directory}/mosaics/{mosaic}-mosaic.fits'
         l_hdu = fits.open(ldr2)[0]
