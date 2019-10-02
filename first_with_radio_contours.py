@@ -211,13 +211,14 @@ def ghz(sigma=4):
         plt.ylim(0, f_cutout.data.shape[1])
 
         _, kpc_per_asec = get_dl_and_kpc_per_asec(z=z)
+        sbar_asec = 30  # desired length of scalebar in arcseconds
         pix = 1.8  # arcseconds per pixel
-        sbar = 16.6667  # desired length of scalebar in pixels
+        sbar = sbar_asec / pix  # length of scalebar in pixels
         kpc_per_pixel = kpc_per_asec * pix
         s = f_cutout.data.shape[1]
         plt.plot([6, 6 + sbar], [s - 6, s - 6], marker='None', lw=2, color='b')
-        plt.text(6, s - 5, f'{sbar * pix}" = {kpc_per_pixel * sbar:.0f} kpc',
-                 fontsize=20, color='b')
+        plt.text(6, s - 5, f'{sbar_asec:.0f}" = {kpc_per_pixel * sbar:.0f} '
+                 'kpc', fontsize=20, color='b')
 
         # add scalebar to this, pandstarrs, ldr2 images.
         # put all scripts in one script.
