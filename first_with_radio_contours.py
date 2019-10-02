@@ -186,7 +186,7 @@ def ghz(sigma=4):
         fmt = {}
         fmt[f_level] = 'FIRST'
 
-        ax = plt.subplot(projection=f_cutout.wcs)
+        ax = plt.subplot(projection=l_cutout.wcs)
         im = ax.imshow(f_cutout.data, vmin=0, vmax=np.max(f_cutout.data),
                        cmap='Greys', origin='lower',
                        norm=DS9Normalize(stretch='arcsinh'))
