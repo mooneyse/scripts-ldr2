@@ -212,8 +212,9 @@ def ghz(sigma=4):
 
         _, kpc_per_asec = get_dl_and_kpc_per_asec(z=z)
         kpc_per_pixel = kpc_per_asec * 1.8
-        plt.plot([10, 30], [10, 10], marker='None', lw=2, color='k')
-        plt.text(8, 20, f'30" = {kpc_per_pixel * 30:.0f} kpc', fontsize=20)
+        s = l_cutout.data.shape[1]
+        plt.plot([10, 30], [s - 10, s - 10], marker='None', lw=2, color='k')
+        plt.text(20, s - 5, f'30" = {kpc_per_pixel * 30:.0f} kpc', fontsize=20)
 
 
         # add beam! 1.5000E-03 = bmaj bmin
