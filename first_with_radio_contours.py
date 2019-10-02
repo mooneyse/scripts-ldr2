@@ -192,11 +192,11 @@ def ghz(sigma=4):
                        norm=DS9Normalize(stretch='arcsinh'))
         cs = ax.contour(f_cutout.data, levels=[f_level], origin='lower',
                         colors=['k'])
-        ax.clabel(cs, fmt=fmt)
+        # ax.clabel(cs), fmt=fmt)
         # interpolation='gaussian'
 
         cbar = plt.colorbar(im)
-        cbar.set_label('Excess counts', size=20)
+        cbar.set_label(r'Jy beam$^{-1}$', size=20)
         cbar.ax.tick_params(labelsize=20)
 
         ax.contour(l_cutout.data, transform=ax.get_transform(l_cutout.wcs),
