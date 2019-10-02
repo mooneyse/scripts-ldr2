@@ -24,32 +24,6 @@ __email__ = 'sean.mooney@ucdconnect.ie'
 __date__ = '06 September 2019'
 
 
-def nearest_to_centre(my_arr, percent):
-    """Given a two dimensional array, return the value of the pixel nearest to
-    the centre that is non-zero.
-    """
-    if np.max(my_arr) == 1:
-        return [1]
-    i1 = int(round(my_arr.shape[0] * (0.5 - percent / 2), 0))
-    i2 = int(round(my_arr.shape[0] * (0.5 + percent / 2), 0))
-    islands_in_the_sun = list(np.unique(my_arr[i1:i2, i1:i2]))
-    if 0 in islands_in_the_sun:
-        islands_in_the_sun.remove(0)
-
-    if len(islands_in_the_sun) >= 1:
-        return islands_in_the_sun
-    else:
-        R = int(round(my_arr.shape[0] / 2, 0))
-        C = int(round(my_arr.shape[0] / 2, 0))
-
-        dist = {}
-        for r in range(my_arr.shape[0]):
-            for c in range(my_arr.shape[1]):
-                if my_arr[r, c] != 0:
-                    dist[my_arr[r, c]] = np.sqrt((R - r) ** 2 + (C - c) ** 2)
-        return [min(dist.items(), key=operator.itemgetter(1))[0]]
-
-
 def get_dl_and_kpc_per_asec(z, H0=70, WM=0.26, WV=0.74):
     """Ned Wright's cosmology calculator. See
     http://www.astro.ucla.edu/~wright/CosmoCalc.html for the online version.
@@ -162,12 +136,7 @@ def optical(sigma=4):
         The name of the CSV containing the results.
     """
     my_directory = '/data5/sean/ldr2'
-    results_csv = f'{my_directory}/results/ldr2.csv'
     df = pd.read_csv(f'{my_directory}/catalogues/final.csv')
-    result_header = ('Name,RA,Dec,RMS (uJy),Redshift,Width ("),Width (kpc)\n')
-
-    with open(results_csv, 'a') as f:
-        f.write(result_header)
 
     plt.figure(figsize=(13.92, 8.60)).patch.set_facecolor('white')
     plt.rcParams['font.family'] = 'serif'
