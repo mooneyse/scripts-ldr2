@@ -2,20 +2,21 @@
 
 """Plot postage stamp images of LDR2 BL Lacs."""
 
+import os
+import operator
+import numpy as np
+import pandas as pd
+from math import sqrt, exp, sin
+from skimage.measure import label
 import matplotlib as mpl
-mpl.use('Agg')
+from matplotlib.patches import Circle
+import matplotlib.pyplot as plt
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
 from astropy.nddata import Cutout2D
 from astropy.wcs import WCS
 from ds9norm import DS9Normalize
-from math import sqrt, exp, sin
-from matplotlib.patches import Circle
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-from skimage.measure import label
 import smallestenclosingcircle
 
 __author__ = 'Sean Mooney'
@@ -26,6 +27,17 @@ __date__ = '06 September 2019'
 def nearest_to_centre(my_arr, percent):
     """Given a two dimensional array, return the value of the pixel nearest to
     the centre that is non-zero.
+
+    Paramters
+    ---------
+    my_arr : NumPy array
+        Array to use.
+    percent : float
+        Fraction of the array to consider the centre.
+
+    Returns
+    ------
+    Indices of the islands.
     """
     if np.max(my_arr) == 1:
         return [1]
@@ -37,7 +49,7 @@ def nearest_to_centre(my_arr, percent):
 
     if len(islands_in_the_sun) >= 1:
         return islands_in_the_sun
-    else:
+    else:  # no islands so find the nearest to the centre
         R = int(round(my_arr.shape[0] / 2, 0))
         C = int(round(my_arr.shape[0] / 2, 0))
 
@@ -49,7 +61,7 @@ def nearest_to_centre(my_arr, percent):
         return [min(dist.items(), key=operator.itemgetter(1))[0]]
 
 
-def get_dl_and_kpc_per_asec(z, H0=70, WM=0.26, WV=0.74):
+def get_kpc_per_asec(z, H0=70, WM=0.26, WV=0.74):
     """Ned Wright's cosmology calculator. See
     http://www.astro.ucla.edu/~wright/CosmoCalc.html for the online version.
 
@@ -73,95 +85,55 @@ def get_dl_and_kpc_per_asec(z, H0=70, WM=0.26, WV=0.74):
     float
         The kpc per arcsecond at the given redshift.
     """
-    WR = 0.        # Omega(radiation)
-    WK = 0.        # Omega curvaturve = 1-Omega(total)
-    c = 299792.458  # velocity of light in km/sec
-    DTT = 0.5      # time from z to now in units of 1/H0
-    age = 0.5      # age of Universe in units of 1/H0
-    zage = 0.1     # age of Universe at redshift z in units of 1/H0
-    DCMR = 0.0     # comoving radial distance in units of c/H0
-    DA = 0.0       # angular size distance
-    DA_Mpc = 0.0
-    kpc_DA = 0.0
-    DL = 0.0       # luminosity distance
-    DL_Mpc = 0.0
-    a = 1.0        # 1/(1+z), the scale factor of the Universe
-    az = 0.5       # 1/(1+z(object))
-    h = H0/100.
-    WR = 4.165E-5/(h*h)   # includes 3 massless neutrino species, T0 = 2.72528
-    WK = 1-WM-WR-WV
-    az = 1.0/(1+1.0*z)
-    age = 0.
-    n = 1000         # number of points in integrals
+    WR = 0  # omega(radiation)
+    WK = 0  # omega curvaturve = 1 - omega(total)
+    c = 299792.458  # velocity of light in km / s
+    DCMR = 0  # comoving radial distance in units of c / H0
+    h = H0 / 100
+    WR = 4.165E-5 / (h * h)  # with 3 massless neutrino species, T0 = 2.72528
+    WK = 1 - WM - WR - WV
+    az = 1 / (1 + z)
+    n = 1000  # number of points in integrals
     for i in range(n):
-        a = az*(i+0.5)/n
-        adot = sqrt(WK+(WM/a)+(WR/(a*a))+(WV*a*a))
-        age = age + 1./adot
-
-    zage = az*age/n
-    DTT = 0.0
-    DCMR = 0.0
-
-    for i in range(n):
-        a = az+(1-az)*(i+0.5)/n
-        adot = sqrt(WK+(WM/a)+(WR/(a*a))+(WV*a*a))
-        DTT = DTT + 1./adot
-        DCMR = DCMR + 1./(a*adot)
-
-    DTT = (1.-az)*DTT/n
-    DCMR = (1.-az)*DCMR/n
-    age = DTT+zage
-
-    ratio = 1.00
-    x = sqrt(abs(WK))*DCMR
+        a = az + (1 - az) * (i + 0.5) / n
+        adot = sqrt(WK + (WM / a) + (WR / (a * a)) + (WV * a * a))
+        DCMR = DCMR + 1 / (a * adot)
+    DCMR = (1 - az) * DCMR / n
+    x = sqrt(abs(WK)) * DCMR
     if x > 0.1:
         if WK > 0:
-            ratio = 0.5*(exp(x)-exp(-x))/x
+            ratio = 0.5 * (exp(x) - exp(-x)) / x
         else:
-            ratio = sin(x)/x
+            ratio = sin(x) / x
     else:
-        y = x*x
+        y = x * x
         if WK < 0:
             y = -y
-        ratio = 1. + y/6. + y*y/120.
-    DCMT = ratio*DCMR
-    DA = az*DCMT
-    DA_Mpc = (c/H0)*DA
-    kpc_DA = DA_Mpc/206.264806
-    DL = DA/(az*az)
-    DL_Mpc = (c/H0)*DL
-
-    ratio = 1.00
-    x = sqrt(abs(WK))*DCMR
-    if x > 0.1:
-        if WK > 0:
-            ratio = (0.125*(exp(2.*x)-exp(-2.*x))-x/2.)/(x*x*x/3.)
-        else:
-            ratio = (x/2. - sin(2.*x)/4.)/(x*x*x/3.)
-    else:
-        y = x*x
-        if WK < 0:
-            y = -y
-        ratio = 1. + y/5. + (2./105.)*y*y
-    return DL_Mpc * 3.086e22, kpc_DA
+        ratio = 1 + y / 6 + y * y / 120
+    return ((c / H0) * (az * (ratio * DCMR))) / 206.264806
 
 
-def smallest_circle(sigma=4):
-    """Measure the extent of blazars in LDR1.
+def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
+    """Plot postage stamp images of LDR2 BL Lacs.
 
     Parameters
     ----------
-    sigma : float or int
+    sigma : float or integer
         The threshold of the significance to set the mask, as a factor of the
         local RMS. The default is 4.
+    my_directory : string
+        Working directory.
 
     Returns
     -------
     string
         The name of the CSV containing the results.
     """
-    my_directory = '/data5/sean/ldr2'
     results_csv = f'{my_directory}/results/ldr2.csv'
+    try:
+        os.remove(results_csv)
+    except OSError:
+        pass
     df = pd.read_csv(f'{my_directory}/catalogues/final.csv')
     result_header = ('Name,RA,Dec,RMS (uJy),Redshift,Width ("),Width (kpc)\n')
 
@@ -180,6 +152,9 @@ def smallest_circle(sigma=4):
     mpl.rcParams['ytick.minor.size'] = 5
     mpl.rcParams['ytick.minor.width'] = 2
     mpl.rcParams['axes.linewidth'] = 2
+    dummy = 123456
+    sbar_asec = 30  # desired length of scalebar in arcseconds
+    pix = 1.5  # arcseconds per pixel
 
     for source_name, ra, dec, mosaic, rms, z in zip(df['Source name'],
                                                     df['RA (J2000.0)'],
@@ -188,22 +163,22 @@ def smallest_circle(sigma=4):
                                                     df['Isl_rms'],
                                                     df['Redshift']):
 
-        field = f'{my_directory}/mosaics/{mosaic}-mosaic.fits'
         threshold = sigma * rms / 1000   # jansky
-        save = f'{my_directory}/images/{source_name}.png'
-
-        hdu = fits.open(field)[0]
+        hdu = fits.open(f'{my_directory}/mosaics/{mosaic}-mosaic.fits')[0]
         wcs = WCS(hdu.header, naxis=2)
         sky_position = SkyCoord(ra, dec, unit='deg')
         if source_name == '5BZBJ1202+4444':
             size = [3, 3] * u.arcmin
+            p = 9
         elif source_name == '5BZBJ1419+5423':
             size = [4, 4] * u.arcmin
+            p = 12
         else:
             size = [2, 2] * u.arcmin
+            p = 6
+
         cutout = Cutout2D(np.squeeze(hdu.data), sky_position, size=size,
                           wcs=wcs)
-
         d = cutout.data
         copy_d = np.copy(d)
         another_copy_d = np.copy(d)
@@ -213,7 +188,6 @@ def smallest_circle(sigma=4):
 
         d = label(d)  # label islands of emission
         source_islands = nearest_to_centre(d, percent=0.1)
-        dummy = 123456
         for source_island in source_islands:
             d[d == source_island] = dummy
 
@@ -258,6 +232,15 @@ def smallest_circle(sigma=4):
         diffuse = Circle((y, x), radius=r, fc='none', edgecolor='k', lw=2)
         ax.add_patch(beam)
         ax.add_patch(diffuse)
+
+        kpc_per_asec = get_kpc_per_asec(z=z)
+        sbar = sbar_asec / pix  # length of scalebar in pixels
+        kpc_per_pixel = kpc_per_asec * pix
+        s = cutout.data.shape[1]  # plot scalebar
+        plt.plot([p, p + sbar], [s - p, s - p], marker='None', lw=2, color='b')
+        plt.text(p, s - 5, f'{sbar_asec:.0f}" = {kpc_per_pixel * sbar:.0f} '
+                 'kpc', fontsize=20, color='b')
+
         cbar = plt.colorbar()
         cbar.set_label(r'Jy beam$^{-1}$', size=20)
         cbar.ax.tick_params(labelsize=20)
@@ -267,15 +250,14 @@ def smallest_circle(sigma=4):
                     colors='w')
         plt.contour(another_copy_d - copy_d, levels=[threshold], colors='grey',
                     origin='lower')
-        plt.savefig(save)
+        plt.savefig(f'{my_directory}/images/{source_name}.png')
         plt.clf()
 
-        dl, kpc = get_dl_and_kpc_per_asec(z=z)
-        width = r * kpc * 2  # radius to diameter
+        width = r * kpc_per_asec * 2  # radius to diameter
 
-        result = (f'{source_name},{ra},{dec},{rms * 1e3},{z}'
-                  f',{r:.1f},{width:.1f}\n')
-        print(f'{source_name}: {r:.1f}", {width:.1f} kpc')
+        result = (f'{source_name},{ra},{dec},{rms * 1e3},{z},{r * 2:.1f},'
+                  f'{width:.1f}\n')
+        print(f'{source_name}: {r * 2:.1f}", {width:.1f} kpc')
 
         with open(results_csv, 'a') as f:
             f.write(result)
@@ -283,9 +265,9 @@ def smallest_circle(sigma=4):
 
 
 def main():
-    """Plot postage stamp images of LDR2 BL Lacs."""
-
-    smallest_circle()
+    """Plot postage stamp images of LDR2 BL Lacs.
+    """
+    loop_through_sources()
 
 
 if __name__ == '__main__':

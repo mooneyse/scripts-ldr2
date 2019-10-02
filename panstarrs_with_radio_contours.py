@@ -4,124 +4,23 @@
 """
 
 import matplotlib as mpl
-mpl.use('Agg')
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
 from astropy.nddata import Cutout2D
 from astropy.wcs import WCS
 from ds9norm import DS9Normalize
-from math import sqrt, exp, sin
-from matplotlib.patches import Circle
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from skimage.measure import label
-import smallestenclosingcircle
+from bl_lac_postage_stamps import get_kpc_per_asec
 
 __author__ = 'Sean Mooney'
 __email__ = 'sean.mooney@ucdconnect.ie'
 __date__ = '06 September 2019'
 
 
-def get_dl_and_kpc_per_asec(z, H0=70, WM=0.26, WV=0.74):
-    """Ned Wright's cosmology calculator. See
-    http://www.astro.ucla.edu/~wright/CosmoCalc.html for the online version.
-
-    Parameters
-    ----------
-    z : float
-        Redshift.
-    H0 : float, optional
-        The Hubble constant. The default is 70. What are the units?
-    WM : float, optional
-        The omega matter value. The default is 0.26.
-    WV : float, optional
-        The omega vacuum parameter. The default is 0.74.
-    n : float, optional
-        The number of points to use in the integration.
-
-    Returns
-    -------
-    float
-        The luminosity distance in metres.
-    float
-        The kpc per arcsecond at the given redshift.
-    """
-    WR = 0.        # Omega(radiation)
-    WK = 0.        # Omega curvaturve = 1-Omega(total)
-    c = 299792.458  # velocity of light in km/sec
-    DTT = 0.5      # time from z to now in units of 1/H0
-    age = 0.5      # age of Universe in units of 1/H0
-    zage = 0.1     # age of Universe at redshift z in units of 1/H0
-    DCMR = 0.0     # comoving radial distance in units of c/H0
-    DA = 0.0       # angular size distance
-    DA_Mpc = 0.0
-    kpc_DA = 0.0
-    DL = 0.0       # luminosity distance
-    DL_Mpc = 0.0
-    a = 1.0        # 1/(1+z), the scale factor of the Universe
-    az = 0.5       # 1/(1+z(object))
-    h = H0/100.
-    WR = 4.165E-5/(h*h)   # includes 3 massless neutrino species, T0 = 2.72528
-    WK = 1-WM-WR-WV
-    az = 1.0/(1+1.0*z)
-    age = 0.
-    n = 1000         # number of points in integrals
-    for i in range(n):
-        a = az*(i+0.5)/n
-        adot = sqrt(WK+(WM/a)+(WR/(a*a))+(WV*a*a))
-        age = age + 1./adot
-
-    zage = az*age/n
-    DTT = 0.0
-    DCMR = 0.0
-
-    for i in range(n):
-        a = az+(1-az)*(i+0.5)/n
-        adot = sqrt(WK+(WM/a)+(WR/(a*a))+(WV*a*a))
-        DTT = DTT + 1./adot
-        DCMR = DCMR + 1./(a*adot)
-
-    DTT = (1.-az)*DTT/n
-    DCMR = (1.-az)*DCMR/n
-    age = DTT+zage
-
-    ratio = 1.00
-    x = sqrt(abs(WK))*DCMR
-    if x > 0.1:
-        if WK > 0:
-            ratio = 0.5*(exp(x)-exp(-x))/x
-        else:
-            ratio = sin(x)/x
-    else:
-        y = x*x
-        if WK < 0:
-            y = -y
-        ratio = 1. + y/6. + y*y/120.
-    DCMT = ratio*DCMR
-    DA = az*DCMT
-    DA_Mpc = (c/H0)*DA
-    kpc_DA = DA_Mpc/206.264806
-    DL = DA/(az*az)
-    DL_Mpc = (c/H0)*DL
-
-    ratio = 1.00
-    x = sqrt(abs(WK))*DCMR
-    if x > 0.1:
-        if WK > 0:
-            ratio = (0.125*(exp(2.*x)-exp(-2.*x))-x/2.)/(x*x*x/3.)
-        else:
-            ratio = (x/2. - sin(2.*x)/4.)/(x*x*x/3.)
-    else:
-        y = x*x
-        if WK < 0:
-            y = -y
-        ratio = 1. + y/5. + (2./105.)*y*y
-    return DL_Mpc * 3.086e22, kpc_DA
-
-
-def optical(sigma=4):
+def optical(sigma=4, my_directory='/data5/sean/ldr2'):
     """Plot Pan-STARRS data.
 
     Parameters
@@ -129,13 +28,9 @@ def optical(sigma=4):
     sigma : float or int
         The threshold of the significance to set the mask, as a factor of the
         local RMS. The default is 4.
-
-    Returns
-    -------
-    string
-        The name of the CSV containing the results.
+    my_directory : string
+        Working directory.
     """
-    my_directory = '/data5/sean/ldr2'
     df = pd.read_csv(f'{my_directory}/catalogues/final.csv')
 
     plt.figure(figsize=(13.92, 8.60)).patch.set_facecolor('white')
@@ -150,6 +45,9 @@ def optical(sigma=4):
     mpl.rcParams['ytick.minor.size'] = 5
     mpl.rcParams['ytick.minor.width'] = 2
     mpl.rcParams['axes.linewidth'] = 2
+    colors = ['#118ab2', '#06d6a0', '#ffd166', '#ef476f']
+    sbar_asec = 30  # desired length of scalebar in arcseconds
+    pix = 0.25  # arcseconds per pixel
 
     for source_name, ra, dec, mosaic, rms, z in zip(df['Source name'],
                                                     df['RA (J2000.0)'],
@@ -161,31 +59,28 @@ def optical(sigma=4):
         sky_position = SkyCoord(ra, dec, unit='deg')
         if source_name == '5BZBJ1202+4444':
             size = [3, 3] * u.arcmin
+            p = 54
         elif source_name == '5BZBJ1419+5423':
             size = [4, 4] * u.arcmin
+            p = 72
         else:
             size = [2, 2] * u.arcmin
+            p = 36
 
-        panstarrs = f'{my_directory}/panstarrs/{source_name}.i.fits'
-        p_hdu = fits.open(panstarrs)[0]
+        p_hdu = fits.open(f'{my_directory}/panstarrs/{source_name}.i.fits')[0]
         p_wcs = WCS(p_hdu.header)
         p_cutout = Cutout2D(p_hdu.data, sky_position, size=size, wcs=p_wcs)
 
-        ldr2 = f'{my_directory}/mosaics/{mosaic}-mosaic.fits'
-        l_hdu = fits.open(ldr2)[0]
+        l_hdu = fits.open(f'{my_directory}/mosaics/{mosaic}-mosaic.fits')[0]
         l_wcs = WCS(l_hdu.header, naxis=2)
         l_cutout = Cutout2D(np.squeeze(l_hdu.data), sky_position, size=size,
                             wcs=l_wcs)
 
         levels = [level * rms / 1000 for level in [4, 8, 16, 32]]
-        colors = ['#118ab2', '#06d6a0', '#ffd166', '#ef476f']
 
         ax = plt.subplot(projection=p_cutout.wcs)
         im = ax.imshow(p_cutout.data, vmin=0, vmax=8000, cmap='Greys',
                        origin='lower', norm=DS9Normalize(stretch='arcsinh'))
-        # interpolation='gaussian'
-
-        # plt.plot()
 
         cbar = plt.colorbar(im)
         cbar.set_label('Excess counts', size=20)
@@ -200,26 +95,21 @@ def optical(sigma=4):
         plt.minorticks_on()
         ax.tick_params(which='minor', length=0)
 
-        save = f'{my_directory}/images/panstarrs-{source_name}.png'
-        plt.savefig(save)
-        plt.clf()
+        kpc_per_asec = get_kpc_per_asec(z=z)
+        sbar = sbar_asec / pix  # length of scalebar in pixels
+        kpc_per_pixel = kpc_per_asec * pix
+        s = p_cutout.data.shape[1]  # plot scalebar
+        plt.plot([p, p + sbar], [s - p, s - p], marker='None', lw=2, color='b')
+        plt.text(p, s - 5, f'{sbar_asec:.0f}" = {kpc_per_pixel * sbar:.0f} '
+                 'kpc', fontsize=20, color='b')
 
-        #     dl, kpc = get_dl_and_kpc_per_asec(z=z)
-        #     width = r * kpc
-        #
-        #     result = (f'{source_name},{ra},{dec},{rms * 1e3},{z}'
-        #               f',{r:.1f},{width:.1f}\n')
-        #     print(f'{source_name}: {r:.1f}", {width:.1f} kpc')
-        #
-        #     with open(results_csv, 'a') as f:
-        #         f.write(result)
-        # return results_csv
+        plt.savefig(f'{my_directory}/images/panstarrs-{source_name}.png')
+        plt.clf()
 
 
 def main():
     """Plot Pan-STARRS data.
     """
-
     optical()
 
 
