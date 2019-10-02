@@ -4,7 +4,7 @@
 """
 
 import matplotlib as mpl
-mpl.use('Agg')
+# mpl.use('Agg')
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
@@ -211,13 +211,19 @@ def ghz(sigma=4):
         plt.xlim(0, f_cutout.data.shape[0])
         plt.ylim(0, f_cutout.data.shape[1])
 
-        # plt.show()
-        # return
+        _, kpc_per_asec = get_dl_and_kpc_per_asec(z=z)
+        kpc_per_pixel = kpc_per_asec * 1.5
+        plt.plot([10, 10], [10, 30], marker='none', lw=2, color='k')
+        plt.text(8, 20, f'30" = {kpc_per_pixel * 30:.0f} kpc')
+
+
+        plt.show()
+        return
+
         save = f'{my_directory}/images/first-{source_name}.png'
         plt.savefig(save)
         plt.clf()
 
-        #     dl, kpc = get_dl_and_kpc_per_asec(z=z)
         #     width = r * kpc
 
 
