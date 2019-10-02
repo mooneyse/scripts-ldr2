@@ -213,11 +213,13 @@ def ghz(sigma=4):
         _, kpc_per_asec = get_dl_and_kpc_per_asec(z=z)
         kpc_per_pixel = kpc_per_asec * 1.8
         s = f_cutout.data.shape[1]
-        plt.plot([10, 30], [s - 8, s - 8], marker='None', lw=2, color='b')
-        plt.text(13, s - 5, f'30" = {kpc_per_pixel * 30:.0f} kpc', fontsize=20,
+        plt.plot([10, 30], [s - 6, s - 6], marker='None', lw=2, color='b')
+        plt.text(10, s - 5, f'30" = {kpc_per_pixel * 30:.0f} kpc', fontsize=20,
                  color='b')
 
-
+        # add scalebar to this, pandstarrs, ldr2 images.
+        # put all scripts in one script.
+        # check that the scalebar sizes make sense on the plot axis and on the smallest circles
         # add beam! 1.5000E-03 = bmaj bmin
         # 1.8" x 1.8" pixel
 
