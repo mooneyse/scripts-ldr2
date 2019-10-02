@@ -4,7 +4,7 @@
 """
 
 import matplotlib as mpl
-# mpl.use('Agg')
+mpl.use('Agg')
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
@@ -211,11 +211,11 @@ def ghz(sigma=4):
         plt.xlim(0, f_cutout.data.shape[0])
         plt.ylim(0, f_cutout.data.shape[1])
 
-        plt.show()
+        # plt.show()
         # return
-        # save = f'{my_directory}/images/panstarrs-{source_name}.png'
-        # plt.savefig(save)
-        # plt.clf()
+        save = f'{my_directory}/images/first-{source_name}.png'
+        plt.savefig(save)
+        plt.clf()
 
         #     dl, kpc = get_dl_and_kpc_per_asec(z=z)
         #     width = r * kpc
