@@ -182,7 +182,7 @@ def ghz(sigma=4):
         levels = [level * rms / 1000 for level in [4, 8, 16, 32]]
         colors = ['#118ab2', '#06d6a0', '#ffd166', '#ef476f']
 
-        f_level = f_rms * 4
+        f_level = f_rms * 4 / 1000
         fmt = {}
         fmt[f_level] = 'FIRST'
 
