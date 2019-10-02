@@ -100,8 +100,8 @@ def optical(sigma=4, my_directory='/data5/sean/ldr2'):
         kpc_per_pixel = kpc_per_asec * pix
         s = p_cutout.data.shape[1]  # plot scalebar
         plt.plot([p, p + sbar], [s - p, s - p], marker='None', lw=2, color='b')
-        plt.text(p, s - 5, f'{sbar_asec:.0f}" = {kpc_per_pixel * sbar:.0f} '
-                 'kpc', fontsize=20, color='b')
+        plt.text(p,  s - p + 10 * (p / 36), f'{sbar_asec:.0f}" = '
+                 f'{kpc_per_pixel * sbar:.0f} kpc', fontsize=20, color='b')
 
         plt.savefig(f'{my_directory}/images/panstarrs-{source_name}.png')
         plt.clf()

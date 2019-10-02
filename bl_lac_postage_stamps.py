@@ -129,7 +129,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
     string
         The name of the CSV containing the results.
     """
-    results_csv = f'{my_directory}/results/ldr2.csv'
+    results_csv = f'{my_directory}/images/ldr2.csv'
     try:
         os.remove(results_csv)
     except OSError:
@@ -229,7 +229,8 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
                    cmap='plasma_r')  # interpolation='gaussian'
         beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
                       edgecolor='blue')
-        diffuse = Circle((y, x), radius=r, fc='none', edgecolor='k', lw=2)
+        diffuse = Circle((y + 0.5, x + 0.5), radius=r, fc='none',
+                         edgecolor='k', lw=2)
         ax.add_patch(beam)
         ax.add_patch(diffuse)
 
@@ -238,8 +239,8 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         kpc_per_pixel = kpc_per_asec * pix
         s = cutout.data.shape[1]  # plot scalebar
         plt.plot([p, p + sbar], [s - p, s - p], marker='None', lw=2, color='b')
-        plt.text(p, s - 5, f'{sbar_asec:.0f}" = {kpc_per_pixel * sbar:.0f} '
-                 'kpc', fontsize=20, color='b')
+        plt.text(p, s - (5 * p / 6), f'{sbar_asec:.0f}" = '
+                 f'{kpc_per_pixel * sbar:.0f} kpc', fontsize=20, color='b')
 
         cbar = plt.colorbar()
         cbar.set_label(r'Jy beam$^{-1}$', size=20)
@@ -253,7 +254,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         plt.savefig(f'{my_directory}/images/{source_name}.png')
         plt.clf()
 
-        width = r * kpc_per_asec * 2  # radius to diameter
+        width = r * kpc_per_pixel * 2  # radius to diameter
 
         result = (f'{source_name},{ra},{dec},{rms * 1e3},{z},{r * 2:.1f},'
                   f'{width:.1f}\n')

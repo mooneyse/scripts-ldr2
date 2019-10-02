@@ -58,13 +58,13 @@ def ghz(sigma=4, my_directory='/data5/sean/ldr2'):
         sky_position = SkyCoord(ra, dec, unit='deg')
         if source_name == '5BZBJ1202+4444':
             size = [3, 3] * u.arcmin
-            x = 9
+            x = 9 * (1.5 / pix)  # to get the scalebar in the same place
         elif source_name == '5BZBJ1419+5423':
             size = [4, 4] * u.arcmin
-            x = 12
+            x = 12 * (1.5 / pix)
         else:
             size = [2, 2] * u.arcmin
-            x = 6
+            x = 6 * (1.5 / pix)
 
         f_hdu = fits.open(f'{my_directory}/first/{source_name}.fits')[0]
         f_wcs = WCS(f_hdu.header, naxis=2)
@@ -110,8 +110,8 @@ def ghz(sigma=4, my_directory='/data5/sean/ldr2'):
         kpc_per_pixel = kpc_per_asec * pix
         s = f_cutout.data.shape[1]
         plt.plot([x, x + sbar], [s - x, s - x], marker='None', lw=2, color='b')
-        plt.text(x, s - 5, f'{sbar_asec:.0f}" = {kpc_per_pixel * sbar:.0f} '
-                 'kpc', fontsize=20, color='b')
+        plt.text(x, s - (4.167 * x / 5), f'{sbar_asec:.0f}" = '
+                 f'{kpc_per_pixel * sbar:.0f} kpc', fontsize=20, color='b')
 
         plt.savefig(f'{my_directory}/images/first-{source_name}.png')
         plt.clf()
