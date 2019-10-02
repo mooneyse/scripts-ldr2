@@ -191,7 +191,7 @@ def ghz(sigma=4):
                        cmap='Greys', origin='lower',
                        norm=DS9Normalize(stretch='arcsinh'))
         cs = ax.contour(f_cutout.data, levels=[f_level], origin='lower',
-                        colors=['#f9b9f2'])
+                        colors=['k'])
         ax.clabel(cs, fmt=fmt)
         # interpolation='gaussian'
 
@@ -209,10 +209,10 @@ def ghz(sigma=4):
         ax.tick_params(which='minor', length=0)
 
         plt.show()
-        return
-        save = f'{my_directory}/images/panstarrs-{source_name}.png'
-        plt.savefig(save)
-        plt.clf()
+        # return
+        # save = f'{my_directory}/images/panstarrs-{source_name}.png'
+        # plt.savefig(save)
+        # plt.clf()
 
         #     dl, kpc = get_dl_and_kpc_per_asec(z=z)
         #     width = r * kpc
