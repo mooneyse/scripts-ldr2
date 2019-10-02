@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 
-"""Plot postage stamp images of LDR2 BL Lacs."""
+"""Plot FIRST data.
+"""
 
 import matplotlib as mpl
-mpl.use('Agg')
+# mpl.use('Agg')
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
@@ -146,8 +147,8 @@ def get_dl_and_kpc_per_asec(z, H0=70, WM=0.26, WV=0.74):
     return DL_Mpc * 3.086e22, kpc_DA
 
 
-def smallest_circle(sigma=4):
-    """Measure the extent of blazars in LDR1.
+def ghz(sigma=4):
+    """Plot FIRST data.
 
     Parameters
     ----------
@@ -161,12 +162,7 @@ def smallest_circle(sigma=4):
         The name of the CSV containing the results.
     """
     my_directory = '/data5/sean/ldr2'
-    results_csv = f'{my_directory}/results/ldr2.csv'
     df = pd.read_csv(f'{my_directory}/catalogues/final.csv')
-    result_header = ('Name,RA,Dec,RMS (uJy),Redshift,Width ("),Width (kpc)\n')
-
-    with open(results_csv, 'a') as f:
-        f.write(result_header)
 
     plt.figure(figsize=(13.92, 8.60)).patch.set_facecolor('white')
     plt.rcParams['font.family'] = 'serif'
@@ -181,19 +177,14 @@ def smallest_circle(sigma=4):
     mpl.rcParams['ytick.minor.width'] = 2
     mpl.rcParams['axes.linewidth'] = 2
 
-    for source_name, ra, dec, mosaic, rms, z in zip(df['Source name'],
-                                                    df['RA (J2000.0)'],
-                                                    df['Dec (J2000.0)'],
-                                                    df['Mosaic_ID'],
-                                                    df['Isl_rms'],
-                                                    df['Redshift']):
+    for source_name, ra, dec, mosaic, rms, z, f_rms in zip(df['Source name'],
+                                                           df['RA (J2000.0)'],
+                                                           df['Dec (J2000.0)'],
+                                                           df['Mosaic_ID'],
+                                                           df['Isl_rms'],
+                                                           df['Redshift'],
+                                                           df['FIRST RMS (mJy)']):
 
-        field = f'{my_directory}/mosaics/{mosaic}-mosaic.fits'
-        threshold = sigma * rms / 1000   # jansky
-        save = f'{my_directory}/images/{source_name}.png'
-
-        hdu = fits.open(field)[0]
-        wcs = WCS(hdu.header, naxis=2)
         sky_position = SkyCoord(ra, dec, unit='deg')
         if source_name == '5BZBJ1202+4444':
             size = [3, 3] * u.arcmin
@@ -201,91 +192,62 @@ def smallest_circle(sigma=4):
             size = [4, 4] * u.arcmin
         else:
             size = [2, 2] * u.arcmin
-        cutout = Cutout2D(np.squeeze(hdu.data), sky_position, size=size,
-                          wcs=wcs)
 
-        d = cutout.data
-        copy_d = np.copy(d)
-        another_copy_d = np.copy(d)
-        d[d < threshold] = 0
-        d[d >= threshold] = 1
-        rows, cols = d.shape
+        first = f'{my_directory}/first/{source_name}.i.fits'
+        f_hdu = fits.open(first)[0]
+        f_wcs = WCS(f_hdu.header)
+        f_cutout = Cutout2D(f_hdu.data, sky_position, size=size, wcs=f_wcs)
 
-        d = label(d)  # label islands of emission
-        source_islands = nearest_to_centre(d, percent=0.1)
-        dummy = 123456
-        for source_island in source_islands:
-            d[d == source_island] = dummy
+        ldr2 = f'{my_directory}/mosaics/{mosaic}-mosaic.fits'
+        l_hdu = fits.open(ldr2)[0]
+        l_wcs = WCS(l_hdu.header, naxis=2)
+        l_cutout = Cutout2D(np.squeeze(l_hdu.data), sky_position, size=size,
+                            wcs=l_wcs)
 
-        d[d != dummy] = 0
-        copy_d[d != dummy] = 0
-        set_to_nil = []  # identify values we can set to zero for being inside
-        for r in range(rows):  # set to 0 if surrounded by non nans
-            for c in range(cols):
-                try:
-                    if (d[r - 1, c - 1] != 0 and d[r - 1, c] != 0 and
-                        d[r - 1, c + 1] != 0 and d[r, c - 1] != 0 and
-                        d[r, c + 1] != 0 and d[r + 1, c - 1] != 0 and
-                            d[r + 1, c] != 0 and d[r + 1, c + 1] != 0):
-                        set_to_nil.append((r, c))
-                except IndexError:
-                    print(f'Index error for {source_name}.')
-                    continue
+        levels = [level * rms / 1000 for level in [4, 8, 16, 32]]
+        colors = ['#118ab2', '#06d6a0', '#ffd166', '#ef476f']
 
-        for r, c in set_to_nil:
-            d[r, c] = 0  # needs separate loop to avoid checkered pattern
+        f_level = f_rms * 4
+        fmt = {}
+        fmt[f_level] = 'FIRST'
 
-        # d is an outline of the source (one) and everything else is zero
-        # copy_d is the source with flux values and everything else is zero
-        # another_copy_d has flux values throughout
-        good_cells = []
-        for r in range(rows):
-            for c in range(cols):
-                if d[r, c] != 0:
-                    good_cells.append([r, c])
+        ax = plt.subplot(projection=f_cutout.wcs)
+        im = ax.imshow(f_cutout.data, vmin=0, vmax=np.max(f_cutout.data),
+                       cmap='Greys', origin='lower',
+                       norm=DS9Normalize(stretch='arcsinh'))
+        cs = ax.contour(f_cutout.data, levels=[f_level], origin='lower',
+                        colors=['#f9b9f2'])
+        ax.clabel(cs, fmt=fmt)
+        # interpolation='gaussian'
 
-        x, y, r = smallestenclosingcircle.make_circle(good_cells)
+        cbar = plt.colorbar(im)
+        cbar.set_label('Excess counts', size=20)
+        cbar.ax.tick_params(labelsize=20)
 
-        ax = plt.subplot(projection=cutout.wcs)
+        ax.contour(l_cutout.data, transform=ax.get_transform(l_cutout.wcs),
+                   levels=levels, origin='lower', colors=colors)
+
         plt.xlabel('Right ascension', fontsize=20, color='black')
         plt.ylabel('Declination', fontsize=20, color='black')
         ax.tick_params(axis='both', which='major', labelsize=20)
-        plt.imshow(another_copy_d, vmin=0, vmax=np.nanmax(another_copy_d),
-                   origin='lower', norm=DS9Normalize(stretch='arcsinh'),
-                   cmap='plasma_r')  # interpolation='gaussian'
-        beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
-                      edgecolor='blue')
-        diffuse = Circle((y, x), radius=r, fc='none', edgecolor='k', lw=2)
-        ax.add_patch(beam)
-        ax.add_patch(diffuse)
-        cbar = plt.colorbar()
-        cbar.set_label(r'Jy beam$^{-1}$', size=20)
-        cbar.ax.tick_params(labelsize=20)
         plt.minorticks_on()
-        plt.tick_params(which='minor', length=0)
-        plt.contour(another_copy_d, levels=[threshold], origin='lower',
-                    colors='w')
-        plt.contour(another_copy_d - copy_d, levels=[threshold], colors='grey',
-                    origin='lower')
+        ax.tick_params(which='minor', length=0)
+
+        plt.show()
+        return
+        save = f'{my_directory}/images/panstarrs-{source_name}.png'
         plt.savefig(save)
         plt.clf()
 
-        dl, kpc = get_dl_and_kpc_per_asec(z=z)
-        width = r * kpc * 2  # radius to diameter
-
-        result = (f'{source_name},{ra},{dec},{rms * 1e3},{z}'
-                  f',{r:.1f},{width:.1f}\n')
-        print(f'{source_name}: {r:.1f}", {width:.1f} kpc')
-
-        with open(results_csv, 'a') as f:
-            f.write(result)
-    return results_csv
+        #     dl, kpc = get_dl_and_kpc_per_asec(z=z)
+        #     width = r * kpc
 
 
 def main():
-    """Plot postage stamp images of LDR2 BL Lacs."""
+    """Plot FIRST data.
+    """
 
-    smallest_circle()
+    ghz()
 
 
 if __name__ == '__main__':
