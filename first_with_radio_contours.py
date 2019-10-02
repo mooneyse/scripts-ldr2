@@ -213,7 +213,7 @@ def ghz(sigma=4):
         _, kpc_per_asec = get_dl_and_kpc_per_asec(z=z)
         pix = 1.8  # arcseconds per pixel
         sbar = 20  # desired length of scalebar in pixels
-        kpc_per_pixel = kpc_per_asec / pix
+        kpc_per_pixel = kpc_per_asec * pix
         s = f_cutout.data.shape[1]
         plt.plot([6, 6 + sbar], [s - 6, s - 6], marker='None', lw=2, color='b')
         plt.text(6, s - 5, f'{sbar * pix}" = {kpc_per_pixel * sbar:.0f} kpc',
