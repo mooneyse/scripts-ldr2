@@ -188,10 +188,8 @@ def ghz(sigma=4):
         im = ax.imshow(f_cutout.data, vmin=0, vmax=np.max(f_cutout.data),
                        cmap='Greys', origin='lower',
                        norm=DS9Normalize(stretch='arcsinh'))
-        # interpolation='gaussian'
         ax.contour(f_cutout.data, levels=[f_level], origin='lower',
                    colors=['k'])
-        # ax.clabel(cs), fmt=fmt)
 
         cbar = plt.colorbar(im)
         cbar.set_label(r'Jy beam$^{-1}$', size=20)
@@ -205,7 +203,6 @@ def ghz(sigma=4):
         ax.tick_params(axis='both', which='major', labelsize=20)
         plt.minorticks_on()
         ax.tick_params(which='minor', length=0)
-
         plt.xlim(0, f_cutout.data.shape[0])
         plt.ylim(0, f_cutout.data.shape[1])
 
@@ -214,15 +211,12 @@ def ghz(sigma=4):
         plt.plot([10, 10], [10, 30], marker='None', lw=2, color='k')
         plt.text(8, 20, f'30" = {kpc_per_pixel * 30:.0f} kpc')
 
-
         plt.show()
         return
 
         save = f'{my_directory}/images/first-{source_name}.png'
         plt.savefig(save)
         plt.clf()
-
-        #     width = r * kpc
 
 
 def main():
