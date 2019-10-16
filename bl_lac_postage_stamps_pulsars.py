@@ -95,12 +95,11 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
     sbar_asec = 30  # desired length of scalebar in arcseconds
     pix = 1.5  # arcseconds per pixel
 
-    for source_name, ra, dec, mosaic, rms, z in zip(df['NAME'],
-                                                    df['RAJD'],
-                                                    df['DECJD'],
-                                                    df['Mosaic_ID'],
-                                                    df['Isl_rms'],
-                                                    df['Redshift']):
+    for source_name, ra, dec, mosaic, rms in zip(df['NAME'],
+                                                 df['RAJD'],
+                                                 df['DECJD'],
+                                                 df['Mosaic_ID'],
+                                                 df['Isl_rms']):
 
         threshold = sigma * rms / 1000   # jansky
         hdu = fits.open(f'{my_directory}/mosaics/{mosaic}-mosaic.fits')[0]
@@ -181,7 +180,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
                     colors='w')
         plt.contour(another_copy_d - copy_d, levels=[threshold], colors='grey',
                     origin='lower')
-        plt.savefig(f'{my_directory}/images/{source_name}.png')
+        plt.savefig(f'{my_directory}/images/pulsar-{source_name}.png')
         plt.clf()
 
         print(f'{source_name}: {r * 2:.1f}"')
