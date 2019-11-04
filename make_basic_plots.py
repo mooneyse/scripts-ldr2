@@ -13,6 +13,11 @@ __email__ = 'sean.mooney@ucdconnect.ie'
 __date__ = '06 September 2019'
 
 
+def g(x, pos):
+    f = mticker.ScalarFormatter(useOffset=False, useMathText=True)
+    return r'${}$'.format(f._formatSciNotation('%1.10e' % x))
+
+
 def my_plot(my_directory='/mnt/closet/ldr2'):
     """Make some plots.
 
@@ -23,8 +28,8 @@ def my_plot(my_directory='/mnt/closet/ldr2'):
     """
 
     df = pd.read_csv(f'{my_directory}/catalogues/final.csv')
-    f = mticker.ScalarFormatter(useOffset=False, useMathText=True)
-    g = lambda x, pos: '${}$'.format(f._formatSciNotation('%1.10e' % x))
+    # f = mticker.ScalarFormatter(useOffset=False, useMathText=True)
+    # g = lambda x, pos: '${}$'.format(f._formatSciNotation('%1.10e' % x))
 
     plt.figure(figsize=(13.92, 8.60)).patch.set_facecolor('white')
     plt.rcParams['font.family'] = 'serif'
@@ -40,50 +45,69 @@ def my_plot(my_directory='/mnt/closet/ldr2'):
     mpl.rcParams['axes.linewidth'] = 2
 
     # plot extent (kpc) against spectral index
-    plt.plot(df['LDR2-to-NVSS index'], df['Extent (kpc)'], marker='o',
-             ls='none', color='k')
-    plt.xlabel(r'$\alpha_{\mathrm{MHz-GHz}}$', fontsize=20)
-    plt.ylabel('Extent (kpc)', fontsize=20)
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
-    # plt.show()
-    plt.savefig(f'{my_directory}/images/fig1-alpha-v-extent.png')
-    plt.clf()
-
-    # plot extent (kpc) against radio luminosity
-    plt.plot(df['Luminosity (W/Hz)'], df['Extent (kpc)'], marker='o',
-             ls='none', color='k')
-    plt.xlabel(r'$L$ (W Hz$^{-1}$)', fontsize=20)
-    plt.ylabel('Extent (kpc)', fontsize=20)
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
-    plt.gca().xaxis.set_major_formatter(mticker.FuncFormatter(g))
-    # plt.show()
-    plt.savefig(f'{my_directory}/images/fig2-luminosity-v-extent.png')
-    plt.clf()
-
-    # plot luminosity against redshift
-    plt.plot(df['Luminosity (W/Hz)'], df['Redshift'], marker='o',
-             ls='none', color='k')
-    plt.xlabel(r'$L$ (W Hz$^{-1}$)', fontsize=20)
-    plt.ylabel('Redshift', fontsize=20)
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
-    plt.gca().xaxis.set_major_formatter(mticker.FuncFormatter(g))
-    # plt.show()
-    plt.savefig(f'{my_directory}/images/fig3-luminosity-v-redshift.png')
-    plt.clf()
-
-    # plot luminosity against spectral index
-    plt.plot(df['Luminosity (W/Hz)'], df['LDR2-to-NVSS index'], marker='o',
-             ls='none', color='k')
-    plt.xlabel(r'$L$ (W Hz$^{-1}$)', fontsize=20)
+    plt.errorbar(df['Extent (kpc)'], df['LDR2-to-NVSS index'],
+                 xerr=df['Extent (kpc)'] * 0.2,
+                 yerr=df['LDR2-to-NVSS index'] * 0.2,
+                 marker='o', ls='none', color='k')
+    plt.xlabel('Extent (kpc)', fontsize=20)
     plt.ylabel(r'$\alpha_{\mathrm{MHz-GHz}}$', fontsize=20)
     plt.xticks(fontsize=20)
     plt.yticks(fontsize=20)
-    plt.gca().xaxis.set_major_formatter(mticker.FuncFormatter(g))
+    plt.tight_layout()
     # plt.show()
-    plt.savefig(f'{my_directory}/images/fig4-luminosity-v-alpha.png')
+    plt.savefig(f'{my_directory}/images/extent-v-index.png')
+    plt.clf()
+
+    # plot extent (kpc) against radio luminosity
+    plt.errorbar(df['Extent (kpc)'], df['Luminosity (W/Hz)'], marker='o',
+                 xerr=df['Extent (kpc)'] * 0.2,
+                 yerr=df['Luminosity (W/Hz)'] * 0.2,
+                 ls='none', color='k')
+    plt.xlabel('Extent (kpc)', fontsize=20)
+    plt.ylabel(r'$L$ (W Hz$^{-1}$)', fontsize=20)
+    plt.xticks(fontsize=20)
+    plt.yticks([0, 1e26, 2e26, 3e26, 4e26, 5e26],
+               ['0', r'$1 \times 10^{26}$', r'$2 \times 10^{26}$',
+                r'$3 \times 10^{26}$', r'$4 \times 10^{26}$',
+                r'$5 \times 10^{26}$'], fontsize=20)
+    plt.tight_layout()
+    # plt.show()
+    plt.savefig(f'{my_directory}/images/extent-v-luminosity.png')
+    plt.clf()
+
+    # plot luminosity against redshift
+    plt.errorbar(df['Redshift'], df['Luminosity (W/Hz)'], marker='o',
+                 xerr=df['Redshift'] * 0.2,
+                 yerr=df['Luminosity (W/Hz)'] * 0.2,
+                 ls='none', color='k')
+    plt.xlabel('Redshift', fontsize=20)
+    plt.ylabel(r'$L$ (W Hz$^{-1}$)', fontsize=20)
+    plt.xticks(fontsize=20)
+    plt.yticks([0, 1e26, 2e26, 3e26, 4e26, 5e26],
+               ['0', r'$1 \times 10^{26}$', r'$2 \times 10^{26}$',
+                r'$3 \times 10^{26}$', r'$4 \times 10^{26}$',
+                r'$5 \times 10^{26}$'], fontsize=20)
+    plt.tight_layout()
+    # plt.show()
+    plt.savefig(f'{my_directory}/images/redshift-v-luminosity.png')
+    plt.clf()
+
+    # plot luminosity against spectral index
+    plt.errorbar(df['LDR2-to-NVSS index'], df['Luminosity (W/Hz)'], marker='o',
+                 xerr=df['LDR2-to-NVSS index'] * 0.2,
+                 yerr=df['Luminosity (W/Hz)'] * 0.2,
+                 ls='none', color='k')
+    plt.xlabel(r'$\alpha_{\mathrm{MHz-GHz}}$', fontsize=20)
+    plt.ylabel(r'$L$ (W Hz$^{-1}$)', fontsize=20)
+    plt.xticks(fontsize=20)
+    plt.yticks(fontsize=20)
+    plt.yticks([0, 1e26, 2e26, 3e26, 4e26, 5e26],
+               ['0', r'$1 \times 10^{26}$', r'$2 \times 10^{26}$',
+                r'$3 \times 10^{26}$', r'$4 \times 10^{26}$',
+                r'$5 \times 10^{26}$'], fontsize=20)
+    plt.tight_layout()
+    # plt.show()
+    plt.savefig(f'{my_directory}/images/index-v-luminosity.png')
 
 
 def main():
