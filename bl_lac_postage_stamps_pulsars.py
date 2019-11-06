@@ -2,11 +2,9 @@
 
 """Plot postage stamp images of LDR2 BL Lacs."""
 
-import os
 import operator
 import numpy as np
 import pandas as pd
-from math import sqrt, exp, sin
 from skimage.measure import label
 import matplotlib as mpl
 from matplotlib.patches import Circle
@@ -183,7 +181,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         plt.savefig(f'{my_directory}/images/pulsar-{source_name}.png')
         plt.clf()
 
-        print(f'{source_name}: {r * 2:.1f}"')
+        print(f'{source_name}: {r * 1.5 * 2:.1f}"')
 
 
 def main():
