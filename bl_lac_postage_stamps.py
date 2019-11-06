@@ -228,7 +228,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
                    origin='lower', norm=DS9Normalize(stretch='arcsinh'),
                    cmap='plasma_r')  # interpolation='gaussian'
         beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
-                      edgecolor='blue')
+                      edgecolor='blue')  # radius=2 pixels -> 3" -> diameter=6"
         diffuse = Circle((y + 0.5, x + 0.5), radius=r, fc='none',
                          edgecolor='k', lw=2)
         ax.add_patch(beam)
@@ -256,8 +256,8 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
 
         width = r * kpc_per_pixel * 2  # radius to diameter
 
-        result = (f'{source_name},{ra},{dec},{rms * 1e3},{z},{r * 2:.1f},'
-                  f'{width:.1f}\n')
+        result = (f'{source_name},{ra},{dec},{rms * 1e3},{z},'
+                  f'{r * pix * 2:.1f}, {width:.1f}\n')
         print(f'{source_name}: {r * 2:.1f}", {width:.1f} kpc')
 
         with open(results_csv, 'a') as f:
