@@ -258,7 +258,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
 
         result = (f'{source_name},{ra},{dec},{rms * 1e3},{z},'
                   f'{r * pix * 2:.1f}, {width:.1f}\n')
-        print(f'{source_name}: {r * 2:.1f}", {width:.1f} kpc')
+        print(f'{source_name}: {r * pix * 2:.1f}", {width:.1f} kpc')
 
         with open(results_csv, 'a') as f:
             f.write(result)
