@@ -2,6 +2,8 @@
 
 """Plot postage stamp images of LDR2 BL Lacs."""
 
+import matplotlib as mpl
+mpl.use('Agg')
 import operator
 import numpy as np
 import pandas as pd
