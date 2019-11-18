@@ -132,8 +132,10 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         os.remove(results_csv)
     except OSError:
         pass
-    df = pd.read_csv(f'{my_directory}/images/LDR2 and BZCAT 10_ crossmatch - Sheet6.csv')
-    result_header = ('Name,RA,Dec,RMS (uJy),Redshift,Width ("),Width (kpc)\n')
+    df = pd.read_csv(f'{my_directory}/images/LDR2 and BZCAT 10_ crossmatch -'
+                     'Sheet6.csv')
+    result_header = ('Name,RA,Dec,RMS (uJy),Redshift,Width ("),Width (kpc),'
+                     'Peak flux (mJy)\n')
 
     with open(results_csv, 'a') as f:
         f.write(result_header)
@@ -154,14 +156,20 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
     sbar_asec = 30  # desired length of scalebar in arcseconds
     pix = 1.5  # arcseconds per pixel
 
-    for source_name, ra, dec, mosaic, rms, z in zip(df['BZCAT name'],
-                                                    df['BZCAT RA'],
-                                                    df['BZCAT Dec'],
-                                                    df['Mosaic_ID'],
-                                                    df['Isl_rms'],
-                                                    df['redshift']):
+    for source_name, ra, dec, mosaic, rms, z, pf in zip(df['BZCAT name'],
+                                                        df['BZCAT RA'],
+                                                        df['BZCAT Dec'],
+                                                        df['Mosaic_ID'],
+                                                        df['Isl_rms'],
+                                                        df['redshift'],
+                                                        df['Peak_flux']):
         source_name = source_name.replace(' ', '')
         threshold = sigma * rms / 1000   # jansky
+        thresh_ans = f'{sigma}sigma'
+        if threshold < (pf / 50) / 1000:
+            # see 2.2 of https://arxiv.org/pdf/1907.03726.pdf
+            threshold = (pf / 50) / 1000
+            thresh_ans = '1/50 S_peak'
         hdu = fits.open(f'{my_directory}/mosaics/{mosaic}-mosaic.fits')[0]
         wcs = WCS(hdu.header, naxis=2)
         sky_position = SkyCoord(ra, dec, unit='deg')
@@ -255,8 +263,9 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         width = r * kpc_per_pixel * 2  # radius to diameter
 
         result = (f'{source_name},{ra},{dec},{rms * 1e3},{z},'
-                  f'{r * pix * 2:.1f}, {width:.1f}\n')
-        print(f'{source_name}: {r * pix * 2:.1f}", {width:.1f} kpc')
+                  f'{r * pix * 2:.1f}, {width:.1f}, {pf}\n')
+        print(f'{source_name}: {r * pix * 2:.1f}", {width:.1f} kpc,'
+              f'{thresh_ans}')
 
         with open(results_csv, 'a') as f:
             f.write(result)
