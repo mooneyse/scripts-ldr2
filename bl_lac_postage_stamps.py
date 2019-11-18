@@ -81,8 +81,6 @@ def get_kpc_per_asec(z, H0=70, WM=0.26, WV=0.74):
     Returns
     -------
     float
-        The luminosity distance in metres.
-    float
         The kpc per arcsecond at the given redshift.
     """
     WR = 0  # omega(radiation)
@@ -134,7 +132,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         os.remove(results_csv)
     except OSError:
         pass
-    df = pd.read_csv(f'{my_directory}/catalogues/final.csv')
+    df = pd.read_csv(f'{my_directory}/catalogues/LDR2 and BZCAT 10_ crossmatch - Sheet6.csv')
     result_header = ('Name,RA,Dec,RMS (uJy),Redshift,Width ("),Width (kpc)\n')
 
     with open(results_csv, 'a') as f:
@@ -156,12 +154,12 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
     sbar_asec = 30  # desired length of scalebar in arcseconds
     pix = 1.5  # arcseconds per pixel
 
-    for source_name, ra, dec, mosaic, rms, z in zip(df['Source name'],
-                                                    df['RA (J2000.0)'],
-                                                    df['Dec (J2000.0)'],
+    for source_name, ra, dec, mosaic, rms, z in zip(df['BZCAT name'],
+                                                    df['BZCAT RA'],
+                                                    df['BZCAT Dec'],
                                                     df['Mosaic_ID'],
                                                     df['Isl_rms'],
-                                                    df['Redshift']):
+                                                    df['redshift']):
 
         threshold = sigma * rms / 1000   # jansky
         hdu = fits.open(f'{my_directory}/mosaics/{mosaic}-mosaic.fits')[0]
