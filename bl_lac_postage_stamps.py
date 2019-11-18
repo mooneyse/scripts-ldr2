@@ -160,7 +160,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
                                                     df['Mosaic_ID'],
                                                     df['Isl_rms'],
                                                     df['redshift']):
-
+        source_name = source_name.replace(' ', '')
         threshold = sigma * rms / 1000   # jansky
         hdu = fits.open(f'{my_directory}/mosaics/{mosaic}-mosaic.fits')[0]
         wcs = WCS(hdu.header, naxis=2)
