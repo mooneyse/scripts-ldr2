@@ -173,7 +173,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         hdu = fits.open(f'{my_directory}/mosaics/{mosaic}-mosaic.fits')[0]
         wcs = WCS(hdu.header, naxis=2)
         sky_position = SkyCoord(ra, dec, unit='deg')
-        if source_name == '5BZBJ1202+4444':
+        if source_name == '5BZBJ1202+4444' or source_name == '5BZB J1202+4444':
             size = [3, 3] * u.arcmin
             p = 9
         elif source_name == '5BZBJ1419+5423':
