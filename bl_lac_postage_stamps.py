@@ -132,7 +132,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         os.remove(results_csv)
     except OSError:
         pass
-    df = pd.read_csv(f'{my_directory}/catalogues/LDR2 and BZCAT 10_ crossmatch - Sheet6.csv')
+    df = pd.read_csv(f'{my_directory}/images/LDR2 and BZCAT 10_ crossmatch - Sheet6.csv')
     result_header = ('Name,RA,Dec,RMS (uJy),Redshift,Width ("),Width (kpc)\n')
 
     with open(results_csv, 'a') as f:
