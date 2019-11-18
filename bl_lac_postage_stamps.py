@@ -133,7 +133,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
     except OSError:
         pass
     df = pd.read_csv(f'{my_directory}/images/LDR2 and BZCAT 10_ crossmatch -'
-                     'Sheet6.csv')
+                     ' Sheet6.csv')
     result_header = ('Name,RA,Dec,RMS (uJy),Redshift,Width ("),Width (kpc),'
                      'Peak flux (mJy)\n')
 
