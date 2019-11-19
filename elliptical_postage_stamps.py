@@ -6,6 +6,7 @@ import warnings
 warnings.filterwarnings('ignore')
 import matplotlib as mpl
 mpl.use('Agg')
+import os
 import operator
 import numpy as np
 import pandas as pd
@@ -94,9 +95,10 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
     pix = 1.5  # arcseconds per pixel
 
     big = ['J091315.78+520854.9', 'J092122.11+545153.9', 'J092307.46+543655.2',
-           'J093352.59+580118.6', 'J101558.25+404647.2', 'J102345.06+494629.5',
-           'J110944.13+445847.5', 'J113327.71+604507.3', 'J135634.51+614314.1',
+           'J093352.59+580118.6', 'J102345.06+494629.5',
+           'J113327.71+604507.3', 'J135634.51+614314.1',
            'J140744.32+585440.9', 'J144219.19+504357.9', 'J141157.99+550515.5']
+    bigger = ['J110944.13+445847.5', 'J101558.25+404647.2']
 
     for source_name, ra, dec, mosaic, rms, compact in zip(df['name'],
                                                           df['ra_1'],
@@ -104,7 +106,10 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
                                                           df['Mosaic_ID'],
                                                           df['Isl_rms'],
                                                           df['Compact?']):
-
+        savefile = f'{my_directory}/images/ellipticals/el-{source_name}.png'
+        if os.path.exsits(savefile):
+            print(f'{source_name}')
+            continue
         if compact:
             print(f'{source_name}')
             continue
@@ -114,6 +119,8 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         sky_position = SkyCoord(ra, dec, unit='deg')
         if source_name in big:
             size = [3, 3] * u.arcmin
+        elif source_name in bigger:
+            size = [4, 4] * u.arcmin
         else:
             size = [2, 2] * u.arcmin
         p = 6
@@ -189,7 +196,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
                     colors='w')
         plt.contour(another_copy_d - copy_d, levels=[threshold], colors='grey',
                     origin='lower')
-        plt.savefig(f'{my_directory}/images/ellipticals/el-{source_name}.png')
+        plt.savefig(savefile)
         plt.clf()
 
         print(f'{source_name}: {r * 1.5 * 2:.1f}"')
