@@ -93,6 +93,11 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
     sbar_asec = 30  # desired length of scalebar in arcseconds
     pix = 1.5  # arcseconds per pixel
 
+    big = ['J091315.78+520854.9', 'J092122.11+545153.9', 'J092307.46+543655.2',
+           'J093352.59+580118.6', 'J101558.25+404647.2', 'J102345.06+494629.5',
+           'J110944.13+445847.5', 'J113327.71+604507.3', 'J135634.51+614314.1',
+           'J140744.32+585440.9', 'J144219.19+504357.9', 'J141157.99+550515.5']
+
     for source_name, ra, dec, mosaic, rms, compact in zip(df['name'],
                                                           df['ra_1'],
                                                           df['dec_1'],
@@ -107,9 +112,11 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         hdu = fits.open(f'{my_directory}/mosaics/{mosaic}-mosaic.fits')[0]
         wcs = WCS(hdu.header, naxis=2)
         sky_position = SkyCoord(ra, dec, unit='deg')
-        size = [2, 2] * u.arcmin
+        if source_name in big:
+            size = [3, 3] * u.arcmin
+        else:
+            size = [2, 2] * u.arcmin
         p = 6
-
         cutout = Cutout2D(np.squeeze(hdu.data), sky_position, size=size,
                           wcs=wcs)
         d = cutout.data
@@ -186,6 +193,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         plt.clf()
 
         print(f'{source_name}: {r * 1.5 * 2:.1f}"')
+    print('Finished.')
 
 
 def main():
