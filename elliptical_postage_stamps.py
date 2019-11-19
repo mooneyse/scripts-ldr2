@@ -94,13 +94,12 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
     sbar_asec = 30  # desired length of scalebar in arcseconds
     pix = 1.5  # arcseconds per pixel
 
-    # big = ['J091315.78+520854.9', 'J092307.46+543655.2', 'J093553.19+542837.5',
-    #        'J102345.06+494629.5', 'J113327.71+604507.3', 'J090836.47+483918.2',
-    #        'J135634.51+614314.1', 'J141157.99+550515.5', 'J093821.50+554333.8',
-    #        'J104119.12+520047.2', 'J104648.76+544803.8', 'J104908.41+444056.7']
     bigger = ['J093352.59+580118.6', 'J140744.32+585440.9',
+              'J092307.46+543655.2', 'J093553.19+542837.5',
               'J144219.19+504357.9', 'J110944.13+445847.5',
-              'J101558.25+404647.2', 'J092122.11+545153.9']
+              'J101558.25+404647.2', 'J093821.50+554333.8',
+              'J124543.16+485926.9', 'J135801.04+562727.6']
+    biggest = ['J092122.11+545153.9']
 
     for source_name, ra, dec, mosaic, rms, compact in zip(df['name'],
                                                           df['ra_1'],
@@ -123,6 +122,9 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         #     size = [3, 3] * u.arcmin
         if source_name in bigger:
             size = [4, 4] * u.arcmin
+            p = 12
+        elif source_name in biggest:
+            size = [5, 5] * u.arcmin
             p = 12
         else:
             size = [3, 3] * u.arcmin
