@@ -2,6 +2,8 @@
 
 """Plot postage stamp images of LDR2 BL Lacs."""
 
+import warnings
+warnings.filterwarnings('ignore')
 import matplotlib as mpl
 mpl.use('Agg')
 import operator
@@ -98,7 +100,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
                                                           df['Isl_rms'],
                                                           df['Compact?']):
 
-        if compact == 'TRUE':
+        if compact:
             print(f'{source_name}')
             continue
         threshold = sigma * rms / 1000   # jansky
