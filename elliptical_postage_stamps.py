@@ -107,7 +107,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
                                                           df['Isl_rms'],
                                                           df['Compact?']):
         savefile = f'{my_directory}/images/ellipticals/el-{source_name}.png'
-        if os.path.exsits(savefile):
+        if os.path.exists(savefile):
             print(f'{source_name}')
             continue
         if compact:
