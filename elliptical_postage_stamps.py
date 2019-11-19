@@ -152,7 +152,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
                         set_to_nil.append((r, c))
                 except IndexError:
                     print(f'Index error for {source_name}.')
-                    continue
+                    raise  # continue
 
         for r, c in set_to_nil:
             d[r, c] = 0  # needs separate loop to avoid checkered pattern
