@@ -19,10 +19,6 @@ from astropy.wcs import WCS
 from ds9norm import DS9Normalize
 import smallestenclosingcircle
 
-__author__ = 'Sean Mooney'
-__email__ = 'sean.mooney@ucdconnect.ie'
-__date__ = '06 September 2019'
-
 
 def nearest_to_centre(my_arr, percent):
     """Given a two dimensional array, return the value of the pixel nearest to
@@ -77,7 +73,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
     string
         The name of the CSV containing the results.
     """
-    df = pd.read_csv(f'{my_directory}/catalogues/pulsars-10asec-match.csv')
+    df = pd.read_csv(f'{my_directory}/catalogues/ellipticals.csv')
 
     plt.figure(figsize=(13.92, 8.60)).patch.set_facecolor('white')
     plt.rcParams['font.family'] = 'serif'
@@ -95,12 +91,16 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
     sbar_asec = 30  # desired length of scalebar in arcseconds
     pix = 1.5  # arcseconds per pixel
 
-    for source_name, ra, dec, mosaic, rms in zip(df['NAME'],
-                                                 df['RAJD'],
-                                                 df['DECJD'],
-                                                 df['Mosaic_ID'],
-                                                 df['Isl_rms']):
+    for source_name, ra, dec, mosaic, rms, compact in zip(df['name'],
+                                                          df['ra_1'],
+                                                          df['dec_1'],
+                                                          df['Mosaic_ID'],
+                                                          df['Isl_rms'],
+                                                          df['Compact?']):
 
+        if compact == 'TRUE':
+            print(f'{source_name}')
+            continue
         threshold = sigma * rms / 1000   # jansky
         hdu = fits.open(f'{my_directory}/mosaics/{mosaic}-mosaic.fits')[0]
         wcs = WCS(hdu.header, naxis=2)
@@ -180,7 +180,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
                     colors='w')
         plt.contour(another_copy_d - copy_d, levels=[threshold], colors='grey',
                     origin='lower')
-        plt.savefig(f'{my_directory}/images/pulsar-{source_name}.png')
+        plt.savefig(f'{my_directory}/images/ellipticals/el-{source_name}.png')
         plt.clf()
 
         print(f'{source_name}: {r * 1.5 * 2:.1f}"')
