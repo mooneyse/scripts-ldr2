@@ -410,8 +410,7 @@ def main():
         # point_source_residual = point_source_regrid - model
         # scaled_model = (model * np.max(blazar_regrid) /
         #                 np.max(point_source_regrid))
-        print(blazar_data.shape, 'shape!')
-        x_, y_ = blazar_data.shape
+        x_, y_ = blazar_regrid.shape
         xy = np.meshgrid(np.linspace(0, x_, x_ + 1),
                          np.linspace(0, y_, y_ + 1))
         scaled_model = gaussian(xy=xy,
