@@ -15,14 +15,14 @@ import matplotlib
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-from matplotlib_scalebar.scalebar import ScaleBar
+# from matplotlib_scalebar.scalebar import ScaleBar
 from astropy import units as u
 from astropy.coordinates import SkyCoord
 from astropy.io import fits
 from astropy.nddata import Cutout2D
 from astropy.table import Table
 from astropy.wcs import WCS
-from photutils.isophote import build_ellipse_model, Ellipse, EllipseGeometry
+# from photutils.isophote import build_ellipse_model, Ellipse, EllipseGeometry
 from scipy.ndimage.interpolation import map_coordinates, shift
 import scipy.optimize as opt
 from ds9norm import DS9Normalize
