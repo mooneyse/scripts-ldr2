@@ -430,8 +430,8 @@ def main():
                                 amplitude=np.max(blazar_regrid),  # jansky
                                 x0=x0,
                                 y0=y0,
-                                sigma_x=bmaj / 1.5,  # * new_size,
-                                sigma_y=bmin / 1.5,  # * new_size,
+                                sigma_x=bmaj / 2 / 1.5,  # * new_size,
+                                sigma_y=bmin / 2 / 1.5,  # * new_size,
                                 theta=angle,
                                 offset=0)
         # plt.imshow(scaled_model, origin='lower')
