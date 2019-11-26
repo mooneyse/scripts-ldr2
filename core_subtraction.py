@@ -399,8 +399,10 @@ def main():
             size = [2, 2] * u.arcmin
         cutout = Cutout2D(np.squeeze(hdu.data), sky_position, size=size,
                           wcs=wcs)
-        blazar_data = cutout.data
-        blazar_regrid = regrid(blazar_data, new_size=new_size, normalise=False)
+        blazar_data = cutout.data  # 1 pixel = 1.5"
+        # blazar_regrid = regrid(blazar_data, new_size=new_size, normalise=False)
+        # 1 pixel of blazar_regrid = 1.5" / new_size
+        blazar_regrid = blazar_data
         x0, y0 = np.unravel_index(blazar_regrid.argmax(), blazar_regrid.shape)
         # plt.imshow(blazar_regrid, origin='lower')
         # plt.show()
