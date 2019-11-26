@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
+from matplotlib.patches import Circle
 from mpl_toolkits.mplot3d import Axes3D
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 # from matplotlib_scalebar.scalebar import ScaleBar
@@ -436,36 +437,37 @@ def main():
                                 offset=0)
         # plt.imshow(scaled_model, origin='lower')
         # plt.show()
-        plt.figure()
+        plt.figure(figsize=figsize)
+
+        beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
+                      edgecolor='blue')  # radius=2 pixels -> 3" -> diameter=6"
+
         ax0 = plt.subplot(1, 3, 1, projection=wcs)
         ax0.imshow(blazar_regrid, origin='lower', cmap='RdGy',
-                   vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid),
-                   norm=DS9Normalize(stretch='arcsinh'))
+                   vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid))
+        # norm=DS9Normalize(stretch='arcsinh'))
         plt.xlabel('Right ascension', fontsize=20, color='black')
         plt.ylabel('Declination', fontsize=20, color='black')
+        ax0.add_patch(beam)
 
         ax1 = plt.subplot(1, 3, 2, projection=wcs)
         ax1.imshow(scaled_model, origin='lower', cmap='RdGy',
-                   vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid),
-                   norm=DS9Normalize(stretch='arcsinh'))
+                   vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid))
+        # norm=DS9Normalize(stretch='arcsinh'))
         plt.xlabel('Right ascension', fontsize=20, color='black')
         plt.ylabel('Declination', fontsize=20, color='black')
+        ax1.add_patch(beam)
 
         ax2 = plt.subplot(1, 3, 3, projection=wcs)
         ax2.imshow(blazar_regrid - scaled_model, origin='lower',
                    cmap='RdGy', vmin=-np.max(blazar_regrid),
-                   vmax=np.max(blazar_regrid),
-                   norm=DS9Normalize(stretch='arcsinh'))
+                   vmax=np.max(blazar_regrid))
+        # norm=DS9Normalize(stretch='arcsinh'))
         plt.xlabel('Right ascension', fontsize=20, color='black')
         plt.ylabel('Declination', fontsize=20, color='black')
-
-        from matplotlib.patches import Circle
-        beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
-                      edgecolor='blue')  # radius=2 pixels -> 3" -> diameter=6"
-        # ax0.add_patch(beam)
-        # ax1.add_patch(beam)
         ax2.add_patch(beam)
 
+        plt.tight_layout()
         plt.show()
         continue
         if i > 1:
