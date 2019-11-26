@@ -424,7 +424,7 @@ def main():
                                 x0=x0,
                                 y0=y0,
                                 sigma_x=1,  #bmaj / 1.5,  # * new_size,
-                                sigma_y=4, #bmin / 1.5,  # * new_size,
+                                sigma_y=1, #bmin / 1.5,  # * new_size,
                                 theta=angle,
                                 offset=0)
         # plt.imshow(scaled_model, origin='lower')
