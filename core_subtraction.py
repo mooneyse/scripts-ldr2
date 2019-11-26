@@ -415,8 +415,8 @@ def main():
         # scaled_model = (model * np.max(blazar_regrid) /
         #                 np.max(point_source_regrid))
         x_, y_ = blazar_regrid.shape
-        xy = np.meshgrid(np.linspace(0, x_, x_ + 1),
-                         np.linspace(0, y_, y_ + 1))
+        xy = np.meshgrid(np.linspace(0, x_ - 1, x_),
+                         np.linspace(0, y_ - 1, y_))
         scaled_model = gaussian(xy=xy,
                                 amplitude=peak_flux,
                                 x0=x0,
