@@ -438,6 +438,17 @@ def main():
         # plt.imshow(scaled_model, origin='lower')
         # plt.show()
         plt.figure(figsize=figsize)
+        plt.rcParams['font.family'] = 'serif'
+        plt.rcParams['mathtext.fontset'] = 'dejavuserif'
+        matplotlib.rcParams['xtick.major.size'] = 10
+        matplotlib.rcParams['xtick.major.width'] = 2
+        matplotlib.rcParams['xtick.minor.size'] = 5
+        matplotlib.rcParams['xtick.minor.width'] = 2
+        matplotlib.rcParams['ytick.major.size'] = 10
+        matplotlib.rcParams['ytick.major.width'] = 2
+        matplotlib.rcParams['ytick.minor.size'] = 5
+        matplotlib.rcParams['ytick.minor.width'] = 2
+        matplotlib.rcParams['axes.linewidth'] = 2
 
         beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
                       edgecolor='blue')  # radius=2 pixels -> 3" -> diameter=6"
