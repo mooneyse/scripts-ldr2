@@ -427,7 +427,7 @@ def main():
         xy = np.meshgrid(np.linspace(0, x_ - 1, x_),
                          np.linspace(0, y_ - 1, y_))
         scaled_model = gaussian(xy=xy,
-                                amplitude=peak_flux,
+                                amplitude=np.max(blazar_regrid),  # jansky
                                 x0=x0,
                                 y0=y0,
                                 sigma_x=bmaj / 1.5,  # * new_size,
@@ -450,8 +450,8 @@ def main():
                    cmap='plasma_r', vmin=0, vmax=np.max(blazar_regrid),
                    norm=DS9Normalize(stretch='arcsinh'))
         plt.show()
-        if i > 1:
-            return
+        # if i > 1:
+        return
         # blazar_shifted = match_peaks(blazar_regrid, scaled_model)
         # blazar_residual = blazar_shifted - scaled_model
         # blazar_regrid_back = regrid(blazar_shifted, new_size=1 / new_size, normalise=False)  # regrid the blazar and blazar residual data back to the native resolution
