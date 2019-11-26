@@ -183,12 +183,17 @@ def regrid(data, new_size=10, normalise=True):
 
 
 def gaussian(xy, amplitude, x0, y0, sigma_x, sigma_y, theta, offset):
-    '''Fit a two-dimensional Gaussian to the data.'''
+    """Fit a two-dimensional Gaussian to the data.
+    """
     x, y = xy
-    a = ((np.cos(theta) ** 2) / (2 * sigma_x ** 2) + (np.sin(theta) ** 2) / (2 * sigma_y ** 2))
-    b = (-(np.sin(2 * theta)) / (4 * sigma_x ** 2) + (np.sin(2 * theta)) / (4 * sigma_y ** 2))
-    c = ((np.sin(theta) ** 2)/(2 * sigma_x ** 2) + (np.cos(theta) ** 2) / (2 * sigma_y ** 2))
-    g = (offset + amplitude * np.exp(-(a * ((x - x0) ** 2) + 2 * b * (x - x0) * (y - y0) + c * ((y - y0) **2 ))))
+    a = ((np.cos(theta) ** 2) / (2 * sigma_x ** 2) +
+         (np.sin(theta) ** 2) / (2 * sigma_y ** 2))
+    b = (-(np.sin(2 * theta)) / (4 * sigma_x ** 2) +
+         (np.sin(2 * theta)) / (4 * sigma_y ** 2))
+    c = ((np.sin(theta) ** 2)/(2 * sigma_x ** 2) +
+         (np.cos(theta) ** 2) / (2 * sigma_y ** 2))
+    g = (offset + amplitude * np.exp(-(a * ((x - x0) ** 2) +
+         2 * b * (x - x0) * (y - y0) + c * ((y - y0) ** 2))))
     return g
     # g_ravel = g.ravel()
     # return g_ravel
@@ -400,7 +405,9 @@ def main():
         cutout = Cutout2D(np.squeeze(hdu.data), sky_position, size=size,
                           wcs=wcs)
         blazar_data = cutout.data  # 1 pixel = 1.5"
-        blazar_regrid = regrid(blazar_data, new_size=new_size, normalise=False)
+        blazar_regrid = blazar_data
+        # blazar_regrid = regrid(blazar_data, new_size=new_size,
+        #                        normalise=False)
         # 1 pixel of blazar_regrid = 1.5" / new_size
         # blazar_regrid = blazar_data
         x0, y0 = np.unravel_index(blazar_regrid.argmax(), blazar_regrid.shape)
@@ -443,16 +450,17 @@ def main():
                    cmap='plasma_r', vmin=0, vmax=np.max(blazar_regrid),
                    norm=DS9Normalize(stretch='arcsinh'))
         plt.show()
-        return
+        if i > 1:
+            return
         # blazar_shifted = match_peaks(blazar_regrid, scaled_model)
-        blazar_residual = blazar_shifted - scaled_model
-        blazar_regrid_back = regrid(blazar_shifted, new_size=1 / new_size, normalise=False)  # regrid the blazar and blazar residual data back to the native resolution
-        blazar_residual_regrid_back = regrid(blazar_residual, new_size=1 / new_size, normalise=False)
-        five_sigma = get_noise_catalogue(df_blazars, blazar_name)
-        if blazar_name == '5BZQJ1437+3519':
-            print('Doing a little more housekeeping on {}.'.format(blazar_name))
-            blazar_regrid_back[:, 60:] = 0
-            blazar_residual_regrid_back[:, 60:] = 0
+        # blazar_residual = blazar_shifted - scaled_model
+        # blazar_regrid_back = regrid(blazar_shifted, new_size=1 / new_size, normalise=False)  # regrid the blazar and blazar residual data back to the native resolution
+        # blazar_residual_regrid_back = regrid(blazar_residual, new_size=1 / new_size, normalise=False)
+        # five_sigma = get_noise_catalogue(df_blazars, blazar_name)
+        # if blazar_name == '5BZQJ1437+3519':
+        #     print('Doing a little more housekeeping on {}.'.format(blazar_name))
+        #     blazar_regrid_back[:, 60:] = 0
+        #     blazar_residual_regrid_back[:, 60:] = 0
         b, d = diffuse_fraction(df=df_blazars, name=blazar_name, blazar=blazar_regrid_back, diffuse=blazar_residual_regrid_back, threshold=five_sigma)
         my_blazars.append(b)
         my_diffuse.append(d)
