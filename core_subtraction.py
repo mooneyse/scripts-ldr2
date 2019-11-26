@@ -437,19 +437,33 @@ def main():
         # plt.imshow(scaled_model, origin='lower')
         # plt.show()
         plt.figure()
-        ax0 = plt.subplot(1, 3, 1)
-        ax0.imshow(blazar_regrid, origin='lower', cmap='plasma_r',
-                   vmax=np.max(blazar_regrid), vmin=np.min(blazar_regrid),
+        ax0 = plt.subplot(1, 3, 1, projection=wcs)
+        ax0.imshow(blazar_regrid, origin='lower', cmap='RdGy',
+                   vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid),
                    norm=DS9Normalize(stretch='arcsinh'))
-        ax1 = plt.subplot(1, 3, 2)
-        ax1.imshow(scaled_model, origin='lower', cmap='plasma_r',
-                   vmax=np.max(blazar_regrid), vmin=np.min(blazar_regrid),
+        plt.xlabel('Right ascension', fontsize=20, color='black')
+        plt.ylabel('Declination', fontsize=20, color='black')
+
+        ax1 = plt.subplot(1, 3, 2, projection=wcs)
+        ax1.imshow(scaled_model, origin='lower', cmap='RdGy',
+                   vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid),
                    norm=DS9Normalize(stretch='arcsinh'))
-        ax2 = plt.subplot(1, 3, 3)
+        plt.xlabel('Right ascension', fontsize=20, color='black')
+        plt.ylabel('Declination', fontsize=20, color='black')
+
+        ax2 = plt.subplot(1, 3, 3, projection=wcs)
         ax2.imshow(blazar_regrid - scaled_model, origin='lower',
-                   cmap='plasma_r', vmin=np.min(blazar_regrid),
+                   cmap='RdGy', vmin=-np.max(blazar_regrid),
                    vmax=np.max(blazar_regrid),
                    norm=DS9Normalize(stretch='arcsinh'))
+        plt.xlabel('Right ascension', fontsize=20, color='black')
+        plt.ylabel('Declination', fontsize=20, color='black')
+        
+        from matplotlib.patches import Circle
+        beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
+                      edgecolor='blue')  # radius=2 pixels -> 3" -> diameter=6"
+        ax.add_patch(beam)
+
         plt.show()
         continue
         if i > 1:
