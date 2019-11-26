@@ -211,7 +211,10 @@ def gaussian(xy, amplitude, x0, y0, sigma_x, sigma_y, theta, offset):
 
 
 def match_peaks(data, model, cval=0):
-    '''Shift the data so that the index of the maximum value in the data matches up with that of the model. This is needed to ensure accurate subtraction.'''
+    """Shift the data so that the index of the maximum value in the data
+    matches up with that of the model. This is needed to ensure accurate
+    subtraction.
+    """
     data_max = data.argmax()
     model_max = model.argmax()
     data_shape = data.shape
@@ -398,8 +401,9 @@ def main():
                           wcs=wcs)
         blazar_data = cutout.data
         blazar_regrid = regrid(blazar_data, new_size=new_size, normalise=False)
-        plt.imshow(blazar_regrid, origin='lower')
-        plt.show()
+        x0, y0 = np.unravel_index(blazar_regrid.argmax(), blazar_regrid.shape)
+        # plt.imshow(blazar_regrid, origin='lower')
+        # plt.show()
         # blazar_data = housekeeping(blazar_name, blazar_data)
         # point_source_data = get_data(position=point_source_position, hdu=hdu,
         #                              wcs=wcs)
@@ -415,16 +419,30 @@ def main():
                          np.linspace(0, y_, y_ + 1))
         scaled_model = gaussian(xy=xy,
                                 amplitude=peak_flux,
-                                x0=500,
-                                y0=500,
-                                sigma_x=bmaj,
-                                sigma_y=bmin,
+                                x0=x0,
+                                y0=y0,
+                                sigma_x=bmaj * new_size,
+                                sigma_y=bmin * new_size,
                                 theta=angle,
                                 offset=0)
-        plt.imshow(scaled_model, origin='lower')
+        # plt.imshow(scaled_model, origin='lower')
+        # plt.show()
+        plt.figure()
+        ax0 = plt.subplot(1, 3, 1)
+        ax0.imshow(blazar_regrid, origin='lower', cmap='plasma_r', vmin=0,
+                   vmax=np.max(blazar_regrid),
+                   norm=DS9Normalize(stretch='arcsinh'))
+        ax1 = plt.subplot(1, 3, 2)
+        ax1.imshow(scaled_model, origin='lower', cmap='plasma_r', vmin=0,
+                   vmax=np.max(blazar_regrid),
+                   norm=DS9Normalize(stretch='arcsinh'))
+        ax2 = plt.subplot(1, 3, 3)
+        ax1.imshow(blazar_regrid - scaled_model, origin='lower',
+                   cmap='plasma_r', vmin=0, vmax=np.max(blazar_regrid),
+                   norm=DS9Normalize(stretch='arcsinh'))
         plt.show()
         return
-        blazar_shifted = match_peaks(blazar_regrid, scaled_model)
+        # blazar_shifted = match_peaks(blazar_regrid, scaled_model)
         blazar_residual = blazar_shifted - scaled_model
         blazar_regrid_back = regrid(blazar_shifted, new_size=1 / new_size, normalise=False)  # regrid the blazar and blazar residual data back to the native resolution
         blazar_residual_regrid_back = regrid(blazar_residual, new_size=1 / new_size, normalise=False)
