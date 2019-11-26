@@ -385,6 +385,7 @@ def main():
         # hdu, wcs = get_fits(filename=image)
         hdu = fits.open(f'/data5/sean/ldr2/mosaics/{image}-mosaic.fits')[0]
         wcs = WCS(hdu.header, naxis=2)
+        print(blazar_position[0], blazar_position[1],'fffffffffff')
         sky_position = SkyCoord(blazar_position[0], blazar_position[1],
                                 unit='deg')
         if blazar_name == '5BZB J1202+4444':
