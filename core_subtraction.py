@@ -438,20 +438,22 @@ def main():
         # plt.show()
         plt.figure()
         ax0 = plt.subplot(1, 3, 1)
-        ax0.imshow(blazar_regrid, origin='lower', cmap='plasma_r', vmin=0,
-                   vmax=np.max(blazar_regrid),
+        ax0.imshow(blazar_regrid, origin='lower', cmap='plasma_r',
+                   vmax=np.max(blazar_regrid), vmin=np.min(blazar_regrid),
                    norm=DS9Normalize(stretch='arcsinh'))
         ax1 = plt.subplot(1, 3, 2)
-        ax1.imshow(scaled_model, origin='lower', cmap='plasma_r', vmin=0,
-                   vmax=np.max(blazar_regrid),
+        ax1.imshow(scaled_model, origin='lower', cmap='plasma_r',
+                   vmax=np.max(blazar_regrid), vmin=np.min(blazar_regrid),
                    norm=DS9Normalize(stretch='arcsinh'))
         ax2 = plt.subplot(1, 3, 3)
         ax2.imshow(blazar_regrid - scaled_model, origin='lower',
-                   cmap='plasma_r', vmin=0, vmax=np.max(blazar_regrid),
+                   cmap='plasma_r', vmin=np.min(blazar_regrid),
+                   vmax=np.max(blazar_regrid),
                    norm=DS9Normalize(stretch='arcsinh'))
         plt.show()
-        # if i > 1:
-        return
+        continue
+        if i > 1:
+            return
         # blazar_shifted = match_peaks(blazar_regrid, scaled_model)
         # blazar_residual = blazar_shifted - scaled_model
         # blazar_regrid_back = regrid(blazar_shifted, new_size=1 / new_size, normalise=False)  # regrid the blazar and blazar residual data back to the native resolution
