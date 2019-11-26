@@ -458,11 +458,13 @@ def main():
                    norm=DS9Normalize(stretch='arcsinh'))
         plt.xlabel('Right ascension', fontsize=20, color='black')
         plt.ylabel('Declination', fontsize=20, color='black')
-        
+
         from matplotlib.patches import Circle
         beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
                       edgecolor='blue')  # radius=2 pixels -> 3" -> diameter=6"
-        ax.add_patch(beam)
+        ax0.add_patch(beam)
+        ax1.add_patch(beam)
+        ax2.add_patch(beam)
 
         plt.show()
         continue
