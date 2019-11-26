@@ -437,7 +437,7 @@ def main():
                    vmax=np.max(blazar_regrid),
                    norm=DS9Normalize(stretch='arcsinh'))
         ax2 = plt.subplot(1, 3, 3)
-        ax1.imshow(blazar_regrid - scaled_model, origin='lower',
+        ax2.imshow(blazar_regrid - scaled_model, origin='lower',
                    cmap='plasma_r', vmin=0, vmax=np.max(blazar_regrid),
                    norm=DS9Normalize(stretch='arcsinh'))
         plt.show()
