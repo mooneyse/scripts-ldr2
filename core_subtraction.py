@@ -462,7 +462,7 @@ def main():
         ax0.add_patch(beam)
 
         ax1 = plt.subplot(1, 3, 2, projection=wcs)
-        ax1.imshow(scaled_model, origin='lower', cmap='RdGy',
+        ax1.imshow(-scaled_model, origin='lower', cmap='RdGy',
                    vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid))
         # norm=DS9Normalize(stretch='arcsinh'))
         plt.xlabel('Right ascension', fontsize=20, color='black')
@@ -480,6 +480,7 @@ def main():
 
         plt.tight_layout()
         plt.show()
+        return
         continue
         if i > 1:
             return
