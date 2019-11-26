@@ -400,9 +400,9 @@ def main():
         cutout = Cutout2D(np.squeeze(hdu.data), sky_position, size=size,
                           wcs=wcs)
         blazar_data = cutout.data  # 1 pixel = 1.5"
-        # blazar_regrid = regrid(blazar_data, new_size=new_size, normalise=False)
+        blazar_regrid = regrid(blazar_data, new_size=new_size, normalise=False)
         # 1 pixel of blazar_regrid = 1.5" / new_size
-        blazar_regrid = blazar_data
+        # blazar_regrid = blazar_data
         x0, y0 = np.unravel_index(blazar_regrid.argmax(), blazar_regrid.shape)
         # plt.imshow(blazar_regrid, origin='lower')
         # plt.show()
@@ -423,8 +423,8 @@ def main():
                                 amplitude=peak_flux,
                                 x0=x0,
                                 y0=y0,
-                                sigma_x=1,  #bmaj / 1.5,  # * new_size,
-                                sigma_y=1, #bmin / 1.5,  # * new_size,
+                                sigma_x=1,  # bmaj / 1.5,  # * new_size,
+                                sigma_y=1,  # bmin / 1.5,  # * new_size,
                                 theta=angle,
                                 offset=0)
         # plt.imshow(scaled_model, origin='lower')
