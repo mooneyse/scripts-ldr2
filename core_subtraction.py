@@ -427,11 +427,11 @@ def main():
         xy = np.meshgrid(np.linspace(0, x_ - 1, x_),
                          np.linspace(0, y_ - 1, y_))
         scaled_model = gaussian(xy=xy,
-                                amplitude=peak_flux,
+                                amplitude=peak_flux / 1000,
                                 x0=x0,
                                 y0=y0,
-                                sigma_x=1,  # bmaj / 1.5,  # * new_size,
-                                sigma_y=1,  # bmin / 1.5,  # * new_size,
+                                sigma_x=bmaj / 1.5,  # * new_size,
+                                sigma_y=bmin / 1.5,  # * new_size,
                                 theta=angle,
                                 offset=0)
         # plt.imshow(scaled_model, origin='lower')
