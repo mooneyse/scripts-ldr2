@@ -369,14 +369,15 @@ def main():
     # (blazar_names, blazar_positions,
     #  catalogues, images) = get_position(df_blazars, cat_dir=catalogue_dir)
     for i, (blazar_name, blazar_ra, blazar_dec, bmaj, bmin, angle, peak_flux,
-            image) in enumerate(zip(df_blazars.index.tolist(),
-                                    df_blazars['BZCAT RA'],
-                                    df_blazars['BZCAT Dec'],
-                                    df_blazars['Point major'],
-                                    df_blazars['Point minor'],
-                                    df_blazars['Point angle'],
-                                    df_blazars['Peak_flux'],
-                                    df_blazars['Mosaic_ID'])):
+            image, rms) in enumerate(zip(df_blazars.index.tolist(),
+                                         df_blazars['BZCAT RA'],
+                                         df_blazars['BZCAT Dec'],
+                                         df_blazars['Point major'],
+                                         df_blazars['Point minor'],
+                                         df_blazars['Point angle'],
+                                         df_blazars['Peak_flux'],
+                                         df_blazars['Mosaic_ID'],
+                                         df_blazars['Isl_rms'])):
         blazar_position = [blazar_ra, blazar_dec]
         # if testing:
         #     if i != 0:  # do one at a time
