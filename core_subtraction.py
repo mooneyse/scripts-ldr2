@@ -454,6 +454,7 @@ def main():
         ax0.imshow(blazar_regrid, origin='lower', cmap='RdGy',
                    vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid))
         # norm=DS9Normalize(stretch='arcsinh'))
+        ax0.tick_params(axis='both', which='major', labelsize=20)
         beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
                       edgecolor='blue')  # radius=2 pixels -> 3" -> diameter=6"
         ax0.add_patch(beam)
@@ -461,9 +462,10 @@ def main():
         plt.ylabel('Declination', fontsize=20, color='black')
 
         ax1 = plt.subplot(1, 3, 2, projection=wcs)
-        ax1.imshow(-scaled_model, origin='lower', cmap='RdGy',
+        ax1.imshow(scaled_model, origin='lower', cmap='RdGy',
                    vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid))
         # norm=DS9Normalize(stretch='arcsinh'))
+        ax1.tick_params(axis='both', which='major', labelsize=20)
         beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
                       edgecolor='blue')  # radius=2 pixels -> 3" -> diameter=6"
         ax1.add_patch(beam)
@@ -475,6 +477,7 @@ def main():
                    cmap='RdGy', vmin=-np.max(blazar_regrid),
                    vmax=np.max(blazar_regrid))
         # norm=DS9Normalize(stretch='arcsinh'))
+        ax2.tick_params(axis='both', which='major', labelsize=20)
         beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
                       edgecolor='blue')  # radius=2 pixels -> 3" -> diameter=6"
         ax2.add_patch(beam)
