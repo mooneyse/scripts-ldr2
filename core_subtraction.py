@@ -359,15 +359,16 @@ def main():
     df_blazars.set_index('BZCAT name', inplace=True)
     # (blazar_names, blazar_positions,
     #  catalogues, images) = get_position(df_blazars, cat_dir=catalogue_dir)
-    for i, (blazar_name, blazar_position, bmaj, bmin, angle, peak_flux,
+    for i, (blazar_name, blazar_ra, blazar_dec, bmaj, bmin, angle, peak_flux,
             image) in enumerate(zip(df_blazars.index.tolist(),
-                                    [df_blazars['BZCAT RA'],
-                                     df_blazars['BZCAT Dec']],
+                                    df_blazars['BZCAT RA'],
+                                    df_blazars['BZCAT Dec'],
                                     df_blazars['Point major'],
                                     df_blazars['Point minor'],
                                     df_blazars['Point angle'],
                                     df_blazars['Peak_flux'],
                                     df_blazars['Mosaic_ID'])):
+        blazar_position = [blazar_ra, blazar_dec]
         # if testing:
         #     if i != 0:  # do one at a time
         #         sys.exit()
@@ -385,7 +386,6 @@ def main():
         # hdu, wcs = get_fits(filename=image)
         hdu = fits.open(f'/data5/sean/ldr2/mosaics/{image}-mosaic.fits')[0]
         wcs = WCS(hdu.header, naxis=2)
-        print(blazar_position[0], blazar_position[1],'fffffffffff')
         sky_position = SkyCoord(blazar_position[0], blazar_position[1],
                                 unit='deg')
         if blazar_name == '5BZB J1202+4444':
