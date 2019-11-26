@@ -400,7 +400,6 @@ def main():
         blazar_regrid = regrid(blazar_data, new_size=new_size, normalise=False)
         plt.imshow(blazar_regrid, origin='lower')
         plt.show()
-        return
         # blazar_data = housekeeping(blazar_name, blazar_data)
         # point_source_data = get_data(position=point_source_position, hdu=hdu,
         #                              wcs=wcs)
@@ -411,8 +410,10 @@ def main():
         # point_source_residual = point_source_regrid - model
         # scaled_model = (model * np.max(blazar_regrid) /
         #                 np.max(point_source_regrid))
-        xy = np.meshgrid(np.linspace(0, 1000, 1001),
-                         np.linspace(0, 1000, 1001))
+        print(blazar_data.shape, 'shape!')
+        x_, y_ = blazar_data.shape
+        xy = np.meshgrid(np.linspace(0, x_, x_ + 1),
+                         np.linspace(0, y_, y_ + 1))
         scaled_model = gaussian(xy=xy,
                                 amplitude=peak_flux,
                                 x0=500,
@@ -421,6 +422,9 @@ def main():
                                 sigma_y=bmin,
                                 theta=angle,
                                 offset=0)
+        plt.imshow(scaled_model, origin='lower')
+        plt.show()
+        return
         blazar_shifted = match_peaks(blazar_regrid, scaled_model)
         blazar_residual = blazar_shifted - scaled_model
         blazar_regrid_back = regrid(blazar_shifted, new_size=1 / new_size, normalise=False)  # regrid the blazar and blazar residual data back to the native resolution
