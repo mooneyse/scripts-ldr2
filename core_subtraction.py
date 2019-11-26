@@ -398,7 +398,8 @@ def main():
                           wcs=wcs)
         blazar_data = cutout.data
         blazar_regrid = regrid(blazar_data, new_size=new_size, normalise=False)
-        plt.imshow(blazar_regrid)
+        plt.imshow(blazar_regrid, origin='lower')
+        plt.show()
         return
         # blazar_data = housekeeping(blazar_name, blazar_data)
         # point_source_data = get_data(position=point_source_position, hdu=hdu,
