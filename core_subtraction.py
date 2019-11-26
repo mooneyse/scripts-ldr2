@@ -27,33 +27,35 @@ from scipy.ndimage.interpolation import map_coordinates, shift
 import scipy.optimize as opt
 from ds9norm import DS9Normalize
 
-__author__ = 'Sean Mooney'
-__email__ = 'sean.mooney@ucdconnect.ie'
-__date__ = '18 June 2019'
+# def get_df(filename, format, index):
+#     """Create the data frame.
+#     """
+#     if format == 'csv':
+#         df = pd.read_csv(filename)
+#     else:
+#         data = Table.read(filename, format=format)
+#         df = data.to_pandas()
+#     df.set_index(index, inplace=True)
+#     return df
 
 
-def get_df(filename, format, index):
-    '''Create the data frame.'''
-    if format == 'csv':
-        df = pd.read_csv(filename)
-    else:
-        data = Table.read(filename, format=format)
-        df = data.to_pandas()
-    df.set_index(index, inplace=True)
-    return df
+# def get_position(df, cat_dir):
+#     """Look up the position of the blazar.
+#     """
+#     blazar_names = df.index.tolist()
+#     blazar_positions, catalogues, fits_images = [], [], []
+#     for ra, dec, field in zip(df['BZCAT RA'], df['BZCAT Dec'],
+#                               df['Mosaic_ID']):
+#         blazar_positions.append([ra, dec])
+#         field = field.lower().replace(' ', '.')
+#         catalogues.append(f'{cat_dir}/ldr2-point-sources-near-bllacs.csv')
+#         fits_images.append(f'/data5/sean/ldr2/mosaics/{field}-mosaic.fits')
+#     return blazar_names, blazar_positions, catalogues, fits_images
 
 
-def get_position(df, cat_dir):
-    '''Look up the position of the blazar.'''
-    # df = df[df['Field'] == field]  # filters to one field
-    blazar_names = df.index.tolist()
-    blazar_positions, catalogues, fits_images = [], [], []
-    for ra, dec, field in zip(df['RA'], df['DEC'], df['Field']):
-        blazar_positions.append([ra, dec])
-        field = field.lower().replace(' ', '.')
-        catalogues.append(f'{cat_dir}/{field}.11.06.2019.cat.fits')
-        fits_images.append(f'{cat_dir}/{field}.11.06.2019.img.fits')
-    return blazar_names, blazar_positions, catalogues, fits_images
+# def new_nearest_point_source(csv, bllac):
+#     df = pd.read_csv('/data5/sean/ldr2/catalogues/bright.near.points.csv')
+#     df = df[df['BZCAT name'] == bllac]
 
 
 def nearest_point_source(df, position, s_code='S', flux_threshold=0.01,
@@ -99,7 +101,8 @@ def get_data(position, hdu, wcs, size=[2, 2] * u.arcmin):
 
 
 def housekeeping(name, data):
-    '''Some ad hoc adjustments to a few sources, made after visual inspection.'''
+    '''Some ad hoc adjustments to a few sources, made after visual inspection.
+    '''
     if name == '5BZQJ1422+3223':
         print('Doing a little housekeeping on {}.'.format(name))
         data[42:47, 55:60] = 0
@@ -185,25 +188,26 @@ def gaussian(xy, amplitude, x0, y0, sigma_x, sigma_y, theta, offset):
     a = ((np.cos(theta) ** 2) / (2 * sigma_x ** 2) + (np.sin(theta) ** 2) / (2 * sigma_y ** 2))
     b = (-(np.sin(2 * theta)) / (4 * sigma_x ** 2) + (np.sin(2 * theta)) / (4 * sigma_y ** 2))
     c = ((np.sin(theta) ** 2)/(2 * sigma_x ** 2) + (np.cos(theta) ** 2) / (2 * sigma_y ** 2))
-    g = (offset + amplitude * np.exp( -(a * ((x - x0) ** 2) + 2 * b * (x - x0) * (y - y0) + c * ((y - y0) **2 ))))
-    g_ravel = g.ravel()
-    return g_ravel
+    g = (offset + amplitude * np.exp(-(a * ((x - x0) ** 2) + 2 * b * (x - x0) * (y - y0) + c * ((y - y0) **2 ))))
+    return g
+    # g_ravel = g.ravel()
+    # return g_ravel
 
 
-def make_model(data, amplitude=1, sigma_x=30, sigma_y=30, theta=0, offset=0):
-    '''Fit a model to the data.'''
-    len_x, len_y = data.shape
-    range_x = range(len_x)
-    range_y = range(len_y)
-    x, y = np.meshgrid(range_x, range_y)
-    x0 = len_x / 2
-    y0 = len_y / 2
-    data_ravel = data.ravel()
-    p0 = (amplitude, x0, y0, sigma_x, sigma_y, theta, offset)
-    popt, pcov = opt.curve_fit(gaussian, (x, y), data_ravel, p0=p0)
-    model = gaussian((x, y), *popt)
-    model_reshape = model.reshape(len_x, len_y)
-    return model_reshape
+# def make_model(data, amplitude=1, sigma_x=30, sigma_y=30, theta=0, offset=0):
+#     '''Fit a model to the data.'''
+#     len_x, len_y = data.shape
+#     range_x = range(len_x)
+#     range_y = range(len_y)
+#     x, y = np.meshgrid(range_x, range_y)
+#     x0 = len_x / 2
+#     y0 = len_y / 2
+#     data_ravel = data.ravel()
+#     p0 = (amplitude, x0, y0, sigma_x, sigma_y, theta, offset)
+#     popt, pcov = opt.curve_fit(gaussian, (x, y), data_ravel, p0=p0)
+#     model = gaussian((x, y), *popt)
+#     model_reshape = model.reshape(len_x, len_y)
+#     return model_reshape
 
 
 def match_peaks(data, model, cval=0):
@@ -334,52 +338,87 @@ def new_plots(pos, data, layer=None, plot_type='blazar', vmax=1, levels=[]):
 
 
 def main():
-    '''Fit a Gaussian point spread function to a point source and subtract it from a source with diffuse emission.'''
-    formatter_class = argparse.RawDescriptionHelpFormatter
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=formatter_class)
-    # parser.add_argument('-i', '--image', required=False, type=str, default='/mnt/closet/ldr2-blazars/deep-fields/bootes-image.fits', help='FITS image of the field')
-    parser.add_argument('-c', '--catalogue_dir', required=False, type=str, default='/mnt/closet/deep-fields/catalogues', help='Directory with the catalogues')
-    parser.add_argument('-d', '--csv', required=False, type=str, default='/mnt/closet/deep-fields/catalogues/deep.fields.11.06.2019.cat.csv', help='CSV catalogue of the blazars')
-    parser.add_argument('-o', '--output', required=False, type=str, default='/mnt/closet/deep-fields/images/core-subtract', help='Directory to save the plots')
-
-    args = parser.parse_args()
-    # image = args.image
-    catalogue_dir = args.catalogue_dir
-    csv = args.csv
-    output = args.output
+    """Fit a Gaussian point spread function to a point source and subtract it
+       from a source with diffuse emission.
+    """
+    catalogue_dir = '/data5/sean/ldr2/catalogues/'
+    # catalogue = f'{catalogue_dir}ldr2-point-sources-near-bllacs.csv'
+    csv = f'{catalogue_dir}LDR2 and BZCAT 10_ crossmatch - Copy of BL Lacs.csv'
+    output = f'{catalogue_dir}../images/core-subtraction/'
 
     font = 'STIXGeneral'
     math_font = 'cm'
     font_size = 12
-    figsize = (17, 8)  # (40, 20)
-    bbox_inches = 'tight'
-    testing = False
+    figsize = (17, 8)
+    # testing = False
     new_size = 10
     my_blazars, my_diffuse = [], []
 
-    df_blazars = get_df(csv, format='csv', index='Source name')
-    blazar_names, blazar_positions, catalogues, images = get_position(df_blazars, cat_dir=catalogue_dir)
-    for i, (blazar_name, blazar_position, catalogue, image) in enumerate(zip(blazar_names, blazar_positions, catalogues, images)):
-        if testing:
-            if i != 0:  # do one at a time
-                sys.exit()
+    # df_blazars = get_df(csv, format='csv', index='BZCAT name')
+    df_blazars = pd.read_csv(csv)
+    df_blazars.set_index('BZCAT name', inplace=True)
+    # (blazar_names, blazar_positions,
+    #  catalogues, images) = get_position(df_blazars, cat_dir=catalogue_dir)
+    for i, (blazar_name, blazar_position, bmaj, bmin, angle, peak_flux,
+            image) in enumerate(zip(df_blazars.index.tolist(),
+                                    [df_blazars['BZCAT RA'],
+                                     df_blazars['BZCAT Dec']],
+                                    df_blazars['Point major'],
+                                    df_blazars['Point minor'],
+                                    df_blazars['Point angle'],
+                                    df_blazars['Peak_flux'],
+                                    df_blazars['Mosaic_ID'])):
+        # if testing:
+        #     if i != 0:  # do one at a time
+        #         sys.exit()
         # if blazar_name != '5BZQJ1437+3519':
         #     continue
-        print(f'Analysing {blazar_name} which is in {image} (blazar {i + 1} of {len(blazar_names)}).')
-        df_cat = get_df(catalogue, format='fits', index='Source_id')
-        point_source_id, point_source_position = nearest_point_source(df_cat, blazar_position)
-        if point_source_id is False:
-            print('Going to the next iteration.')
-            continue
-        hdu, wcs = get_fits(filename=image)
-        blazar_data = get_data(position=blazar_position, hdu=hdu, wcs=wcs)
-        blazar_data = housekeeping(blazar_name, blazar_data)
-        point_source_data = get_data(position=point_source_position, hdu=hdu, wcs=wcs)
-        blazar_regrid = regrid(blazar_data, new_size=new_size, normalise=False)  # peak and total values change with regridding
-        point_source_regrid = regrid(point_source_data, new_size=new_size, normalise=False)
-        model = make_model(point_source_regrid, sigma_x=4, sigma_y=4)
-        point_source_residual = point_source_regrid - model
-        scaled_model = (model * np.max(blazar_regrid) / np.max(point_source_regrid))
+        print(f'Analysing {blazar_name} which is in {image} (BL Lac {i + 1} of'
+              f' {len(df_blazars.index.tolist())}).')
+        # df_cat = get_df(catalogue, format='csv', index='Source_Name')
+        # (point_source_id,
+        #  point_source_position = nearest_point_source(df_cat,
+        #                                               blazar_position)
+        # if point_source_id is False:
+        #     print('Going to the next iteration.')
+        #     continue
+        # hdu, wcs = get_fits(filename=image)
+        hdu = fits.open(f'/data5/sean/ldr2/mosaics/{image}-mosaic.fits')[0]
+        wcs = WCS(hdu.header, naxis=2)
+        sky_position = SkyCoord(blazar_position[0], blazar_position[1],
+                                unit='deg')
+        if blazar_name == '5BZB J1202+4444':
+            size = [3, 3] * u.arcmin
+        elif blazar_name == '5BZB J1419+5423':
+            size = [4, 4] * u.arcmin
+        else:
+            size = [2, 2] * u.arcmin
+        cutout = Cutout2D(np.squeeze(hdu.data), sky_position, size=size,
+                          wcs=wcs)
+        blazar_data = cutout.data
+        blazar_regrid = regrid(blazar_data, new_size=new_size, normalise=False)
+        plt.imshow(blazar_regrid)
+        return
+        # blazar_data = housekeeping(blazar_name, blazar_data)
+        # point_source_data = get_data(position=point_source_position, hdu=hdu,
+        #                              wcs=wcs)
+        # NOTE peak and total values change with regridding
+        # point_source_regrid = regrid(point_source_data, new_size=new_size,
+        #                              normalise=False)
+        # model = make_model(point_source_regrid, sigma_x=4, sigma_y=4)
+        # point_source_residual = point_source_regrid - model
+        # scaled_model = (model * np.max(blazar_regrid) /
+        #                 np.max(point_source_regrid))
+        xy = np.meshgrid(np.linspace(0, 1000, 1001),
+                         np.linspace(0, 1000, 1001))
+        scaled_model = gaussian(xy=xy,
+                                amplitude=peak_flux,
+                                x0=500,
+                                y0=500,
+                                sigma_x=bmaj,
+                                sigma_y=bmin,
+                                theta=angle,
+                                offset=0)
         blazar_shifted = match_peaks(blazar_regrid, scaled_model)
         blazar_residual = blazar_shifted - scaled_model
         blazar_regrid_back = regrid(blazar_shifted, new_size=1 / new_size, normalise=False)  # regrid the blazar and blazar residual data back to the native resolution
