@@ -367,7 +367,7 @@ def main():
                                 # fwhm from asec to pixels to sigma
                                 sigma_x=bmaj / 1.5 / 2.355,
                                 sigma_y=bmin / 1.5 / 2.355,
-                                theta=angle,
+                                theta=angle + 90,
                                 offset=0)
 
         core_flux = np.sum(scaled_model) * 1000 / 18.1294  # divide beam area
@@ -387,35 +387,36 @@ def main():
         matplotlib.rcParams['ytick.minor.width'] = 2
         matplotlib.rcParams['axes.linewidth'] = 2
 
-        plt.suptitle(f'{blazar_name}', fontsize=20)
+        plt.suptitle(f'{blazar_name}', fontsize=30)
 
         ax0 = plt.subplot(1, 3, 1, projection=wcs)
         ax0.imshow(blazar_regrid, origin='lower', cmap='RdGy',
-                   vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid))
-        # norm=DS9Normalize(stretch='arcsinh'))
+                   vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid),
+                   norm=DS9Normalize(stretch='arcsinh'))
         ax0.tick_params(axis='both', which='major', labelsize=20,
                         direction='in')
         beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
-                      edgecolor='blue')
+                      edgecolor='black')
         ax0.add_patch(beam)
         plt.xlabel('Right ascension', fontsize=20, color='black')
         plt.ylabel('Declination', fontsize=20, color='black')
-        plt.title(r'$S_\mathrm{int}$' + f' = {total_flux:.2f} mJy',
+        plt.title(r'$S_\mathrm{int}$' + f' = {total_flux:.0f} mJy',
                   fontsize=20)
         ax0.contour(blazar_regrid, levels=[rms * 4 / 1000], origin='lower',
                     colors='r')
 
         ax1 = plt.subplot(1, 3, 2, projection=wcs)
         ax1.imshow(scaled_model, origin='lower', cmap='RdGy',
-                   vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid))
+                   vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid),
+                   norm=DS9Normalize(stretch='arcsinh'))
         ax1.tick_params(axis='both', which='major', labelsize=20,
                         direction='in')
         beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
-                      edgecolor='blue')
+                      edgecolor='black')
         ax1.add_patch(beam)
         plt.xlabel('Right ascension', fontsize=20, color='black')
         plt.ylabel('Declination', fontsize=20, color='black')
-        plt.title(r'$S_\mathrm{core}$' + f' = {core_flux:.2f} mJy',
+        plt.title(r'$S_\mathrm{core}$' + f' = {core_flux:.0f} mJy',
                   fontsize=20)
         ax1.contour(blazar_regrid, levels=[rms * 4 / 1000], origin='lower',
                     colors='r')
@@ -425,20 +426,21 @@ def main():
         ax2 = plt.subplot(1, 3, 3, projection=wcs)
         ax2.imshow(blazar_regrid - scaled_model, origin='lower',
                    cmap='RdGy', vmin=-np.max(blazar_regrid),
-                   vmax=np.max(blazar_regrid))
+                   vmax=np.max(blazar_regrid),
+                   norm=DS9Normalize(stretch='arcsinh'))
         ax2.tick_params(axis='both', which='major', labelsize=20,
                         direction='in')
         beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
-                      edgecolor='blue')
+                      edgecolor='black')
         ax2.add_patch(beam)
         plt.xlabel('Right ascension', fontsize=20, color='black')
         plt.ylabel('Declination', fontsize=20, color='black')
-        plt.title(r'$S_\mathrm{diffuse}$' + f' = {total_flux - core_flux:.2f}'
+        plt.title(r'$S_\mathrm{diffuse}$' + f' = {total_flux - core_flux:.0f}'
                   + ' mJy', fontsize=20)
         ax2.contour(blazar_regrid, levels=[rms * 4 / 1000], origin='lower',
                     colors='r')
         ax2.contour(blazar_regrid - scaled_model, levels=[rms * 4 / 1000],
-                    origin='lower', colors='blue')
+                    origin='lower', colors='blue', ls='dashed')
 
         # plt.show()
         plt.savefig(f'{catalogue_dir}../images/core-subtraction'
