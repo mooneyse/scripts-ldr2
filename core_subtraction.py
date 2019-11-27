@@ -405,7 +405,7 @@ def main():
                   fontsize=20)
         ax0.contour(blazar_regrid, levels=[rms * 4 / 1000, rms * 8 / 1000,
                                            rms * 16 / 1000, rms * 32 / 1000],
-                    origin='lower', colors=['r', 'magenta', 'yellow', 'cyan')
+                    origin='lower', colors=['r', 'magenta', 'yellow', 'cyan'])
 
         ax1 = plt.subplot(1, 3, 2, projection=wcs)
         ax1.imshow(scaled_model, origin='lower', cmap='RdGy',
