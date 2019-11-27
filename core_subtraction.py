@@ -387,12 +387,13 @@ def main():
         matplotlib.rcParams['ytick.minor.width'] = 2
         matplotlib.rcParams['axes.linewidth'] = 2
 
-        plt.suptitle(f'{blazar_name}', fontsize=30)
+        p = 'unresolved' if unresolved else 'resolved'
+        plt.suptitle(f'{blazar_name} ({p})', fontsize=30)
 
         ax0 = plt.subplot(1, 3, 1, projection=wcs)
         ax0.imshow(blazar_regrid, origin='lower', cmap='RdGy',
-                   vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid),
-                   norm=DS9Normalize(stretch='arcsinh'))
+                   vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid))
+        # norm=DS9Normalize(stretch='arcsinh'))
         ax0.tick_params(axis='both', which='major', labelsize=20,
                         direction='in')
         beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
@@ -407,8 +408,7 @@ def main():
 
         ax1 = plt.subplot(1, 3, 2, projection=wcs)
         ax1.imshow(scaled_model, origin='lower', cmap='RdGy',
-                   vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid),
-                   norm=DS9Normalize(stretch='arcsinh'))
+                   vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid))
         ax1.tick_params(axis='both', which='major', labelsize=20,
                         direction='in')
         beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
@@ -426,8 +426,7 @@ def main():
         ax2 = plt.subplot(1, 3, 3, projection=wcs)
         ax2.imshow(blazar_regrid - scaled_model, origin='lower',
                    cmap='RdGy', vmin=-np.max(blazar_regrid),
-                   vmax=np.max(blazar_regrid),
-                   norm=DS9Normalize(stretch='arcsinh'))
+                   vmax=np.max(blazar_regrid))
         ax2.tick_params(axis='both', which='major', labelsize=20,
                         direction='in')
         beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
