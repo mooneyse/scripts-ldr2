@@ -321,15 +321,15 @@ def main():
        from a source with diffuse emission.
     """
     catalogue_dir = '/data5/sean/ldr2/catalogues/'
-    csv = f'{catalogue_dir}LDR2 and BZCAT 10_ crossmatch - Copy of BL Lacs.csv'
-    output = f'{catalogue_dir}../images/core-subtraction/'
-    figsize = (32, 8)
-    my_blazars, my_diffuse = [], []
-    df_blazars = pd.read_csv(csv)
+    df_blazars = pd.read_csv(f'{catalogue_dir}LDR2 and BZCAT 10_ crossmatch - '
+                             'Copy of BL Lacs.csv')
     df_blazars.set_index('BZCAT name', inplace=True)
+    print(f'Index (of {len(df_blazars.index.tolist())}), Source, Total (mJy), '
+          'Core (mJy), Diffuse (mJy), Unresolved?')
 
     for i, (blazar_name, blazar_ra, blazar_dec, bmaj, bmin, angle, peak_flux,
-            image, rms) in enumerate(zip(df_blazars.index.tolist(),
+            image, rms, total_flux,
+            unresolved) in enumerate(zip(df_blazars.index.tolist(),
                                          df_blazars['BZCAT RA'],
                                          df_blazars['BZCAT Dec'],
                                          df_blazars['Point major'],
@@ -337,10 +337,10 @@ def main():
                                          df_blazars['Point angle'],
                                          df_blazars['Peak_flux'],
                                          df_blazars['Mosaic_ID'],
-                                         df_blazars['Isl_rms'])):
+                                         df_blazars['Isl_rms'],
+                                         df_blazars['Total_flux'],
+                                         df_blazars['Compact'])):
         blazar_position = [blazar_ra, blazar_dec]
-        print(f'Analysing {blazar_name} which is in {image} (BL Lac {i + 1} of'
-              f' {len(df_blazars.index.tolist())}).')
         hdu = fits.open(f'/data5/sean/ldr2/mosaics/{image}-mosaic.fits')[0]
         wcs = WCS(hdu.header, naxis=2)
         sky_position = SkyCoord(blazar_position[0], blazar_position[1],
@@ -360,7 +360,8 @@ def main():
         xy = np.meshgrid(np.linspace(0, x_ - 1, x_),
                          np.linspace(0, y_ - 1, y_))
         scaled_model = gaussian(xy=xy,
-                                amplitude=np.max(blazar_regrid),  # jansky
+                                amplitude=peak_flux * 1000,
+                                # amplitude=np.max(blazar_regrid),
                                 x0=x0,
                                 y0=y0,
                                 # fwhm from asec to pixels to sigma
@@ -369,7 +370,11 @@ def main():
                                 theta=angle,
                                 offset=0)
 
-        plt.figure(figsize=figsize)
+        core_flux = np.sum(scaled_model) * 1000 / 18.1294  # divide beam area
+        print(f'{i + 1}, {blazar_name}, {total_flux}, {core_flux},'
+              f'{total_flux - core_flux}, {unresolved}')
+
+        plt.figure(figsize=(32, 8))
         plt.rcParams['font.family'] = 'serif'
         plt.rcParams['mathtext.fontset'] = 'dejavuserif'
         matplotlib.rcParams['xtick.major.size'] = 10
@@ -392,59 +397,33 @@ def main():
         ax0.add_patch(beam)
         plt.xlabel('Right ascension', fontsize=20, color='black')
         plt.ylabel('Declination', fontsize=20, color='black')
+        plt.title(f'S_int = {total_flux}')
+        ax0.contour(blazar_regrid, levels=[rms * 4 / 1000], origin='lower',
+                    colors='w')
 
         ax1 = plt.subplot(1, 3, 2, projection=wcs)
         ax1.imshow(scaled_model, origin='lower', cmap='RdGy',
                    vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid))
-        # norm=DS9Normalize(stretch='arcsinh'))
-        ax1.tick_params(axis='both', which='major', labelsize=20)
-        beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
-                      edgecolor='blue')
-        ax1.add_patch(beam)
-        plt.xlabel('Right ascension', fontsize=20, color='black')
-        plt.ylabel('Declination', fontsize=20, color='black')
+        plt.title(f'S_core = {core_flux}')
+        ax1.contour(blazar_regrid, levels=[rms * 4 / 1000], origin='lower',
+                    colors='w')
+        ax1.contour(scaled_model, levels=[rms * 4 / 1000], origin='lower',
+                    colors='cyan')
 
         ax2 = plt.subplot(1, 3, 3, projection=wcs)
         ax2.imshow(blazar_regrid - scaled_model, origin='lower',
                    cmap='RdGy', vmin=-np.max(blazar_regrid),
                    vmax=np.max(blazar_regrid))
-        # norm=DS9Normalize(stretch='arcsinh'))
-        ax2.tick_params(axis='both', which='major', labelsize=20)
-        beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
-                      edgecolor='blue')
-        ax2.add_patch(beam)
-        plt.xlabel('Right ascension', fontsize=20, color='black')
-        plt.ylabel('Declination', fontsize=20, color='black')
+        plt.title(f'S_diffuse = {total_flux - core_flux}')
+        ax2.contour(blazar_regrid, levels=[rms * 4 / 1000], origin='lower',
+                    colors='w')
+        ax2.contour(blazar_regrid - scaled_model, levels=[rms * 4 / 1000],
+                    origin='lower', colors='magenta')
 
-        plt.show()
-        # plt.savefig(f'{output}/2-plots-{blazar_name}.png')
-
-        print(f'{blazar_name}, {np.sum(scaled_model) * 1000 / 18.1294} mJy')
-        # return
-
-        # b, d = diffuse_fraction(df=df_blazars, name=blazar_name, blazar=blazar_regrid_back, diffuse=blazar_residual_regrid_back, threshold=five_sigma)
-        # my_blazars.append(b)
-        # my_diffuse.append(d)
-
-        # make_plot(position=1, data=point_source_regrid, title=point_source_id, vmax=np.max(point_source_regrid))
-        # make_plot(position=2, data=model, title=point_source_id + ' model', vmax=np.max(point_source_regrid))
-        # make_plot(position=3, data=point_source_residual, title=point_source_id + ' residual', vmax=np.max(point_source_regrid))
-        # make_plot(position=4, data=blazar_shifted, title=blazar_name, vmax=np.max(blazar_shifted))
-        # make_plot(position=5, data=blazar_residual, title=blazar_name + ' diffuse', vmax=np.max(blazar_shifted))
-        # make_plot(position=6, data=blazar_regrid_back, title=blazar_name, levels=five_sigma, plot='blazar', vmax=np.max(blazar_regrid_back))
-        # make_plot(position=7, data=blazar_residual_regrid_back, title=blazar_name + ' diffuse', levels=five_sigma, plot='diffuse', layer=blazar_regrid_back, vmax=np.max(blazar_regrid_back))
-        # new_plots(pos=1, data=blazar_regrid_back, vmax=np.max(blazar_regrid_back), levels=five_sigma)
-        # old_max = np.max(blazar_regrid_back)
-        # blazar_regrid_back[24:43, 36:42] = 0
-        # blazar_regrid_back[38:40, 42:43] = 0
-        # blazar_regrid_back[35:38, 35:36] = 0
-        # blazar_regrid_back[27:30, 42:43] = 0
-        # new_plots(pos=2, data=blazar_regrid_back, vmax=old_max, levels=five_sigma, layer=blazar_regrid_back, plot_type='diffuse')
-        # new_plots(pos=2, data=blazar_residual_regrid_back, vmax=np.max(blazar_regrid_back), levels=five_sigma, layer=blazar_regrid_back, plot_type='diffuse')
-
-    # print()
-    # for b, d in zip(my_blazars, my_diffuse):
-    #     print(f'{b} {d}')
+        # plt.show()
+        plt.savefig(f'{catalogue_dir}../images/core-subtraction'
+                    f'/2-plots-{blazar_name}.png')
+        plt.close()
 
 
 if __name__ == '__main__':
