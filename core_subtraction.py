@@ -387,6 +387,8 @@ def main():
         matplotlib.rcParams['ytick.minor.width'] = 2
         matplotlib.rcParams['axes.linewidth'] = 2
 
+        plt.suptitle(f'{blazar_name}', fontsize=20)
+
         ax0 = plt.subplot(1, 3, 1, projection=wcs)
         ax0.imshow(blazar_regrid, origin='lower', cmap='RdGy',
                    vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid))
