@@ -442,14 +442,15 @@ def main():
         ax2.contour(blazar_regrid - scaled_model, levels=[rms * 4 / 1000],
                     origin='lower', colors='blue', ls='dashed')
 
-        if blazar_name == '5BZB J1340+4410':
-            plt.show()
-            print(blazar_name, 'blazar peak:', x0, y0)
-            x0, y0 = np.unravel_index(scaled_model.argmax(), scaled_model.shape)
-            print(blazar_name, 'Gaussian peak:', x0, y0)
-        else:
-            plt.savefig(f'{catalogue_dir}../images/core-subtraction'
-                        f'/core-sub-{blazar_name.replace(" ", "")}.png')
+        # if blazar_name == '5BZB J1340+4410':
+        #     plt.show()
+        #     print(blazar_name, 'blazar peak:', x0, y0)
+        #     x0, y0 = np.unravel_index(scaled_model.argmax(),
+        #                               scaled_model.shape)
+        #     print(blazar_name, 'Gaussian peak:', x0, y0)
+        # else:
+        plt.savefig(f'{catalogue_dir}../images/core-subtraction'
+                    f'/core-sub-{blazar_name.replace(" ", "")}.png')
         plt.close()
 
 
