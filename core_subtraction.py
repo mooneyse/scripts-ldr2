@@ -370,7 +370,7 @@ def main():
                                 theta=angle,
                                 offset=0)
 
-        core_flux = np.sum(scaled_model) / 1000 / 18.1294  # divide beam area
+        core_flux = np.sum(scaled_model) * 1000 / 18.1294  # divide beam area
         print(f'{i + 1}, {blazar_name}, {total_flux}, {core_flux},'
               f'{total_flux - core_flux}, {unresolved}')
 
@@ -391,20 +391,25 @@ def main():
         ax0.imshow(blazar_regrid, origin='lower', cmap='RdGy',
                    vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid))
         # norm=DS9Normalize(stretch='arcsinh'))
-        ax0.tick_params(axis='both', which='major', labelsize=20)
+        ax0.tick_params(axis='both', which='major', labelsize=20,
+                        direction='in')
         beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
                       edgecolor='blue')
         ax0.add_patch(beam)
         plt.xlabel('Right ascension', fontsize=20, color='black')
         plt.ylabel('Declination', fontsize=20, color='black')
-        plt.title(f'S_int = {total_flux}')
+        plt.title(f'S_int = {total_flux:.2f} mJy', fontsize=20)
         ax0.contour(blazar_regrid, levels=[rms * 4 / 1000], origin='lower',
                     colors='r')
 
         ax1 = plt.subplot(1, 3, 2, projection=wcs)
         ax1.imshow(scaled_model, origin='lower', cmap='RdGy',
                    vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid))
-        plt.title(f'S_core = {core_flux}')
+        ax1.tick_params(axis='both', which='major', labelsize=20,
+                        direction='in')
+        plt.xlabel('Right ascension', fontsize=20, color='black')
+        plt.ylabel('Declination', fontsize=20, color='black')
+        plt.title(f'S_core = {core_flux:.2f} mJy', fontsize=20)
         ax1.contour(blazar_regrid, levels=[rms * 4 / 1000], origin='lower',
                     colors='r')
         ax1.contour(scaled_model, levels=[rms * 4 / 1000], origin='lower',
@@ -414,7 +419,11 @@ def main():
         ax2.imshow(blazar_regrid - scaled_model, origin='lower',
                    cmap='RdGy', vmin=-np.max(blazar_regrid),
                    vmax=np.max(blazar_regrid))
-        plt.title(f'S_diffuse = {total_flux - core_flux}')
+        ax2.tick_params(axis='both', which='major', labelsize=20,
+                        direction='in')
+        plt.xlabel('Right ascension', fontsize=20, color='black')
+        plt.ylabel('Declination', fontsize=20, color='black')
+        plt.title(f'S_diffuse = {total_flux - core_flux:.2f} mJy', fontsize=20)
         ax2.contour(blazar_regrid, levels=[rms * 4 / 1000], origin='lower',
                     colors='r')
         ax2.contour(blazar_regrid - scaled_model, levels=[rms * 4 / 1000],
