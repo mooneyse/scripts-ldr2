@@ -362,8 +362,8 @@ def main():
         scaled_model = gaussian(xy=xy,
                                 amplitude=peak_flux / 1000,
                                 # amplitude=np.max(blazar_regrid),
-                                x0=x0,
-                                y0=y0,
+                                x0=y0,
+                                y0=x0,
                                 # fwhm from asec to pixels to sigma
                                 sigma_x=bmaj / 1.5 / 2.355,
                                 sigma_y=bmin / 1.5 / 2.355,
