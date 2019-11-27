@@ -360,7 +360,7 @@ def main():
         xy = np.meshgrid(np.linspace(0, x_ - 1, x_),
                          np.linspace(0, y_ - 1, y_))
         scaled_model = gaussian(xy=xy,
-                                amplitude=peak_flux * 1000,
+                                amplitude=peak_flux / 1000,
                                 # amplitude=np.max(blazar_regrid),
                                 x0=x0,
                                 y0=y0,
@@ -399,16 +399,16 @@ def main():
         plt.ylabel('Declination', fontsize=20, color='black')
         plt.title(f'S_int = {total_flux}')
         ax0.contour(blazar_regrid, levels=[rms * 4 / 1000], origin='lower',
-                    colors='w')
+                    colors='r')
 
         ax1 = plt.subplot(1, 3, 2, projection=wcs)
         ax1.imshow(scaled_model, origin='lower', cmap='RdGy',
                    vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid))
         plt.title(f'S_core = {core_flux}')
         ax1.contour(blazar_regrid, levels=[rms * 4 / 1000], origin='lower',
-                    colors='w')
+                    colors='r')
         ax1.contour(scaled_model, levels=[rms * 4 / 1000], origin='lower',
-                    colors='cyan')
+                    colors='g')
 
         ax2 = plt.subplot(1, 3, 3, projection=wcs)
         ax2.imshow(blazar_regrid - scaled_model, origin='lower',
@@ -416,7 +416,7 @@ def main():
                    vmax=np.max(blazar_regrid))
         plt.title(f'S_diffuse = {total_flux - core_flux}')
         ax2.contour(blazar_regrid, levels=[rms * 4 / 1000], origin='lower',
-                    colors='w')
+                    colors='r')
         ax2.contour(blazar_regrid - scaled_model, levels=[rms * 4 / 1000],
                     origin='lower', colors='magenta')
 
