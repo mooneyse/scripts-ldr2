@@ -370,7 +370,7 @@ def main():
                                 theta=angle,
                                 offset=0)
 
-        core_flux = np.sum(scaled_model) * 1000 / 18.1294  # divide beam area
+        core_flux = np.sum(scaled_model) / 1000 / 18.1294  # divide beam area
         print(f'{i + 1}, {blazar_name}, {total_flux}, {core_flux},'
               f'{total_flux - core_flux}, {unresolved}')
 
