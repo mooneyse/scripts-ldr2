@@ -371,7 +371,7 @@ def main():
                                 offset=0)
 
         core_flux = np.sum(scaled_model) * 1000 / 18.1294  # divide beam area
-        print(f'{i + 1}, {blazar_name}, {total_flux}, {core_flux},'
+        print(f'{i + 1}, {blazar_name}, {total_flux}, {core_flux}, '
               f'{total_flux - core_flux}, {unresolved}')
 
         plt.figure(figsize=(32, 8))
@@ -398,7 +398,8 @@ def main():
         ax0.add_patch(beam)
         plt.xlabel('Right ascension', fontsize=20, color='black')
         plt.ylabel('Declination', fontsize=20, color='black')
-        plt.title(f'S_int = {total_flux:.2f} mJy', fontsize=20)
+        plt.title(r'$S_\mathrm{int}$' + f' = {total_flux:.2f} mJy',
+                  fontsize=20)
         ax0.contour(blazar_regrid, levels=[rms * 4 / 1000], origin='lower',
                     colors='r')
 
@@ -407,9 +408,13 @@ def main():
                    vmax=np.max(blazar_regrid), vmin=-np.max(blazar_regrid))
         ax1.tick_params(axis='both', which='major', labelsize=20,
                         direction='in')
+        beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
+                      edgecolor='blue')
+        ax1.add_patch(beam)
         plt.xlabel('Right ascension', fontsize=20, color='black')
         plt.ylabel('Declination', fontsize=20, color='black')
-        plt.title(f'S_core = {core_flux:.2f} mJy', fontsize=20)
+        plt.title(r'$S_\mathrm{core}$' + f' = {core_flux:.2f} mJy',
+                  fontsize=20)
         ax1.contour(blazar_regrid, levels=[rms * 4 / 1000], origin='lower',
                     colors='r')
         ax1.contour(scaled_model, levels=[rms * 4 / 1000], origin='lower',
@@ -421,17 +426,21 @@ def main():
                    vmax=np.max(blazar_regrid))
         ax2.tick_params(axis='both', which='major', labelsize=20,
                         direction='in')
+        beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
+                      edgecolor='blue')
+        ax2.add_patch(beam)
         plt.xlabel('Right ascension', fontsize=20, color='black')
         plt.ylabel('Declination', fontsize=20, color='black')
-        plt.title(f'S_diffuse = {total_flux - core_flux:.2f} mJy', fontsize=20)
+        plt.title(r'$S_\mathrm{diffuse}$' + f' = {total_flux - core_flux:.2f}'
+                  + ' mJy', fontsize=20)
         ax2.contour(blazar_regrid, levels=[rms * 4 / 1000], origin='lower',
                     colors='r')
         ax2.contour(blazar_regrid - scaled_model, levels=[rms * 4 / 1000],
-                    origin='lower', colors='magenta')
+                    origin='lower', colors='blue')
 
         # plt.show()
         plt.savefig(f'{catalogue_dir}../images/core-subtraction'
-                    f'/2-plots-{blazar_name}.png')
+                    f'/core-sub-{blazar_name.replace(" ", "")}.png')
         plt.close()
 
 
