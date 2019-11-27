@@ -28,36 +28,6 @@ from scipy.ndimage.interpolation import map_coordinates, shift
 import scipy.optimize as opt
 from ds9norm import DS9Normalize
 
-# def get_df(filename, format, index):
-#     """Create the data frame.
-#     """
-#     if format == 'csv':
-#         df = pd.read_csv(filename)
-#     else:
-#         data = Table.read(filename, format=format)
-#         df = data.to_pandas()
-#     df.set_index(index, inplace=True)
-#     return df
-
-
-# def get_position(df, cat_dir):
-#     """Look up the position of the blazar.
-#     """
-#     blazar_names = df.index.tolist()
-#     blazar_positions, catalogues, fits_images = [], [], []
-#     for ra, dec, field in zip(df['BZCAT RA'], df['BZCAT Dec'],
-#                               df['Mosaic_ID']):
-#         blazar_positions.append([ra, dec])
-#         field = field.lower().replace(' ', '.')
-#         catalogues.append(f'{cat_dir}/ldr2-point-sources-near-bllacs.csv')
-#         fits_images.append(f'/data5/sean/ldr2/mosaics/{field}-mosaic.fits')
-#     return blazar_names, blazar_positions, catalogues, fits_images
-
-
-# def new_nearest_point_source(csv, bllac):
-#     df = pd.read_csv('/data5/sean/ldr2/catalogues/bright.near.points.csv')
-#     df = df[df['BZCAT name'] == bllac]
-
 
 def nearest_point_source(df, position, s_code='S', flux_threshold=0.01,
                          distance_threshold=1.5, elongation_threshold=1.2):
@@ -351,23 +321,13 @@ def main():
        from a source with diffuse emission.
     """
     catalogue_dir = '/data5/sean/ldr2/catalogues/'
-    # catalogue = f'{catalogue_dir}ldr2-point-sources-near-bllacs.csv'
     csv = f'{catalogue_dir}LDR2 and BZCAT 10_ crossmatch - Copy of BL Lacs.csv'
     output = f'{catalogue_dir}../images/core-subtraction/'
-
-    font = 'STIXGeneral'
-    math_font = 'cm'
-    font_size = 12
-    figsize = (17, 8)
-    # testing = False
-    new_size = 10
+    figsize = (32, 8)
     my_blazars, my_diffuse = [], []
-
-    # df_blazars = get_df(csv, format='csv', index='BZCAT name')
     df_blazars = pd.read_csv(csv)
     df_blazars.set_index('BZCAT name', inplace=True)
-    # (blazar_names, blazar_positions,
-    #  catalogues, images) = get_position(df_blazars, cat_dir=catalogue_dir)
+
     for i, (blazar_name, blazar_ra, blazar_dec, bmaj, bmin, angle, peak_flux,
             image, rms) in enumerate(zip(df_blazars.index.tolist(),
                                          df_blazars['BZCAT RA'],
@@ -379,21 +339,8 @@ def main():
                                          df_blazars['Mosaic_ID'],
                                          df_blazars['Isl_rms'])):
         blazar_position = [blazar_ra, blazar_dec]
-        # if testing:
-        #     if i != 0:  # do one at a time
-        #         sys.exit()
-        # if blazar_name != '5BZQJ1437+3519':
-        #     continue
         print(f'Analysing {blazar_name} which is in {image} (BL Lac {i + 1} of'
               f' {len(df_blazars.index.tolist())}).')
-        # df_cat = get_df(catalogue, format='csv', index='Source_Name')
-        # (point_source_id,
-        #  point_source_position = nearest_point_source(df_cat,
-        #                                               blazar_position)
-        # if point_source_id is False:
-        #     print('Going to the next iteration.')
-        #     continue
-        # hdu, wcs = get_fits(filename=image)
         hdu = fits.open(f'/data5/sean/ldr2/mosaics/{image}-mosaic.fits')[0]
         wcs = WCS(hdu.header, naxis=2)
         sky_position = SkyCoord(blazar_position[0], blazar_position[1],
@@ -408,23 +355,7 @@ def main():
                           wcs=wcs)
         blazar_data = cutout.data  # 1 pixel = 1.5"
         blazar_regrid = blazar_data
-        # blazar_regrid = regrid(blazar_data, new_size=new_size,
-        #                        normalise=False)
-        # 1 pixel of blazar_regrid = 1.5" / new_size
-        # blazar_regrid = blazar_data
         x0, y0 = np.unravel_index(blazar_regrid.argmax(), blazar_regrid.shape)
-        # plt.imshow(blazar_regrid, origin='lower')
-        # plt.show()
-        # blazar_data = housekeeping(blazar_name, blazar_data)
-        # point_source_data = get_data(position=point_source_position, hdu=hdu,
-        #                              wcs=wcs)
-        # NOTE peak and total values change with regridding
-        # point_source_regrid = regrid(point_source_data, new_size=new_size,
-        #                              normalise=False)
-        # model = make_model(point_source_regrid, sigma_x=4, sigma_y=4)
-        # point_source_residual = point_source_regrid - model
-        # scaled_model = (model * np.max(blazar_regrid) /
-        #                 np.max(point_source_regrid))
         x_, y_ = blazar_regrid.shape
         xy = np.meshgrid(np.linspace(0, x_ - 1, x_),
                          np.linspace(0, y_ - 1, y_))
@@ -432,12 +363,12 @@ def main():
                                 amplitude=np.max(blazar_regrid),  # jansky
                                 x0=x0,
                                 y0=y0,
-                                sigma_x=bmaj / 2 / 1.5,  # * new_size,
-                                sigma_y=bmin / 2 / 1.5,  # * new_size,
+                                # fwhm from asec to pixels to sigma
+                                sigma_x=bmaj / 1.5 / 2.355,
+                                sigma_y=bmin / 1.5 / 2.355,
                                 theta=angle,
                                 offset=0)
-        # plt.imshow(scaled_model, origin='lower')
-        # plt.show()
+
         plt.figure(figsize=figsize)
         plt.rcParams['font.family'] = 'serif'
         plt.rcParams['mathtext.fontset'] = 'dejavuserif'
@@ -457,7 +388,7 @@ def main():
         # norm=DS9Normalize(stretch='arcsinh'))
         ax0.tick_params(axis='both', which='major', labelsize=20)
         beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
-                      edgecolor='blue')  # radius=2 pixels -> 3" -> diameter=6"
+                      edgecolor='blue')
         ax0.add_patch(beam)
         plt.xlabel('Right ascension', fontsize=20, color='black')
         plt.ylabel('Declination', fontsize=20, color='black')
@@ -468,7 +399,7 @@ def main():
         # norm=DS9Normalize(stretch='arcsinh'))
         ax1.tick_params(axis='both', which='major', labelsize=20)
         beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
-                      edgecolor='blue')  # radius=2 pixels -> 3" -> diameter=6"
+                      edgecolor='blue')
         ax1.add_patch(beam)
         plt.xlabel('Right ascension', fontsize=20, color='black')
         plt.ylabel('Declination', fontsize=20, color='black')
@@ -480,35 +411,21 @@ def main():
         # norm=DS9Normalize(stretch='arcsinh'))
         ax2.tick_params(axis='both', which='major', labelsize=20)
         beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
-                      edgecolor='blue')  # radius=2 pixels -> 3" -> diameter=6"
+                      edgecolor='blue')
         ax2.add_patch(beam)
         plt.xlabel('Right ascension', fontsize=20, color='black')
         plt.ylabel('Declination', fontsize=20, color='black')
 
-        plt.tight_layout()
         plt.show()
-        return
-        continue
-        if i > 1:
-            return
-        # blazar_shifted = match_peaks(blazar_regrid, scaled_model)
-        # blazar_residual = blazar_shifted - scaled_model
-        # blazar_regrid_back = regrid(blazar_shifted, new_size=1 / new_size, normalise=False)  # regrid the blazar and blazar residual data back to the native resolution
-        # blazar_residual_regrid_back = regrid(blazar_residual, new_size=1 / new_size, normalise=False)
-        # five_sigma = get_noise_catalogue(df_blazars, blazar_name)
-        # if blazar_name == '5BZQJ1437+3519':
-        #     print('Doing a little more housekeeping on {}.'.format(blazar_name))
-        #     blazar_regrid_back[:, 60:] = 0
-        #     blazar_residual_regrid_back[:, 60:] = 0
-        b, d = diffuse_fraction(df=df_blazars, name=blazar_name, blazar=blazar_regrid_back, diffuse=blazar_residual_regrid_back, threshold=five_sigma)
-        my_blazars.append(b)
-        my_diffuse.append(d)
-        continue  # skip the plotting as I have that already
-        savefig = output + '/' + blazar_name + '.png'
-        matplotlib.rcParams['font.family'] = font
-        matplotlib.rcParams['mathtext.fontset'] = math_font
-        matplotlib.rcParams['font.size'] = font_size
-        plt.figure(figsize=figsize)
+        # plt.savefig(f'{output}/2-plots-{blazar_name}.png')
+
+        print(f'{blazar_name}, {np.sum(scaled_model) * 1000 / 18.1294} mJy')
+        # return
+
+        # b, d = diffuse_fraction(df=df_blazars, name=blazar_name, blazar=blazar_regrid_back, diffuse=blazar_residual_regrid_back, threshold=five_sigma)
+        # my_blazars.append(b)
+        # my_diffuse.append(d)
+
         # make_plot(position=1, data=point_source_regrid, title=point_source_id, vmax=np.max(point_source_regrid))
         # make_plot(position=2, data=model, title=point_source_id + ' model', vmax=np.max(point_source_regrid))
         # make_plot(position=3, data=point_source_residual, title=point_source_id + ' residual', vmax=np.max(point_source_regrid))
@@ -516,33 +433,18 @@ def main():
         # make_plot(position=5, data=blazar_residual, title=blazar_name + ' diffuse', vmax=np.max(blazar_shifted))
         # make_plot(position=6, data=blazar_regrid_back, title=blazar_name, levels=five_sigma, plot='blazar', vmax=np.max(blazar_regrid_back))
         # make_plot(position=7, data=blazar_residual_regrid_back, title=blazar_name + ' diffuse', levels=five_sigma, plot='diffuse', layer=blazar_regrid_back, vmax=np.max(blazar_regrid_back))
-        # if testing:
-        #     plt.show()
-        # else:
-        #     plt.savefig(savefig, bbox_inches=bbox_inches)
-        #     print(f'Done! The plot is saved. View it with this: gpicview {savefig}')
-        # TODO make a df from the results and export it as a csv
-        # TODO make a new plotter only showing the 2d blazar_regrid_back and blazar_residual_regrid_back with viridis
-        #      could I get this contour onto the radio image with proper axes?
-        #      my results might not be correct as I am manually blocking out areas for certain sources
-        # TODO plot negative flux to see if there are any bowls, using a diverging colour scale
-        # TODO does the flux within 5 sigma equal the catalogue flux?
-        new_plots(pos=1, data=blazar_regrid_back, vmax=np.max(blazar_regrid_back), levels=five_sigma)
+        # new_plots(pos=1, data=blazar_regrid_back, vmax=np.max(blazar_regrid_back), levels=five_sigma)
         # old_max = np.max(blazar_regrid_back)
         # blazar_regrid_back[24:43, 36:42] = 0
         # blazar_regrid_back[38:40, 42:43] = 0
         # blazar_regrid_back[35:38, 35:36] = 0
         # blazar_regrid_back[27:30, 42:43] = 0
         # new_plots(pos=2, data=blazar_regrid_back, vmax=old_max, levels=five_sigma, layer=blazar_regrid_back, plot_type='diffuse')
-        new_plots(pos=2, data=blazar_residual_regrid_back, vmax=np.max(blazar_regrid_back), levels=five_sigma, layer=blazar_regrid_back, plot_type='diffuse')
-        # plt.title(blazar_name, color='white')
-        plt.tight_layout()
-        plt.show()
-        # plt.savefig(f'{output}/2-plots-{blazar_name}.png')
+        # new_plots(pos=2, data=blazar_residual_regrid_back, vmax=np.max(blazar_regrid_back), levels=five_sigma, layer=blazar_regrid_back, plot_type='diffuse')
 
-    print()
-    for b, d in zip(my_blazars, my_diffuse):
-        print(f'{b} {d}')
+    # print()
+    # for b, d in zip(my_blazars, my_diffuse):
+    #     print(f'{b} {d}')
 
 
 if __name__ == '__main__':
