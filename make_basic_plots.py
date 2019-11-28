@@ -84,7 +84,7 @@ def my_plot(my_directory='/home/sean/Downloads'):
                  #xerr=df['Redshift'] * 0.1,
                  yerr=df['Luminosity error with FIRST index (W/Hz)'],
                  ls='none', color='k')
-    plt.xlabel('Redshift', fontsize=30)
+    plt.xlabel(r'$z$', fontsize=30)
     plt.ylabel(r'$L$ (W Hz$^{-1}$)', fontsize=30)
     plt.xticks(fontsize=30)
     plt.yticks([0, 1e26, 2e26, 3e26, 4e26, 5e26],
