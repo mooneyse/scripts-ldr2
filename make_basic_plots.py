@@ -18,7 +18,7 @@ def g(x, pos):
     return r'${}$'.format(f._formatSciNotation('%1.10e' % x))
 
 
-def my_plot(my_directory='/mnt/closet/ldr2'):
+def my_plot(my_directory='/home/sean/Downloads'):
     """Make some plots.
 
     Parameters
@@ -27,7 +27,8 @@ def my_plot(my_directory='/mnt/closet/ldr2'):
         Working directory.
     """
 
-    df = pd.read_csv(f'{my_directory}/catalogues/final.csv')
+    df = pd.read_csv(f'{my_directory}/LDR2 and BZCAT 10_ crossmatch - '
+                     'Basic.csv')
     # f = mticker.ScalarFormatter(useOffset=False, useMathText=True)
     # g = lambda x, pos: '${}$'.format(f._formatSciNotation('%1.10e' % x))
 
@@ -45,69 +46,76 @@ def my_plot(my_directory='/mnt/closet/ldr2'):
     mpl.rcParams['axes.linewidth'] = 2
 
     # plot extent (kpc) against spectral index
-    plt.errorbar(df['Extent (kpc)'], df['LDR2-to-NVSS index'],
-                 xerr=df['Extent (kpc)'] * 0.2,
-                 yerr=df['LDR2-to-NVSS index'] * 0.2,
+    plt.errorbar(df['Extent (kpc)'], df['LDR2-to-FIRST index'],
+                 xerr=df['Extent error (kpc)'],
+                 yerr=df['LDR2-to-FIRST index error'],
                  marker='o', ls='none', color='k')
-    plt.xlabel('Extent (kpc)', fontsize=20)
-    plt.ylabel(r'$\alpha_{\mathrm{MHz-GHz}}$', fontsize=20)
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
+    plt.xlabel('Extent (kpc)', fontsize=30)
+    plt.ylabel(r'$\alpha_{\mathrm{MHz-GHz}}$', fontsize=30)
+    plt.xticks(fontsize=30)
+    plt.yticks(fontsize=30)
     plt.tight_layout()
     # plt.show()
-    plt.savefig(f'{my_directory}/images/extent-v-index.png')
+    plt.savefig(f'{my_directory}/extent-v-index.png')
     plt.clf()
 
     # plot extent (kpc) against radio luminosity
-    plt.errorbar(df['Extent (kpc)'], df['Luminosity (W/Hz)'], marker='o',
-                 xerr=df['Extent (kpc)'] * 0.2,
-                 yerr=df['Luminosity (W/Hz)'] * 0.2,
+    plt.errorbar(df['Extent (kpc)'], df['Luminosity with FIRST index (W/Hz)'],
+                 marker='o',
+                 xerr=df['Extent error (kpc)'],
+                 yerr=df['Luminosity error with FIRST index (W/Hz)'],
                  ls='none', color='k')
-    plt.xlabel('Extent (kpc)', fontsize=20)
-    plt.ylabel(r'$L$ (W Hz$^{-1}$)', fontsize=20)
-    plt.xticks(fontsize=20)
+    plt.xlabel('Extent (kpc)', fontsize=30)
+    plt.ylabel(r'$L$ (W Hz$^{-1}$)', fontsize=30)
+    plt.xticks(fontsize=30)
     plt.yticks([0, 1e26, 2e26, 3e26, 4e26, 5e26],
                ['0', r'$1 \times 10^{26}$', r'$2 \times 10^{26}$',
                 r'$3 \times 10^{26}$', r'$4 \times 10^{26}$',
-                r'$5 \times 10^{26}$'], fontsize=20)
+                r'$5 \times 10^{26}$'], fontsize=30)
+    plt.yscale('log')
     plt.tight_layout()
     # plt.show()
-    plt.savefig(f'{my_directory}/images/extent-v-luminosity.png')
+    plt.savefig(f'{my_directory}/extent-v-luminosity.png')
     plt.clf()
 
     # plot luminosity against redshift
-    plt.errorbar(df['Redshift'], df['Luminosity (W/Hz)'], marker='o',
-                 xerr=df['Redshift'] * 0.2,
-                 yerr=df['Luminosity (W/Hz)'] * 0.2,
+    plt.errorbar(df['redshift'], df['Luminosity with FIRST index (W/Hz)'],
+                 marker='o',
+                 #xerr=df['Redshift'] * 0.1,
+                 yerr=df['Luminosity error with FIRST index (W/Hz)'],
                  ls='none', color='k')
-    plt.xlabel('Redshift', fontsize=20)
-    plt.ylabel(r'$L$ (W Hz$^{-1}$)', fontsize=20)
-    plt.xticks(fontsize=20)
+    plt.xlabel('Redshift', fontsize=30)
+    plt.ylabel(r'$L$ (W Hz$^{-1}$)', fontsize=30)
+    plt.xticks(fontsize=30)
     plt.yticks([0, 1e26, 2e26, 3e26, 4e26, 5e26],
                ['0', r'$1 \times 10^{26}$', r'$2 \times 10^{26}$',
                 r'$3 \times 10^{26}$', r'$4 \times 10^{26}$',
-                r'$5 \times 10^{26}$'], fontsize=20)
+                r'$5 \times 10^{26}$'], fontsize=30)
+    plt.yscale('log')
     plt.tight_layout()
     # plt.show()
-    plt.savefig(f'{my_directory}/images/redshift-v-luminosity.png')
+    plt.savefig(f'{my_directory}/redshift-v-luminosity.png')
     plt.clf()
 
     # plot luminosity against spectral index
-    plt.errorbar(df['LDR2-to-NVSS index'], df['Luminosity (W/Hz)'], marker='o',
-                 xerr=df['LDR2-to-NVSS index'] * 0.2,
-                 yerr=df['Luminosity (W/Hz)'] * 0.2,
+    plt.errorbar(df['LDR2-to-FIRST index'],
+                 df['Luminosity with FIRST index (W/Hz)'],
+                 marker='o',
+                 xerr=df['LDR2-to-FIRST index error'],
+                 yerr=df['Luminosity error with FIRST index (W/Hz)'],
                  ls='none', color='k')
-    plt.xlabel(r'$\alpha_{\mathrm{MHz-GHz}}$', fontsize=20)
-    plt.ylabel(r'$L$ (W Hz$^{-1}$)', fontsize=20)
-    plt.xticks(fontsize=20)
-    plt.yticks(fontsize=20)
+    plt.xlabel(r'$\alpha_{\mathrm{MHz-GHz}}$', fontsize=30)
+    plt.ylabel(r'$L$ (W Hz$^{-1}$)', fontsize=30)
+    plt.xticks(fontsize=30)
+    plt.yticks(fontsize=30)
     plt.yticks([0, 1e26, 2e26, 3e26, 4e26, 5e26],
                ['0', r'$1 \times 10^{26}$', r'$2 \times 10^{26}$',
                 r'$3 \times 10^{26}$', r'$4 \times 10^{26}$',
-                r'$5 \times 10^{26}$'], fontsize=20)
+                r'$5 \times 10^{26}$'], fontsize=30)
+    plt.yscale('log')
     plt.tight_layout()
     # plt.show()
-    plt.savefig(f'{my_directory}/images/index-v-luminosity.png')
+    plt.savefig(f'{my_directory}/index-v-luminosity.png')
 
 
 def main():

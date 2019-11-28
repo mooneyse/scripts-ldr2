@@ -1,9 +1,29 @@
 #!/usr/bin/env python3
 
 from uncertainties import ufloat
-from uncertainties.umath import log, sqrt, exp
+from uncertainties.umath import log, sqrt, exp, log10
 import pandas as pd
 import numpy as np
+
+print('Name, Core dominance, Core dominance error, log10(core dom), log10(core'
+      ' dom error)')
+df = pd.read_csv('LDR2 and BZCAT 10_ crossmatch - Basic.csv')
+
+for name, core, total, tot_err, unresolved in zip(df['Name'],
+                                                  df['Raw core calculation'],
+                                                  df['Total_flux'],
+                                                  df['E_Total_flux'],
+                                                  df['Compact']):
+    if unresolved:
+        print(f'{name}, -, -, -, -')
+        continue
+    S_core = ufloat(core, core * (tot_err / total))
+    S_int = ufloat(total, tot_err)
+    core_dom = S_core / (S_int - S_core)
+    log_core_dom = log10(core_dom)
+    # print(S_core, S_int, core_dom)
+    print(f'{name}, {core_dom.n}, {core_dom.s}, {log_core_dom.n},'
+          f'{log_core_dom.s}')
 
 
 def alpha(flux1, flux2, freq1=ufloat(144e6, 24e6),
