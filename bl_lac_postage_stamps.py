@@ -256,7 +256,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         plt.minorticks_on()
         plt.tick_params(which='minor', length=0)
         plt.contour(another_copy_d, levels=[threshold], origin='lower',
-                    colors='#5cc8ff')
+                    colors='#00abe7')
         plt.contour(another_copy_d - copy_d, levels=[threshold], colors='grey',
                     origin='lower')
         plt.savefig(f'{my_directory}/images/{source_name}.png')
