@@ -77,7 +77,8 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
     string
         The name of the CSV containing the results.
     """
-    df = pd.read_csv(f'{my_directory}/catalogues/ellipticals.csv')
+    df = pd.read_csv(f'{my_directory}/catalogues/ellipticals_noradio_ldr2_10'
+                     'asec.csv')
 
     plt.figure(figsize=(13.92, 8.60)).patch.set_facecolor('white')
     plt.rcParams['font.family'] = 'serif'
