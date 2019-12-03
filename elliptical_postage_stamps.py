@@ -103,11 +103,11 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
               'J124543.16+485926.9', 'J135801.04+562727.6']
     biggest = ['J092122.11+545153.9', 'J093821.50+554333.8']
 
-    for source_name, ra, dec, mosaic, rms, compact in zip(df['name'],
-                                                          df['ra_1'],
-                                                          df['dec_1'],
-                                                          df['Mosaic_ID'],
-                                                          df['Isl_rms']):
+    for source_name, ra, dec, mosaic, rms in zip(df['name'],
+                                                 df['ra_1'],
+                                                 df['dec_1'],
+                                                 df['Mosaic_ID'],
+                                                 df['Isl_rms']):
         savefile = f'{my_directory}/ellipticals_noradio/{source_name}.png'
         if os.path.exists(savefile):
             print(f'{source_name}')
