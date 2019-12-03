@@ -5,23 +5,23 @@
 
 import warnings
 warnings.filterwarnings('ignore')
-import matplotlib as mpl
+import matplotlib as mpl  # noqa
 mpl.use('Agg')
-import os
-import operator
-import numpy as np
-import pandas as pd
-from skimage.measure import label
-import matplotlib as mpl
-from matplotlib.patches import Circle
-import matplotlib.pyplot as plt
-from astropy import units as u
-from astropy.coordinates import SkyCoord
-from astropy.io import fits
-from astropy.nddata import Cutout2D
-from astropy.wcs import WCS
-from ds9norm import DS9Normalize
-import smallestenclosingcircle
+import os  # noqa
+import operator  # noqa
+import numpy as np  # noqa
+import pandas as pd  # noqa
+from skimage.measure import label  # noqa
+import matplotlib as mpl  # noqa
+from matplotlib.patches import Circle  # noqa
+import matplotlib.pyplot as plt  # noqa
+from astropy import units as u  # noqa
+from astropy.coordinates import SkyCoord  # noqa
+from astropy.io import fits  # noqa
+from astropy.nddata import Cutout2D  # noqa
+from astropy.wcs import WCS  # noqa
+from ds9norm import DS9Normalize  # noqa
+import smallestenclosingcircle  # noqa
 
 
 def nearest_to_centre(my_arr, percent):
@@ -107,13 +107,9 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
                                                           df['ra_1'],
                                                           df['dec_1'],
                                                           df['Mosaic_ID'],
-                                                          df['Isl_rms'],
-                                                          df['Compact?']):
-        savefile = f'{my_directory}/images/ellipticals/el-{source_name}.png'
+                                                          df['Isl_rms']):
+        savefile = f'{my_directory}/ellipticals_noradio/{source_name}.png'
         if os.path.exists(savefile):
-            print(f'{source_name}')
-            continue
-        if compact:
             print(f'{source_name}')
             continue
         threshold = sigma * rms / 1000   # jansky
@@ -122,15 +118,15 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         sky_position = SkyCoord(ra, dec, unit='deg')
         # if source_name in big:
         #     size = [3, 3] * u.arcmin
-        if source_name in bigger:
-            size = [4, 4] * u.arcmin
-            p = 12
-        elif source_name in biggest:
-            size = [5, 5] * u.arcmin
-            p = 12
-        else:
-            size = [3, 3] * u.arcmin
-            p = 9
+        # if source_name in bigger:
+        #     size = [4, 4] * u.arcmin
+        #     p = 12
+        # elif source_name in biggest:
+        #     size = [5, 5] * u.arcmin
+        #     p = 12
+        # else:
+        size = [3, 3] * u.arcmin
+        p = 9
         cutout = Cutout2D(np.squeeze(hdu.data), sky_position, size=size,
                           wcs=wcs)
         d = cutout.data
