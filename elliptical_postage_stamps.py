@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
-"""Plot postage stamp images of LDR2 BL Lacs."""
+"""Plot postage stamp images of LDR2 elliptical galaxies.
+"""
 
 import warnings
 warnings.filterwarnings('ignore')
