@@ -197,10 +197,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
 
         d = label(d)  # label islands of emission
         if thresh_ans == '1/50 S_peak':
-            plt.imshow(d, origin='lower')
-            plt.title(source_name)
-            plt.show()
-            plt.clf()
+            asdfasdf = np.copy(d)
         source_islands = nearest_to_centre(d, percent=0.1)
         if source_name == '5BZBJ1000+5746':
             source_islands = [1, 2, 3, 4]
@@ -217,6 +214,9 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         for source_island in source_islands:
             d[d == source_island] = dummy
         if thresh_ans == '1/50 S_peak':
+            plt.subplot(1, 2, 1)
+            plt.imshow(asdfasdf, origin='lower')
+            plt.subplot(1, 2, 2)
             plt.imshow(d, origin='lower')
             plt.title(source_name)
             plt.show()
