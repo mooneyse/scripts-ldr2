@@ -288,7 +288,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         width = r * kpc_per_pixel * 2  # radius to diameter
         result = (f'{source_name},{ra},{dec},{rms * 1e3},{z},'
                   f'{r * pix * 2:.1f}, {width:.1f}, {pf}\n')
-        print(f'{source_name[5:]}, {r * pix * 2:.4f}, {width:.4f},'
+        print(f'{source_name[5:]}, {r * pix * 2:.4f}, {width:.4f}, '
               f'{thresh_ans}, {comp}')
 
         with open(results_csv, 'a') as f:
