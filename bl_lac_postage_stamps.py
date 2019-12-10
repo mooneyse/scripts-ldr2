@@ -272,7 +272,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         plt.tick_params(which='minor', length=0)
         levels = [level * threshold for level in [1, 2, 4, 8]]
         plt.contour(another_copy_d, levels=levels, origin='lower',
-                    colors='#00abe7')
+                    colors=colors)
         plt.contour(another_copy_d - copy_d, levels=[threshold], colors='grey',
                     origin='lower')
         plt.savefig(f'{my_directory}/images/ldr2-{source_name}.png')
