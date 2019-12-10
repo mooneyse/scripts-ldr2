@@ -198,6 +198,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         d = label(d)  # label islands of emission
         if thresh_ans == '1/50 S_peak':
             plt.imshow(d, origin='lower')
+            plt.title(source_name)
             plt.show()
             plt.clf()
         source_islands = nearest_to_centre(d, percent=0.1)
