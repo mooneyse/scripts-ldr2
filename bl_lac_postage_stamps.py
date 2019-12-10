@@ -156,6 +156,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
     dummy = 123456
     sbar_asec = 30  # desired length of scalebar in arcseconds
     pix = 1.5  # arcseconds per pixel
+    colors = ['#118ab2', '#06d6a0', '#ffd166', '#ef476f']
     print('Name, asec, kpc, threshold, UL?')
     for source_name, ra, dec, mosaic, rms, z, pf, comp in zip(df['Name'],
                                                               df['BZCAT RA'],
@@ -176,10 +177,11 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         hdu = fits.open(f'{my_directory}/mosaics/{mosaic}-mosaic.fits')[0]
         wcs = WCS(hdu.header, naxis=2)
         sky_position = SkyCoord(ra, dec, unit='deg')
-        if source_name == '5BZBJ1202+4444':
+        if source_name == '5BZBJ1202+4444' or source_name == '5BZBJ1325+4115':
             size = [3, 3] * u.arcmin
             p = 9
-        elif source_name == '5BZBJ1419+5423':
+        elif (source_name == '5BZBJ1419+5423' or
+              source_name == '5BZBJ0945+5757'):
             size = [4, 4] * u.arcmin
             p = 12
         else:
@@ -196,8 +198,6 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         rows, cols = d.shape
 
         d = label(d)  # label islands of emission
-        # if thresh_ans == '1/50 S_peak':
-        #     asdfasdf = np.copy(d)
         source_islands = nearest_to_centre(d, percent=0.1)
         if source_name == '5BZBJ1000+5746':
             source_islands = [1, 2, 3, 4]
@@ -213,14 +213,6 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
 
         for source_island in source_islands:
             d[d == source_island] = dummy
-        # if thresh_ans == '1/50 S_peak':
-        #     plt.subplot(1, 2, 1)
-        #     plt.imshow(asdfasdf, origin='lower')
-        #     plt.subplot(1, 2, 2)
-        #     plt.imshow(d, origin='lower')
-        #     plt.title(source_name)
-        #     plt.show()
-        #     plt.clf()
         d[d != dummy] = 0
         copy_d[d != dummy] = 0
         set_to_nil = []  # identify values we can set to zero for being inside
@@ -278,7 +270,8 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         cbar.ax.tick_params(labelsize=20)
         plt.minorticks_on()
         plt.tick_params(which='minor', length=0)
-        plt.contour(another_copy_d, levels=[threshold], origin='lower',
+        levels = [level * threshold for level in [1, 2, 4, 8]]
+        plt.contour(another_copy_d, levels=levels, origin='lower',
                     colors='#00abe7')
         plt.contour(another_copy_d - copy_d, levels=[threshold], colors='grey',
                     origin='lower')

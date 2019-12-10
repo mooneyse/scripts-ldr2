@@ -56,7 +56,7 @@ def ghz(sigma=4, my_directory='/data5/sean/ldr2'):
             df['RMS']):
         source_name = '5BZB' + source_name
         sky_position = SkyCoord(ra, dec, unit='deg')
-        if source_name == '5BZBJ1202+4444':
+        if source_name == '5BZBJ1202+4444' or source_name == '5BZBJ1325+4115':
             size = [3, 3] * u.arcmin
             x = 9 * (1.5 / pix)  # to get the scalebar in the same place
         elif (source_name == '5BZBJ1419+5423' or
