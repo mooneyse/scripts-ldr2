@@ -169,10 +169,10 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         source_name = source_name.replace(' ', '')
         threshold = sigma * rms / 1000   # jansky
         thresh_ans = f'{sigma}sigma'
-        # if threshold < (pf / 50) / 1000:
-        #     # see 2.2 of https://arxiv.org/pdf/1907.03726.pdf
-        #     threshold = (pf / 50) / 1000
-        #     thresh_ans = '1/50 S_peak'
+        if threshold < (pf / 50) / 1000:
+            # see 2.2 of https://arxiv.org/pdf/1907.03726.pdf
+            threshold = (pf / 50) / 1000
+            thresh_ans = '1/50 S_peak'
         hdu = fits.open(f'{my_directory}/mosaics/{mosaic}-mosaic.fits')[0]
         wcs = WCS(hdu.header, naxis=2)
         sky_position = SkyCoord(ra, dec, unit='deg')
@@ -196,6 +196,10 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         rows, cols = d.shape
 
         d = label(d)  # label islands of emission
+        if thresh_ans == '1/50 S_peak':
+            plt.imshow(d, origin='lower')
+            plt.show()
+            plt.clf()
         source_islands = nearest_to_centre(d, percent=0.1)
         for source_island in source_islands:
             d[d == source_island] = dummy
