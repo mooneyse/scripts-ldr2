@@ -49,18 +49,19 @@ def optical(sigma=4, my_directory='/data5/sean/ldr2'):
     sbar_asec = 30  # desired length of scalebar in arcseconds
     pix = 0.25  # arcseconds per pixel
 
-    for source_name, ra, dec, mosaic, rms, z in zip(df['Source name'],
-                                                    df['RA (J2000.0)'],
-                                                    df['Dec (J2000.0)'],
+    for source_name, ra, dec, mosaic, rms, z in zip(df['Name'],
+                                                    df['BZCAT RA'],
+                                                    df['BZCAT Dec'],
                                                     df['Mosaic_ID'],
                                                     df['Isl_rms'],
-                                                    df['Redshift']):
+                                                    df['redshift']):
 
         sky_position = SkyCoord(ra, dec, unit='deg')
         if source_name == '5BZBJ1202+4444':
             size = [3, 3] * u.arcmin
             p = 54
-        elif source_name == '5BZBJ1419+5423':
+        elif (source_name == '5BZBJ1419+5423' or
+              source_name == '5BZBJ0945+5757'):
             size = [4, 4] * u.arcmin
             p = 72
         else:
