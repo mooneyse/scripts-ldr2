@@ -51,10 +51,10 @@ def ghz(sigma=4, my_directory='/data5/sean/ldr2'):
     pix = 1.8  # arcseconds per pixel
 
     for source_name, ra, dec, mosaic, rms, z, f_rms in zip(
-        df['Source name'], df['RA (J2000.0)'], df['Dec (J2000.0)'],
-        df['Mosaic_ID'], df['Isl_rms'], df['Redshift'],
-            df['FIRST RMS (mJy)']):
-
+        df['Name'], df['BZCAT RA'], df['BZCAT Dec'],
+        df['Mosaic_ID'], df['Isl_rms'], df['redshift'],
+            df['RMS']):
+        source_name = '5BZB' + source_name
         sky_position = SkyCoord(ra, dec, unit='deg')
         if source_name == '5BZBJ1202+4444':
             size = [3, 3] * u.arcmin
