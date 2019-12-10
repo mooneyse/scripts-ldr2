@@ -68,7 +68,8 @@ def optical(sigma=4, my_directory='/data5/sean/ldr2'):
             size = [2, 2] * u.arcmin
             p = 36
 
-        p_hdu = fits.open(f'{my_directory}/panstarrs/{source_name}.i.fits')[0]
+        p_hdu = fits.open(f'{my_directory}/panstarrs/5BZB{source_name}.i.'
+                          'fits')[0]
         p_wcs = WCS(p_hdu.header)
         p_cutout = Cutout2D(p_hdu.data, sky_position, size=size, wcs=p_wcs)
 
