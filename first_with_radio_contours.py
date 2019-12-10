@@ -50,10 +50,10 @@ def ghz(sigma=4, my_directory='/data5/sean/ldr2'):
     sbar_asec = 30  # desired length of scalebar in arcseconds
     pix = 1.8  # arcseconds per pixel
 
-    for source_name, ra, dec, mosaic, rms, z, f_rms in zip(
+    for source_name, ra, dec, mosaic, rms, z, f_rms, pf in zip(
         df['Name'], df['BZCAT RA'], df['BZCAT Dec'],
         df['Mosaic_ID'], df['Isl_rms'], df['redshift'],
-            df['RMS']):
+            df['RMS'], df['Peak_flux']):
         source_name = '5BZB' + source_name
         sky_position = SkyCoord(ra, dec, unit='deg')
         if source_name == '5BZBJ1202+4444' or source_name == '5BZBJ1325+4115':
@@ -78,7 +78,11 @@ def ghz(sigma=4, my_directory='/data5/sean/ldr2'):
         l_cutout = Cutout2D(np.squeeze(l_hdu.data), sky_position, size=size,
                             wcs=l_wcs)
 
-        levels = [level * rms / 1000 for level in [4, 8, 16, 32]]
+        if 4 * rms < (pf / 50):
+            # see 2.2 of https://arxiv.org/pdf/1907.03726.pdf
+            levels = [level * (pf / 50) / 1000 for level in [1, 2, 4, 8]]
+        else:
+            levels = [level * rms / 1000 for level in [4, 8, 16, 32]]
         f_level = f_rms * 4 / 1000
 
         ax = plt.subplot(projection=f_cutout.wcs)
