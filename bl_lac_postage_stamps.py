@@ -245,7 +245,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         diffuse = Circle((y + 0.5, x + 0.5), radius=r, fc='none',
                          edgecolor='k', lw=2)
         ax.add_patch(beam)
-        if compact == False:  # noqa
+        if comp == False:  # noqa
             ax.add_patch(diffuse)
 
         kpc_per_asec = get_kpc_per_asec(z=z)
