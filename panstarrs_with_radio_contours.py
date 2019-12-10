@@ -67,7 +67,7 @@ def optical(sigma=4, my_directory='/data5/sean/ldr2'):
         else:
             size = [2, 2] * u.arcmin
             p = 36
-
+        print(source_name)
         p_hdu = fits.open(f'{my_directory}/panstarrs/{source_name}.i.'
                           'fits')[0]
         p_wcs = WCS(p_hdu.header)
