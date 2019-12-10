@@ -68,9 +68,10 @@ def ghz(sigma=4, my_directory='/data5/sean/ldr2'):
 
         f_hdu = fits.open(f'{my_directory}/first/{source_name}.fits')[0]
         f_wcs = WCS(f_hdu.header, naxis=2)
+        print(f'{source_name}')
         f_cutout = Cutout2D(np.squeeze(f_hdu.data), sky_position, size=size,
                             wcs=f_wcs)
-
+        
         l_hdu = fits.open(f'{my_directory}/mosaics/{mosaic}-mosaic.fits')[0]
         l_wcs = WCS(l_hdu.header, naxis=2)
         l_cutout = Cutout2D(np.squeeze(l_hdu.data), sky_position, size=size,
