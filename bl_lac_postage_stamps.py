@@ -157,14 +157,15 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
     dummy = 123456
     sbar_asec = 30  # desired length of scalebar in arcseconds
     pix = 1.5  # arcseconds per pixel
-
-    for source_name, ra, dec, mosaic, rms, z, pf in zip(df['Name'],
-                                                        df['BZCAT RA'],
-                                                        df['BZCAT Dec'],
-                                                        df['Mosaic_ID'],
-                                                        df['Isl_rms'],
-                                                        df['redshift'],
-                                                        df['Peak_flux']):
+    print('Name, asec, kpc, threshold, UL?')
+    for source_name, ra, dec, mosaic, rms, z, pf, comp in zip(df['Name'],
+                                                              df['BZCAT RA'],
+                                                              df['BZCAT Dec'],
+                                                              df['Mosaic_ID'],
+                                                              df['Isl_rms'],
+                                                              df['redshift'],
+                                                              df['Peak_flux'],
+                                                              df['Compact']):
         source_name = '5BZB' + source_name
         source_name = source_name.replace(' ', '')
         threshold = sigma * rms / 1000   # jansky
@@ -241,7 +242,8 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         diffuse = Circle((y + 0.5, x + 0.5), radius=r, fc='none',
                          edgecolor='k', lw=2)
         ax.add_patch(beam)
-        ax.add_patch(diffuse)
+        if compact == False:  # noqa
+            ax.add_patch(diffuse)
 
         kpc_per_asec = get_kpc_per_asec(z=z)
         sbar = sbar_asec / pix  # length of scalebar in pixels
@@ -264,11 +266,10 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         plt.clf()
 
         width = r * kpc_per_pixel * 2  # radius to diameter
-
         result = (f'{source_name},{ra},{dec},{rms * 1e3},{z},'
                   f'{r * pix * 2:.1f}, {width:.1f}, {pf}\n')
-        print(f'{source_name}: {r * pix * 2:.1f}", {width:.1f} kpc,'
-              f'{thresh_ans}')
+        print(f'{source_name[5:]}, {r * pix * 2:.4f}, {width:.4f},'
+              f'{thresh_ans}, {comp}')
 
         with open(results_csv, 'a') as f:
             f.write(result)
