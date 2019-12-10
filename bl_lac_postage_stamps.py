@@ -202,9 +202,25 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
             plt.show()
             plt.clf()
         source_islands = nearest_to_centre(d, percent=0.1)
+        if source_name == '5BZBJ1000+5746':
+            source_islands = [1, 2, 3, 4]
+        elif source_name == '5BZBJ1202+4444':
+            source_islands = [1, 2, 3]
+        elif (source_name == '5BZBJ1203+5430' or
+              source_name == '5BZBJ1419+5423'):
+            source_islands = [1, 2]
+        elif source_name == '5BZBJ1409+5939':
+            source_islands = [2, 3]
+        elif source_name == '5BZBJ1203+5430':
+            source_islands = [1, 2]
+
         for source_island in source_islands:
             d[d == source_island] = dummy
-
+        if thresh_ans == '1/50 S_peak':
+            plt.imshow(d, origin='lower')
+            plt.title(source_name)
+            plt.show()
+            plt.clf()
         d[d != dummy] = 0
         copy_d[d != dummy] = 0
         set_to_nil = []  # identify values we can set to zero for being inside
