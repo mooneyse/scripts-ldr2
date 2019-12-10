@@ -59,7 +59,8 @@ def ghz(sigma=4, my_directory='/data5/sean/ldr2'):
         if source_name == '5BZBJ1202+4444':
             size = [3, 3] * u.arcmin
             x = 9 * (1.5 / pix)  # to get the scalebar in the same place
-        elif source_name == '5BZBJ1419+5423':
+        elif (source_name == '5BZBJ1419+5423' or
+              source_name == '5BZBJ0945+5757'):
             size = [4, 4] * u.arcmin
             x = 12 * (1.5 / pix)
         else:
@@ -71,7 +72,7 @@ def ghz(sigma=4, my_directory='/data5/sean/ldr2'):
         print(f'{source_name}')
         f_cutout = Cutout2D(np.squeeze(f_hdu.data), sky_position, size=size,
                             wcs=f_wcs)
-        
+
         l_hdu = fits.open(f'{my_directory}/mosaics/{mosaic}-mosaic.fits')[0]
         l_wcs = WCS(l_hdu.header, naxis=2)
         l_cutout = Cutout2D(np.squeeze(l_hdu.data), sky_position, size=size,
