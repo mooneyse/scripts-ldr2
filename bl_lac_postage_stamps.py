@@ -158,13 +158,14 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
     sbar_asec = 30  # desired length of scalebar in arcseconds
     pix = 1.5  # arcseconds per pixel
 
-    for source_name, ra, dec, mosaic, rms, z, pf in zip(df['BZCAT name'],
+    for source_name, ra, dec, mosaic, rms, z, pf in zip(df['Name'],
                                                         df['BZCAT RA'],
                                                         df['BZCAT Dec'],
                                                         df['Mosaic_ID'],
                                                         df['Isl_rms'],
                                                         df['redshift'],
                                                         df['Peak_flux']):
+        source_name = '5BZB' + source_name
         source_name = source_name.replace(' ', '')
         threshold = sigma * rms / 1000   # jansky
         thresh_ans = f'{sigma}sigma'
@@ -259,7 +260,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
                     colors='#00abe7')
         plt.contour(another_copy_d - copy_d, levels=[threshold], colors='grey',
                     origin='lower')
-        plt.savefig(f'{my_directory}/images/{source_name}.png')
+        plt.savefig(f'{my_directory}/images/ldr2-{source_name}.png')
         plt.clf()
 
         width = r * kpc_per_pixel * 2  # radius to diameter
