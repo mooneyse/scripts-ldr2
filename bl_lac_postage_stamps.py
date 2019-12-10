@@ -134,7 +134,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         os.remove(results_csv)
     except OSError:
         pass
-    df = pd.read_csv(f'{my_directory}/images/final.csv')
+    df = pd.read_csv(f'{my_directory}/final.csv')
     result_header = ('Name,RA,Dec,RMS (uJy),Redshift,Width ("),Width (kpc),'
                      'Peak flux (mJy)\n')
 
