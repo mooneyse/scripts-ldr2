@@ -95,7 +95,7 @@ def luminosity(S_obs, z, D_L=0, alpha=0):
     return (S_obs * 4 * np.pi * (D_L ** 2)) / (1 + z) ** ( 1 + alpha)
 
 
-df = pd.read_csv('/home/sean/Downloads/LDR2 and BZCAT 10_ crossmatch - Sheet7.csv')
+df = pd.read_csv('/home/sean/Downloads/csv.download.csv')
 spindices = {}
 i1, i2 = [], []
 print('\nSpectral index:')
