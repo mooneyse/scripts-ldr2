@@ -7,23 +7,23 @@ import numpy as np
 
 print('Name, Core dominance, Core dominance error, log10(core dom), log10(core'
       ' dom error)')
-df = pd.read_csv('LDR2 and BZCAT 10_ crossmatch - Basic.csv')
+df = pd.read_csv('/home/sean/Downloads/csv.download.csv')
 
-for name, core, total, tot_err, unresolved in zip(df['Name'],
-                                                  df['Raw core calculation'],
-                                                  df['Total_flux'],
-                                                  df['E_Total_flux'],
-                                                  df['Compact']):
-    if unresolved:
-        print(f'{name}, -, -, -, -')
-        continue
-    S_core = ufloat(core, core * (tot_err / total))
-    S_int = ufloat(total, tot_err)
-    core_dom = S_core / (S_int - S_core)
-    log_core_dom = log10(core_dom)
-    # print(S_core, S_int, core_dom)
-    print(f'{name}, {core_dom.n}, {core_dom.s}, {log_core_dom.n},'
-          f'{log_core_dom.s}')
+# for name, core, total, tot_err, unresolved in zip(df['Name'],
+#                                                   df['Raw core calculation'],
+#                                                   df['Total_flux'],
+#                                                   df['E_Total_flux'],
+#                                                   df['Compact']):
+#     if unresolved:
+#         print(f'{name}, -, -, -, -')
+#         continue
+#     S_core = ufloat(core, core * (tot_err / total))
+#     S_int = ufloat(total, tot_err)
+#     core_dom = S_core / (S_int - S_core)
+#     log_core_dom = log10(core_dom)
+#     # print(S_core, S_int, core_dom)
+#     print(f'{name}, {core_dom.n}, {core_dom.s}, {log_core_dom.n},'
+#           f'{log_core_dom.s}')
 
 
 def alpha(flux1, flux2, freq1=ufloat(144e6, 24e6),
@@ -92,13 +92,13 @@ def luminosity(S_obs, z, D_L=0, alpha=0):
     """
     if D_L == 0:
         D_L, _ = get_dl_and_kpc_per_asec(z=z)
-    return (S_obs * 4 * np.pi * (D_L ** 2)) / (1 + z) ** ( 1 + alpha)
+    return (S_obs * 4 * np.pi * (D_L ** 2)) / (1 + z) ** (1 + alpha)
 
 
 df = pd.read_csv('/home/sean/Downloads/csv.download.csv')
 spindices = {}
 i1, i2 = [], []
-print('\nSpectral index:')
+# print('\nSpectral index:')
 
 for source, lotss, lotss_err, first, first_err, nvss in zip(df['Name'],
                                                             df['Total_flux'],
@@ -110,22 +110,22 @@ for source, lotss, lotss_err, first, first_err, nvss in zip(df['Name'],
                      flux2=ufloat(first, first * 0.1))
     spindex2 = alpha(flux1=ufloat(lotss, lotss * 0.2),  # lotss_err
                      flux2=ufloat(nvss, nvss * 0.1))
-#    spindices[source] = spindex
-    print(f'{source},{spindex1.n},{spindex1.s},{spindex2.n},{spindex2.s}')
-#    print(f'{source},{lotss},{first},{nvss}')
-#    print(f'{source}: {spindex}')
-    i1.append(spindex1)
-    i2.append(spindex2)
+    spindices[source] = spindex1
+    # print(f'{source},{spindex1.n},{spindex1.s},{spindex2.n},{spindex2.s}')
+    # print(f'{source},{lotss},{first},{nvss}')
+    # print(f'{source}: {spindex}')
+    # i1.append(spindex1)
+    # i2.append(spindex2)
 
-#print('\nLuminosity:')
-#print(df['S1.4.1'])
+print('\nLuminosity:')
 for source, flux, flux_err, z, alpha in zip(df['Name'], df['Total_flux'],
                                             df['E_Total_flux'], df['z'],
                                             spindices):
-    power = luminosity(S_obs=ufloat(flux * 1e-29, flux * 0.2 * 1e-29), z=z,
-            alpha=spindices[source])
 
-#    print(f'{source}: {power}')
+    power = luminosity(S_obs=ufloat(flux * 1e-29, flux * 0.2 * 1e-29), z=z,
+                   alpha=spindices[source])
+
+    print(f'{source}, {power.n}, {power.s}')
 
 print('Averages:')
 print('FIRST:', sum(i1)/len(i1))
