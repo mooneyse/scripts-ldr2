@@ -372,9 +372,9 @@ def main():
                                 offset=0)
 
         core_flux = np.sum(scaled_model) * 1000 / 18.1294  # divide beam area
-        log_core_dominance = np.log10()
+        # log_core_dominance = np.log10()
         print(f'{i + 1}, {blazar_name}, {total_flux}, {core_flux}, '
-              f'{total_flux - core_flux}, {unresolved}, {log_core_dominance}')
+              f'{total_flux - core_flux}, {unresolved}')  #, {log_core_dominance}')
 
         plt.figure(figsize=(32, 8))
         plt.rcParams['font.family'] = 'serif'
