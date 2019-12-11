@@ -333,7 +333,7 @@ def main():
             unresolved) in enumerate(zip(df_blazars.index.tolist(),
                                          df_blazars['BZCAT RA'],
                                          df_blazars['BZCAT Dec'],
-                                         df_blazars['Point major'],
+                                         df_blazars['Point major'].astype('float'),
                                          df_blazars['Point minor'],
                                          df_blazars['Point angle'],
                                          df_blazars['Peak_flux'],
