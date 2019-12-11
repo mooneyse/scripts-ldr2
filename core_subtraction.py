@@ -330,7 +330,7 @@ def main():
 
     for i, (blazar_name, blazar_ra, blazar_dec, bmaj, bmin, angle, peak_flux,
             image, rms, total_flux,
-            unresolved) in enumerate(zip(df_blazars.index.tolist(),
+            unresolved) in enumerate(zip(df_blazars['Name'],
                                          df_blazars['BZCAT RA'],
                                          df_blazars['BZCAT Dec'],
                                          df_blazars['Point major'],
@@ -346,12 +346,14 @@ def main():
         wcs = WCS(hdu.header, naxis=2)
         sky_position = SkyCoord(blazar_position[0], blazar_position[1],
                                 unit='deg')
-        if blazar_name == '5BZB J1202+4444':
+        if blazar_name == 'J1202+4444' or blazar_name == '5BZBJ1325+4115':
             size = [3, 3] * u.arcmin
-        elif blazar_name == '5BZB J1419+5423':
+        elif (blazar_name == 'J1419+5423' or
+              blazar_name == '5BZBJ0945+5757'):
             size = [4, 4] * u.arcmin
         else:
             size = [2, 2] * u.arcmin
+
         cutout = Cutout2D(np.squeeze(hdu.data), sky_position, size=size,
                           wcs=wcs)
         blazar_data = cutout.data  # 1 pixel = 1.5"
