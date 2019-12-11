@@ -86,7 +86,7 @@ def optical(sigma=4, my_directory='/data5/sean/ldr2'):
             levels = [level * rms / 1000 for level in [4, 8, 16, 32]]
 
         ax = plt.subplot(projection=p_cutout.wcs)
-        im = ax.imshow(p_cutout.data, vmin=0, vmax=8000, cmap='Greys',
+        im = ax.imshow(p_cutout.data, vmin=0, vmax=8000, cmap='cubehelix_r',
                        origin='lower', norm=DS9Normalize(stretch='arcsinh'))
 
         cbar = plt.colorbar(im)

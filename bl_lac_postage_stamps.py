@@ -248,7 +248,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         ax.tick_params(axis='both', which='major', labelsize=20)
         plt.imshow(another_copy_d, vmin=0, vmax=np.nanmax(another_copy_d),
                    origin='lower', norm=DS9Normalize(stretch='arcsinh'),
-                   cmap='plasma_r')  # interpolation='gaussian'
+                   cmap='cubehelix_r', interpolation='gaussian')
         beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
                       edgecolor='blue')  # radius=2 pixels -> 3" -> diameter=6"
         diffuse = Circle((y + 0.5, x + 0.5), radius=r, fc='none',
