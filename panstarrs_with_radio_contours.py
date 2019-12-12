@@ -87,7 +87,8 @@ def optical(sigma=4, my_directory='/data5/sean/ldr2'):
 
         ax = plt.subplot(projection=p_cutout.wcs)
         im = ax.imshow(p_cutout.data, vmin=0, vmax=8000, cmap='cubehelix_r',
-                       origin='lower', norm=DS9Normalize(stretch='arcsinh'))
+                       origin='lower', norm=DS9Normalize(stretch='arcsinh'),
+                       interpolation='gaussian')
 
         cbar = plt.colorbar(im)
         cbar.set_label('Excess counts', size=20)

@@ -25,7 +25,8 @@ for name, core, total, tot_err, unresolved in zip(df['Name'],
     print(f'{name}, {core_dom.n}, {core_dom.s}, {log_core_dom.n},'
           f'{log_core_dom.s}')
 
-
+import sys
+sys.exit()
 def alpha(flux1, flux2, freq1=ufloat(144e6, 24e6),
           freq2=ufloat(1400e6, 0)):
     """Get spectral index with error. Default is LDR2 and FIRST.
