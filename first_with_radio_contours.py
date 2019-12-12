@@ -88,6 +88,7 @@ def ghz(sigma=4, my_directory='/data5/sean/ldr2'):
         ax = plt.subplot(projection=f_cutout.wcs)
         im = ax.imshow(f_cutout.data, vmin=0, vmax=np.max(f_cutout.data),
                        cmap='cubehelix_r', origin='lower',
+                       interpolation='gaussian',
                        norm=DS9Normalize(stretch='arcsinh'))
         ax.contour(f_cutout.data, levels=[f_level], origin='lower',
                    colors=['k'])
