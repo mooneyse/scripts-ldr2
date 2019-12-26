@@ -40,18 +40,18 @@ def my_plot(my_folder='/home/sean/Downloads'):
                            hspace=0.02)
     ax = plt.subplot(gs[0, 0])
     ax.errorbar(compact['redshift'],
-                compact['Luminosity with FIRST index (W/Hz)'],
+                compact['Luminosity with NVSS index (W/Hz)'],
                 markersize=15, mec='k', label='Unresolved', elinewidth=2,
-                yerr=compact['Luminosity error with FIRST index (W/Hz)'],
+                yerr=compact['Luminosity error with NVSS index (W/Hz)'],
                 marker='s', ls='none', mfc='#302f2c', color='k', mew=2)
     ax.errorbar(extended['redshift'],
-                extended['Luminosity with FIRST index (W/Hz)'],
+                extended['Luminosity with NVSS index (W/Hz)'],
                 markersize=15, label='Extended', elinewidth=2, mec='k',
-                yerr=extended['Luminosity error with FIRST index (W/Hz)'],
+                yerr=extended['Luminosity error with NVSS index (W/Hz)'],
                 marker='s', ls='none', mfc='#faf3dd', color='k', mew=2)
     ax.set_xticks([])
     ax.set_yscale('log')
-    ax.set_ylabel(r'$L \,\,\,\,(\mathrm{W\,\,Hz}^{-1})$', fontsize=30)
+    ax.set_ylabel(r'$L_{144} \,\,\,\,(\mathrm{W\,\,Hz}^{-1})$', fontsize=30)
     ax.set_xlim(0, 0.7)
     plt.setp(ax.get_yticklabels(), fontsize=30)
     handles, labels = ax.get_legend_handles_labels()
@@ -65,7 +65,7 @@ def my_plot(my_folder='/home/sean/Downloads'):
     axx.hist([compact['redshift'], extended['redshift']],
              histtype='stepfilled', color=['#302f2c', '#faf3dd'],
              edgecolor='k', lw=2, bins=bins, stacked=True)
-    axx.set_yticks([0, 4, 8])
+    axx.set_yticks([0, 3, 6, 9])
     axx.set_xlabel(r'$z$', fontsize=30)
     axx.set_xlim(0, 0.7)
     plt.setp(axx.get_xticklabels(), fontsize=30)
@@ -78,28 +78,28 @@ def my_plot(my_folder='/home/sean/Downloads'):
     gs = gridspec.GridSpec(2, 1, width_ratios=[1],
                            height_ratios=[2, 1], hspace=0.02)
     ax = plt.subplot(gs[0, 0])
-    ax.errorbar(compact['LDR2-to-FIRST index'],
+    ax.errorbar(compact['LDR2-to-NVSS index'],
                 compact['redshift'],
                 markersize=15,
-                xerr=compact['LDR2-to-FIRST index error'],
+                xerr=compact['LDR2-to-NVSS index error'],
                 mec='k',
                 marker='s', ls='none', mfc='#302f2c', color='k', mew=2,
                 label='Unresolved', elinewidth=2)
-    ax.plot([0.48],
+    ax.plot([0.78],
             [0.496],
             markersize=15,
             mec='k', mew=2,
             marker='>', ls='none', mfc='#302f2c', color='k')
-    ax.text(0.42, 0.44, r'$\alpha = 1.95$', rotation=90, fontsize=20)
-    ax.errorbar(extended['LDR2-to-FIRST index'],
+    ax.text(0.58, 0.48359, r'$\alpha = 1.9$', rotation=0, fontsize=20)
+    ax.errorbar(extended['LDR2-to-NVSS index'],
                 extended['redshift'],
                 markersize=15,
-                xerr=extended['LDR2-to-FIRST index error'],
+                xerr=extended['LDR2-to-NVSS index error'],
                 marker='s', ls='none', mfc='#faf3dd', color='k', mew=2,
                 label='Extended', elinewidth=2, mec='k')
     ax.set_xticks([])
     ax.set_ylabel(r'$z$', fontsize=30)
-    ax.set_xlim(-1, 0.5)
+    ax.set_xlim(-0.8, 0.8)
     plt.setp(ax.get_yticklabels(), fontsize=30)
     handles, labels = ax.get_legend_handles_labels()
     handles = [h[0] for h in handles]
@@ -108,43 +108,44 @@ def my_plot(my_folder='/home/sean/Downloads'):
               bbox_to_anchor=(0.5, 1.2, -0.1, 0), frameon=False)
 
     axx = plt.subplot(gs[1, 0])
-    bins = [-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1, 1.25, 1.5]
-    axx.hist([compact['LDR2-to-FIRST index'], extended['LDR2-to-FIRST index']],
+    bins = np.linspace(-0.8, 0.8, 9)  #[-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5, 0.75, 1, 1.25, 1.5]
+    axx.hist([compact['LDR2-to-NVSS index'], extended['LDR2-to-NVSS index']],
              histtype='stepfilled', color=['#302f2c', '#faf3dd'],
              edgecolor='k', lw=2, bins=bins, stacked=True)
-    axx.set_xticks([-1, -0.75, -0.5, -0.25, 0, 0.25, 0.5])
-    axx.set_yticks([0, 4, 8])
+    axx.set_xticks(bins)
+    axx.set_yticks([0, 3, 6, 9, 12])
     axx.set_xlabel(r'$\alpha$', fontsize=30)
-    axx.set_xlim(-1, 0.5)
+    axx.set_xlim(-0.8, 0.8)
     plt.setp(axx.get_xticklabels(), fontsize=30)
     plt.setp(axx.get_yticklabels(), fontsize=30)
     gs.update(left=0.15)
     plt.savefig(f'{my_folder}/redshift-against-spectral-index-hist.png')
+    print(f'{my_folder}/redshift-against-spectral-index-hist.png')
     plt.clf()
 
     # spectral index against luminosity
     gs = gridspec.GridSpec(2, 1, width_ratios=[1],
                            height_ratios=[2, 1], hspace=0.02)
     ax = plt.subplot(gs[0, 0])
-    ax.errorbar(compact['Luminosity with FIRST index (W/Hz)'],
-                compact['LDR2-to-FIRST index'],
+    ax.errorbar(compact['Luminosity with NVSS index (W/Hz)'],
+                compact['LDR2-to-NVSS index'],
                 markersize=15,
-                xerr=compact['Luminosity error with FIRST index (W/Hz)'],
-                yerr=compact['LDR2-to-FIRST index error'],
+                xerr=compact['Luminosity error with NVSS index (W/Hz)'],
+                yerr=compact['LDR2-to-NVSS index error'],
                 mec='k',
                 marker='s', ls='none', mfc='#302f2c', color='k', mew=2,
                 label='Unresolved', elinewidth=2)
     ax.plot([1.31e24],
-            [0.46],
+            [0.76],
             markersize=15,
             mec='k', mew=2,
             marker='^', ls='none', mfc='#302f2c', color='k')
-    ax.text(0.9e24, 0.37, r'$\alpha = 1.95$', rotation=00, fontsize=20)
-    ax.errorbar(extended['Luminosity with FIRST index (W/Hz)'],
-                extended['LDR2-to-FIRST index'],
+    ax.text(0.9e24, 0.66, r'$\alpha = 1.9$', rotation=00, fontsize=20)
+    ax.errorbar(extended['Luminosity with NVSS index (W/Hz)'],
+                extended['LDR2-to-NVSS index'],
                 markersize=15,
-                xerr=extended['Luminosity error with FIRST index (W/Hz)'],
-                yerr=extended['LDR2-to-FIRST index error'],
+                xerr=extended['Luminosity error with NVSS index (W/Hz)'],
+                yerr=extended['LDR2-to-NVSS index error'],
                 marker='s', ls='none', mfc='#faf3dd', color='k', mew=2,
                 label='Extended', elinewidth=2, mec='k')
     bins = np.logspace(np.log10(1e23), np.log10(1e27), 9)
@@ -152,7 +153,7 @@ def my_plot(my_folder='/home/sean/Downloads'):
     ax.set_xlim(bins[1], bins[-1])
     ax.set_xscale('log')
     ax.set_xticks([])
-    ax.set_ylim(-1, 0.5)
+    ax.set_ylim(-0.8, 0.8)
     ax.tick_params(axis='x',
                    which='both',
                    bottom=False,
@@ -166,18 +167,19 @@ def my_plot(my_folder='/home/sean/Downloads'):
               bbox_to_anchor=(0.5, 1.2, -0.1, 0), frameon=False)
 
     axx = plt.subplot(gs[1, 0])
-    axx.hist([compact['Luminosity with FIRST index (W/Hz)'],
-             extended['Luminosity with FIRST index (W/Hz)']],
+    axx.hist([compact['Luminosity with NVSS index (W/Hz)'],
+             extended['Luminosity with NVSS index (W/Hz)']],
              histtype='stepfilled', color=['#302f2c', '#faf3dd'],
              edgecolor='k', lw=2, stacked=True, bins=bins)
-    axx.set_yticks([0, 4, 8])
-    axx.set_xlabel(r'$L \,\,\,\,(\mathrm{W\,\,Hz}^{-1})$', fontsize=30)
+    axx.set_yticks([0, 4, 8, 12])
+    axx.set_xlabel(r'$L_{144} \,\,\,\,(\mathrm{W\,\,Hz}^{-1})$', fontsize=30)
     axx.set_xlim(bins[1], bins[-1])
     axx.set_xscale('log')
     plt.setp(axx.get_xticklabels(), fontsize=30)
     plt.setp(axx.get_yticklabels(), fontsize=30)
     gs.update(left=0.15)
     plt.savefig(f'{my_folder}/spectral-index-against-luminosity-hist.png')
+    print(f'{my_folder}/spectral-index-against-luminosity-hist.png')
     plt.close()
 
     '''---------------------------------------------------------------------'''
@@ -261,14 +263,14 @@ def my_plot(my_folder='/home/sean/Downloads'):
                            height_ratios=[18, 6])
     gs.update(wspace=0.05, hspace=0.05)
     ax = plt.subplot(gs[0, 1])
-    extended.sort_values('Luminosity with FIRST index (W/Hz)', inplace=True,
+    extended.sort_values('Luminosity with NVSS index (W/Hz)', inplace=True,
                          ascending=False)
-    x = np.log10(extended['Luminosity with FIRST index (W/Hz)'])
+    x = np.log10(extended['Luminosity with NVSS index (W/Hz)'])
     s = (((60 - 10) / (np.max(x) - np.min(x))) * (x - np.max(x)) + 60) ** 2
     hb = ax.scatter(extended['Extent (kpc)'].astype('float'),
                     extended['Core dominance'].astype('float'),
                     s=s, cmap='plasma', linewidths=2, edgecolors='k',
-                    c=extended['LDR2-to-FIRST index'])
+                    c=extended['LDR2-to-NVSS index'])
     # ax.set_yscale('log')
     ax.set_xlim(0, 700)
     ax.set_ylim(0, 1)#1e-2, 1e1)
@@ -285,8 +287,8 @@ def my_plot(my_folder='/home/sean/Downloads'):
                            markersize=np.sqrt(s.iloc[0]), mew=2),
                     Line2D([0], [0], marker='o', linestyle='None', mew=2,
                            markersize=np.sqrt(s.iloc[-1]), mec='k', mfc='w')]
-    labels = [f'{extended["Luminosity with FIRST index (W/Hz)"].iloc[0]}',
-              f'{extended["Luminosity with FIRST index (W/Hz)"].iloc[-1]}']
+    labels = [f'{extended["Luminosity with NVSS index (W/Hz)"].iloc[0]}',
+              f'{extended["Luminosity with NVSS index (W/Hz)"].iloc[-1]}']
     labels = [r'$1.9 \times 10^{24}$ W Hz', r'$4.5 \times 10^{26}$ W Hz']
     plt.legend(custom_lines, labels, ncol=2, loc='upper center',
                bbox_to_anchor=(0.55, 1.2, -0.15, 0),
