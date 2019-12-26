@@ -19,7 +19,7 @@ def my_plot(my_folder='/home/sean/Downloads'):
     my_directory : string
         Working directory.
     """
-    df = pd.read_csv(f'{my_folder}/LDR2 and BZCAT 10_ crossmatch - Basic.csv')
+    df = pd.read_csv(f'{my_folder}/csv.download.csv')
     compact = df[df['Compact'] == True]  # noqa
     extended = df[df['Compact'] != True]  # noqa
     plt.figure(figsize=(12, 12)).patch.set_facecolor('white')
@@ -180,6 +180,71 @@ def my_plot(my_folder='/home/sean/Downloads'):
     plt.savefig(f'{my_folder}/spectral-index-against-luminosity-hist.png')
     plt.close()
 
+    '''---------------------------------------------------------------------'''
+    # # spectral index against luminosity
+    # gs = gridspec.GridSpec(2, 1, width_ratios=[1],
+    #                        height_ratios=[2, 1], hspace=0.02)
+    # ax = plt.subplot(gs[0, 0])
+    # # ax.errorbar(compact['Core dominance'],
+    # #             compact['Extent (kpc)'],
+    # #             markersize=15,
+    # #             xerr=compact['Core dominance error'],
+    # #             yerr=compact['Extent error (kpc)'],
+    # #             mec='k',
+    # #             marker='s', ls='none', mfc='#302f2c', color='k', mew=2,
+    # #             label='Unresolved', elinewidth=2)
+    # # ax.plot([1.31e24],
+    # #         [0.46],
+    # #         markersize=15,
+    # #         mec='k', mew=2,
+    # #         marker='^', ls='none', mfc='#302f2c', color='k')
+    # # ax.text(0.9e24, 0.37, r'$\alpha = 1.95$', rotation=00, fontsize=20)
+    # ax.errorbar(extended['Core dominance'],
+    #             extended['Extent (kpc)'],
+    #             markersize=15,
+    #             xerr=extended['Core dominance error'],
+    #             yerr=extended['Extent error (kpc)'],
+    #             marker='s', ls='none', mfc='#faf3dd', color='k', mew=2,
+    #             label='Extended', elinewidth=2, mec='k')
+    # bins = np.logspace(np.log10(1e23), np.log10(1e27), 9)
+    # ax.set_ylabel(r'$R$', fontsize=30)
+    # # ax.set_xlim(bins[1], bins[-1])
+    # # ax.set_xscale('log')
+    # ax.set_xticks([])
+    # # ax.set_ylim(-1, 0.5)
+    # ax.tick_params(axis='x',
+    #                which='both',
+    #                bottom=False,
+    #                top=False,
+    #                labelbottom=False)
+    # plt.setp(ax.get_yticklabels(), fontsize=30)
+    # handles, labels = ax.get_legend_handles_labels()
+    # handles = [h[0] for h in handles]
+    # ax.legend(handles, labels, ncol=2, loc='upper center', numpoints=1,
+    #           fontsize=30, mode='expand',
+    #           bbox_to_anchor=(0.5, 1.2, -0.1, 0), frameon=False)
+    #
+    # axx = plt.subplot(gs[1, 0])
+    # axx.hist(#[compact['Core dominance'],
+    #          extended['Core dominance'],#],
+    #          histtype='stepfilled', color=['#302f2c', '#faf3dd'],
+    #          edgecolor='k', lw=2, stacked=True, bins=bins)
+    # axx.set_yticks([0, 4, 8])
+    # axx.set_xlabel(r'$L \,\,\,\,(\mathrm{W\,\,Hz}^{-1})$', fontsize=30)
+    # axx.set_xlim(bins[1], bins[-1])
+    # axx.set_xscale('log')
+    # plt.setp(axx.get_xticklabels(), fontsize=30)
+    # plt.setp(axx.get_yticklabels(), fontsize=30)
+    # gs.update(left=0.15)
+    # plt.savefig(f'{my_folder}/core-dominance-against-extent-hist.png')
+    # plt.close()
+
+
+
+
+
+    '''---------------------------------------------------------------------'''
+
     plt.figure(figsize=(20, 12)).patch.set_facecolor('white')
     plt.rcParams['font.family'] = 'serif'
     plt.rcParams['mathtext.fontset'] = 'dejavuserif'
@@ -242,7 +307,7 @@ def my_plot(my_folder='/home/sean/Downloads'):
                 linewidth=2, linestyle='dashed')
     axx.set_xlim(0, 700)
     axx.yaxis.tick_right()
-    axx.set_xlabel(r'$E$ (kpc)', fontsize=30)
+    axx.set_xlabel(r'$D$ (kpc)', fontsize=30)
     axx.set_yticks([0, 3, 6])
     plt.setp(axx.get_xticklabels(), fontsize=30)
     plt.setp(axx.get_yticklabels(), fontsize=30)
@@ -264,6 +329,7 @@ def my_plot(my_folder='/home/sean/Downloads'):
     plt.setp(axy.get_yticklabels(), fontsize=30)
     # gs.update(bottom=0)
     # plt.show()
+    print(len(extended['Core dominance']))
     plt.savefig(f'{my_folder}/core-dominance-against-extent-hist.png')
 
 

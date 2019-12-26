@@ -22,16 +22,16 @@ mpl.rcParams['axes.linewidth'] = 2
 fig, ax = plt.subplots(figsize=(13.92, 8.60))
 
 df = pd.read_csv('/home/sean/Downloads/LDR2 and BZCAT 10_ crossmatch -'
-                 ' Basic.csv')
+                 ' BL Lacs(1).csv')
 df = df[df['Compact']==False]  # resolved sources
-
+print(len(df))
 ax.errorbar(df['S1.4.1'], df['FINT'], label=r'Extended ($N = {}$)'.format(len(df['Compact'])),
              xerr=df['S1.4.1'] * 0.1, yerr=df['FINT'] * 0.1, color='k',
              marker='s', ls='none', mfc='#faf3dd', mew=2, mec='k', markersize=15, elinewidth=2)
 
 
 df = pd.read_csv('/home/sean/Downloads/LDR2 and BZCAT 10_ crossmatch -'
-                 ' Basic.csv')
+                 ' BL Lacs(1).csv')
 
 df = df[df['Compact']==True]  # compact sources
 

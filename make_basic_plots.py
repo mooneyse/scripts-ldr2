@@ -99,8 +99,7 @@ def my_plot(my_directory='/home/sean/Downloads'):
         Working directory.
     """
 
-    df = pd.read_csv(f'{my_directory}/LDR2 and BZCAT 10_ crossmatch - '
-                     'Basic.csv')
+    df = pd.read_csv(f'{my_directory}/csv.download.csv')
     # f = mticker.ScalarFormatter(useOffset=False, useMathText=True)
     # g = lambda x, pos: '${}$'.format(f._formatSciNotation('%1.10e' % x))
 

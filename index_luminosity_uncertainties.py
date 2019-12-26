@@ -8,6 +8,7 @@ import numpy as np
 print('Name, Core dominance, Core dominance error, log10(core dom), log10(core'
       ' dom error)')
 df = pd.read_csv('/home/sean/Downloads/csv.download.csv')
+cd, lcd = [], []
 
 for name, core, total, tot_err, unresolved in zip(df['Name'],
                                                   df['Raw core calculation'],
@@ -24,7 +25,12 @@ for name, core, total, tot_err, unresolved in zip(df['Name'],
     # print(S_core, S_int, core_dom)
     print(f'{name}, {core_dom.n}, {core_dom.s}, {log_core_dom.n},'
           f'{log_core_dom.s}')
+    cd.append(core_dom)
+    lcd.append(log_core_dom)
 
+print(np.sum(cd) / len(cd))
+print(np.sum(lcd) / len(lcd))
+print(len(cd), len(lcd))
 import sys
 sys.exit()
 def alpha(flux1, flux2, freq1=ufloat(144e6, 24e6),
