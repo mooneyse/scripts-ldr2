@@ -172,6 +172,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         thresh_ans = f'{sigma}sigma'
         if threshold < (pf / 50) / 1000:
             # see 2.2 of https://arxiv.org/pdf/1907.03726.pdf
+            four_sigma = threshold
             threshold = (pf / 50) / 1000
             thresh_ans = '1/50 S_peak'
         hdu = fits.open(f'{my_directory}/mosaics/{mosaic}-mosaic.fits')[0]
@@ -192,6 +193,7 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
                           wcs=wcs)
         d = cutout.data
         copy_d = np.copy(d)
+        last_copy = np.copy(d)
         another_copy_d = np.copy(d)
         d[d < threshold] = 0
         d[d >= threshold] = 1
@@ -275,6 +277,10 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
                     colors=colors)
         plt.contour(another_copy_d - copy_d, levels=[threshold], colors='grey',
                     origin='lower')
+        if thresh_ans == '1/50 S_peak':
+            plt.contour(last_copy, levels=[four_sigma], colors='grey',
+                        origin='lower', linestyles='dashed')
+            print('view me!' + f'{my_directory}/images/ldr2-{source_name}.png')
         plt.savefig(f'{my_directory}/images/ldr2-{source_name}.png')
         plt.clf()
 
