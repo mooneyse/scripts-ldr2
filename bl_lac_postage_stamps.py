@@ -113,7 +113,7 @@ def get_kpc_per_asec(z, H0=70, WM=0.26, WV=0.74):
     return ((c / H0) * (az * (ratio * DCMR))) / 206.264806
 
 
-def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
+def loop_through_sources(sigma=5, my_directory='/data5/sean/ldr2'):
     """Plot postage stamp images of LDR2 BL Lacs.
 
     Parameters
@@ -170,11 +170,11 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         source_name = source_name.replace(' ', '')
         threshold = sigma * rms / 1000   # jansky
         thresh_ans = f'{sigma}sigma'
-        if threshold < (pf / 50) / 1000:
-            # see 2.2 of https://arxiv.org/pdf/1907.03726.pdf
-            four_sigma = threshold
-            threshold = (pf / 50) / 1000
-            thresh_ans = '1/50 S_peak'
+        # if threshold < (pf / 50) / 1000:
+        #     # see 2.2 of https://arxiv.org/pdf/1907.03726.pdf
+        #     four_sigma = threshold
+        #     threshold = (pf / 50) / 1000
+        #     thresh_ans = '1/50 S_peak'
         hdu = fits.open(f'{my_directory}/mosaics/{mosaic}-mosaic.fits')[0]
         wcs = WCS(hdu.header, naxis=2)
         sky_position = SkyCoord(ra, dec, unit='deg')
@@ -273,10 +273,10 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         plt.minorticks_on()
         plt.tick_params(which='minor', length=0)
         # levels = [level * threshold for level in [1, 2, 4, 8]]
-        levels = [level * four_sigma for level in [1, 2, 4, 8]]
+        levels = [level * threshold for level in [1, 2, 4, 8]]
         plt.contour(another_copy_d, levels=levels, origin='lower',
                     colors=colors)
-        plt.contour(last_copy, levels=[-four_sigma], colors='grey',
+        plt.contour(last_copy, levels=[-threshold], colors='grey',
                     origin='lower', linestyles='dashed')
         # plt.contour(another_copy_d - copy_d, levels=[threshold],
         #             colors='grey', origin='lower')
