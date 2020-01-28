@@ -276,7 +276,7 @@ def loop_through_sources(sigma=5, my_directory='/data5/sean/ldr2'):
         levels = [level * threshold for level in [1, 2, 4, 8]]
         plt.contour(another_copy_d, levels=levels, origin='lower',
                     colors=colors)
-        plt.contour(last_copy, levels=[-threshold], colors='grey',
+        plt.contour(last_copy, levels=[-threshold * (3 / 5)], colors='grey',
                     origin='lower', linestyles='dashed')
         # plt.contour(another_copy_d - copy_d, levels=[threshold],
         #             colors='grey', origin='lower')
