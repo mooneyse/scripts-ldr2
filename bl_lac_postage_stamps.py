@@ -253,11 +253,11 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
                    cmap='cubehelix_r', interpolation='gaussian')
         beam = Circle((6, 6), radius=2, linestyle='dashed', lw=2, fc='none',
                       edgecolor='blue')  # radius=2 pixels -> 3" -> diameter=6"
-        diffuse = Circle((y + 0.5, x + 0.5), radius=r, fc='none',
-                         edgecolor='k', lw=2)
+        # diffuse = Circle((y + 0.5, x + 0.5), radius=r, fc='none',
+        #                  edgecolor='k', lw=2)
         ax.add_patch(beam)
-        if comp == False:  # noqa
-            ax.add_patch(diffuse)
+        # if comp == False:  # noqa
+        #     ax.add_patch(diffuse)
 
         kpc_per_asec = get_kpc_per_asec(z=z)
         sbar = sbar_asec / pix  # length of scalebar in pixels
@@ -272,18 +272,21 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         cbar.ax.tick_params(labelsize=20)
         plt.minorticks_on()
         plt.tick_params(which='minor', length=0)
-        levels = [level * threshold for level in [1, 2, 4, 8]]
+        # levels = [level * threshold for level in [1, 2, 4, 8]]
+        levels = [level * four_sigma for level in [1, 2, 4, 8]]
         plt.contour(another_copy_d, levels=levels, origin='lower',
                     colors=colors)
+        plt.contour(last_copy, levels=[-four_sigma], colors='grey',
+                    origin='lower', linestyles='dashed')
         # plt.contour(another_copy_d - copy_d, levels=[threshold],
         #             colors='grey', origin='lower')
         saved = f'{my_directory}/images/ldr2-{source_name}.png'
-        if thresh_ans == '1/50 S_peak':
-            plt.contour(last_copy, levels=[-four_sigma], colors='grey',
-                        origin='lower', linestyles='dashed')
-            plt.contour(last_copy, levels=[four_sigma], colors='grey',
-                        origin='lower', linestyles='solid')
-            print('view me: gpicview ' + saved)
+        # if thresh_ans == '1/50 S_peak':
+        #     plt.contour(last_copy, levels=[-four_sigma], colors='grey',
+        #                 origin='lower', linestyles='dashed')
+        #     plt.contour(last_copy, levels=[four_sigma], colors='grey',
+        #                 origin='lower', linestyles='solid')
+        print('view me: gpicview ' + saved)
         plt.savefig(saved)
         plt.clf()
         os.system(f'convert {saved} -trim {saved}')  # removes whitespace
