@@ -277,14 +277,16 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
                     colors=colors)
         # plt.contour(another_copy_d - copy_d, levels=[threshold],
         #             colors='grey', origin='lower')
+        saved = f'{my_directory}/images/ldr2-{source_name}.png'
         if thresh_ans == '1/50 S_peak':
             plt.contour(last_copy, levels=[-four_sigma], colors='grey',
                         origin='lower', linestyles='dashed')
             plt.contour(last_copy, levels=[four_sigma], colors='grey',
                         origin='lower', linestyles='solid')
-            print('view me!' + f'{my_directory}/images/ldr2-{source_name}.png')
-        plt.savefig(f'{my_directory}/images/ldr2-{source_name}.png')
+            print('view me: gpicview ' + saved)
+        plt.savefig(saved)
         plt.clf()
+        os.system(f'convert {saved} -trim {saved}')  # removes whitespace
 
         width = r * kpc_per_pixel * 2  # radius to diameter
         result = (f'{source_name},{ra},{dec},{rms * 1e3},{z},'
