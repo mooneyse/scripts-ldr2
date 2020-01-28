@@ -275,11 +275,13 @@ def loop_through_sources(sigma=4, my_directory='/data5/sean/ldr2'):
         levels = [level * threshold for level in [1, 2, 4, 8]]
         plt.contour(another_copy_d, levels=levels, origin='lower',
                     colors=colors)
-        plt.contour(another_copy_d - copy_d, levels=[threshold], colors='grey',
-                    origin='lower')
+        # plt.contour(another_copy_d - copy_d, levels=[threshold],
+        #             colors='grey', origin='lower')
         if thresh_ans == '1/50 S_peak':
-            plt.contour(last_copy, levels=[four_sigma], colors='grey',
+            plt.contour(last_copy, levels=[-four_sigma], colors='grey',
                         origin='lower', linestyles='dashed')
+            plt.contour(last_copy, levels=[four_sigma], colors='grey',
+                        origin='lower', linestyles='solid')
             print('view me!' + f'{my_directory}/images/ldr2-{source_name}.png')
         plt.savefig(f'{my_directory}/images/ldr2-{source_name}.png')
         plt.clf()
