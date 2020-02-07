@@ -11,7 +11,7 @@ def luminosity(s, d, z, alpha):
     return (s * 4 * np.pi * (d ** 2)) / ((1 + z) ** (1 + alpha))
 
 
-df = pd.read_csv('/home/sean/Downloads/'
+df = pd.read_csv('/home/sean/Downloads/ldr2/'
                  'LDR2 and BZCAT 10_ crossmatch - BL Lacs.csv')
 L_total_cpt, L_total_ext, L_core, L_ext = [], [], [], []
 for s_total, s_core, s_ext, d, z, alpha, cpt in zip(df['Total_flux'],
@@ -68,7 +68,7 @@ plt.yticks(np.linspace(2, 12, 6), fontsize=fontsize)
 plt.xscale('log')
 plt.xlim(bins[0], bins[-1])
 plt.ylim(0, 13)
-plt.text(2.5e26, 8, r'$L_\mathrm{total}$', fontsize=fontsize)
+plt.text(2.5e26, 8, r'Total', fontsize=fontsize)
 plt.ylabel(r'$N$', fontsize=30)
 legend = plt.legend(ncol=2, fontsize=fontsize, frameon=False, mode='expand',
                     bbox_to_anchor=(0,0.2,1,1))
@@ -91,7 +91,7 @@ plt.hist(L_core,
 plt.setp(ax2.get_xticklabels(), visible=False)
 plt.tick_params(axis='x', direction='in', top=True, bottom=True, which='both')
 plt.yticks(fontsize=fontsize)
-plt.text(2.5e26, 8, r'$L_\mathrm{core}$', fontsize=fontsize)
+plt.text(2.5e26, 8, r'Core', fontsize=fontsize)
 plt.ylabel(r'$N$', fontsize=30)
 
 ax3 = plt.subplot(313, sharex=ax1, sharey=ax1)
@@ -107,11 +107,11 @@ plt.hist(L_ext,
 plt.tick_params(axis='x', direction='in', top=True, bottom=True, which='both',
                 pad=15)
 plt.yticks(fontsize=fontsize)
-plt.text(2.5e26, 8, r'$L_\mathrm{ext}$', fontsize=fontsize)
+plt.text(2.5e26, 8, r'Extended', fontsize=fontsize)
 plt.yticks(fontsize=fontsize)
 plt.ylabel(r'$N$', fontsize=30)
 
-plt.xlabel(r'$L_{144}$ (W Hz$^{-1}$)', fontsize=fontsize)
+plt.xlabel(r'$\nu \, L_{144}$ (W)', fontsize=fontsize)
 plt.xticks(fontsize=fontsize)
 plt.subplots_adjust(wspace=0, hspace=0)
 save_name = '/home/sean/Downloads/luminosity-hist.png'

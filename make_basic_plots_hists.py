@@ -20,7 +20,7 @@ def my_plot(my_folder='/mnt/closet/ldr2/catalogues'):
     my_directory : string
         Working directory.
     """
-    df = pd.read_csv('/home/sean/Downloads/LDR2 and BZCAT 10_ crossmatch -'
+    df = pd.read_csv('/home/sean/Downloads/ldr2/LDR2 and BZCAT 10_ crossmatch -'
                      ' BL Lacs.csv')
     compact = df[df['Compact'] == True]  # noqa
     extended = df[df['Compact'] != True]  # noqa
@@ -233,6 +233,8 @@ def my_plot(my_folder='/mnt/closet/ldr2/catalogues'):
     #           bbox_to_anchor=(0.5, 1.2, -0.1, 0), frameon=False)
 
     axx = plt.subplot(gs[1, 0])
+    print('asdfasdfasdf')
+    print(extended['Extent (kpc)'])
     axx.hist(#[compact['Luminosity with NVSS index (W/Hz)'],
              extended['Extent (kpc)'],
              histtype='stepfilled', color=['#faf3dd'],
